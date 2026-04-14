@@ -1,0 +1,395 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f8fc;
+    color: #28445f;
+}
+
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(54, 104, 153, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #56a7e9, #84d0f7);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2c73ae;
+}
+
+.logo-text span {
+    color: #4ec2cf;
+}
+
+.main-nav {
+    display: flex;
+    gap: 20px;
+}
+
+.main-nav a,
+.header-btn,
+.toolbar-actions a,
+.toolbar-actions button,
+.medicine-card a,
+.medicine-list-card a,
+.back-link,
+.empty-state a {
+    text-decoration: none;
+}
+
+.main-nav a {
+    color: #4c6780;
+    font-weight: 600;
+}
+
+.main-nav a.active {
+    color: #2e7ec7;
+}
+
+.header-btn,
+.toolbar-actions button,
+.hero-search button,
+.empty-state a {
+    background: linear-gradient(135deg, #2f86d4, #53b7ea);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.hero-section {
+    padding: 70px 20px 40px;
+    background: linear-gradient(180deg, #dff2ff 0%, #eef8ff 100%);
+}
+
+.hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.hero-content h1,
+.listing-hero h1,
+.detail-header h1 {
+    color: #356f9a;
+}
+
+.hero-content h1 {
+    font-size: 42px;
+    margin-bottom: 16px;
+}
+
+.hero-content p,
+.listing-hero p {
+    color: #60819f;
+    line-height: 1.6;
+}
+
+.hero-search {
+    margin: 28px auto 0;
+    max-width: 760px;
+    background: #fff;
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(60, 117, 170, 0.12);
+    display: flex;
+    gap: 12px;
+}
+
+.hero-search input,
+.toolbar input,
+.toolbar select {
+    border: 1px solid #d7e4f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    width: 100%;
+    color: #36516b;
+}
+
+.service-strip,
+.section-block,
+.listing-hero {
+    max-width: 1180px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+.service-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+}
+
+.service-item,
+.medicine-card,
+.medicine-list-card,
+.detail-card,
+.toolbar,
+.empty-state {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(58, 112, 165, 0.08);
+}
+
+.service-item {
+    padding: 22px;
+    text-align: center;
+    font-weight: 700;
+    color: #376f9f;
+}
+
+.section-title-row,
+.results-head,
+.detail-header,
+.bottom-row,
+.top-row,
+.toolbar,
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.section-title-row {
+    margin-bottom: 18px;
+}
+
+.section-title-row a,
+.medicine-card a,
+.medicine-list-card a,
+.back-link {
+    color: #2c82c9;
+    font-weight: 700;
+}
+
+.card-grid,
+.medicine-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 22px;
+}
+
+.medicine-card,
+.medicine-list-card {
+    padding: 24px;
+}
+
+.medicine-icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+.medicine-card h3,
+.medicine-list-card h3 {
+    margin-bottom: 8px;
+    color: #315d84;
+}
+
+.meta,
+.bottom-row span,
+.results-head,
+.detail-header p,
+.detail-list li {
+    color: #6b8299;
+}
+
+.medicine-card p,
+.medicine-list-card .description,
+.detail-grid p,
+.empty-state p {
+    line-height: 1.6;
+    color: #54718d;
+}
+
+.listing-hero {
+    padding-top: 34px;
+}
+
+.toolbar {
+    padding: 18px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 220px;
+}
+
+.toolbar-group.grow {
+    flex: 1;
+}
+
+.toolbar label {
+    font-weight: 700;
+    color: #41627d;
+}
+
+.toolbar-actions {
+    margin-top: 24px;
+}
+
+.toolbar-actions a {
+    color: #436b8f;
+    padding: 12px 8px;
+}
+
+.narrow {
+    max-width: 1180px;
+}
+
+.pill {
+    background: #e8f5ff;
+    color: #2d86c8;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pill.large {
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.price,
+.detail-price {
+    font-weight: 700;
+    color: #28a17a;
+}
+
+.detail-price {
+    font-size: 24px;
+}
+
+.pagination {
+    margin-top: 26px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagination a {
+    min-width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #fff;
+    color: #3c6487;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(58, 112, 165, 0.08);
+    font-weight: 700;
+}
+
+.pagination a.current {
+    background: linear-gradient(135deg, #2f86d4, #53b7ea);
+    color: #fff;
+}
+
+.detail-card {
+    padding: 30px;
+}
+
+.detail-header {
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+}
+
+.detail-grid h3 {
+    margin-bottom: 12px;
+    color: #345f84;
+}
+
+.detail-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.empty-state {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.empty-state h1,
+.empty-state h3 {
+    margin-bottom: 10px;
+}
+
+.site-footer {
+    margin-top: 50px;
+    padding: 28px 20px 42px;
+    text-align: center;
+    color: #62809d;
+}
+
+@media (max-width: 900px) {
+    .site-header,
+    .detail-header,
+    .toolbar,
+    .section-title-row,
+    .results-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .service-strip,
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-content h1 {
+        font-size: 32px;
+    }
+
+    .hero-search {
+        flex-direction: column;
+    }
+}
