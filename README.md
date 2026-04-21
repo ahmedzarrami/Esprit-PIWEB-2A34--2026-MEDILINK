@@ -1,35 +1,52 @@
-# MediLink Front Office - Médicaments
+# MEDILINK – Medical Appointment Booking Platform
 
-Projet PHP MVC simple pour la partie front office de MediLink.
+## Overview
+This project was developed as part of the PIWEB – 2nd Year Web Technologies Project at Esprit School of Engineering (Academic Year 2025–2026).
 
-## Fonctionnalités
-- page d'accueil inspirée du prototype MediLink
-- catalogue public des médicaments
-- recherche
-- tri
-- pagination
-- détail d'un médicament
-- connexion PDO
-- architecture MVC
+MEDILINK is a centralized web platform that simplifies the medical appointment process. It allows patients to search for healthcare professionals, consult their profiles, check availability, book appointments online, receive reminders, and leave reviews after consultations.
 
-## Structure
-- `config/`
-- `controllers/`
-- `models/`
-- `views/`
-- `public/`
+## Features
+- Search for healthcare professionals
+- View doctor profiles and specialties
+- Check appointment availability
+- Book appointments online
+- Receive appointment reminders
+- Leave reviews after consultation
 
-## Installation
-1. Copier le dossier dans `C:\xampp\htdocs\medilink_frontoffice_medicament`
-2. Démarrer Apache et MySQL dans XAMPP
-3. Réutiliser la base `medilink` déjà créée pour le back office
-4. Vérifier `config/database.php`
-5. Ouvrir :
+## Tech Stack
 
-```text
-http://localhost/medilink_frontoffice_medicament/public/index.php
-```
+### Frontend
+- HTML
+- CSS
+- JavaScript
 
-## Remarque
-Le front office lit les médicaments existants dans la table `medicaments`.
-La création, modification et suppression restent dans le back office.
+### Backend
+- PHP
+
+### Database
+- MySQL
+
+## Architecture
+The application is based on:
+- a frontend interface for patients and users
+- a backend developed in PHP for business logic
+- a MySQL database for storing users, appointments, and medical professional data
+
+## Contributors
+-Ahmed Zarrami
+- [ahmed ferjaoui ]
+- [achref brini]
+- [yacine ben mouaouia  ]
+- [tarek akrout ]
+
+## Academic Context
+Developed at **Esprit School of Engineering – Tunisia**  
+Academic Year: **2025–2026**  
+Module: **PIWEB**
+
+## Getting Started
+
+### Installation
+1. Clone the repository
+```bash
+git clone https://github.com/ahmedzarrami/Esprit-PIWEB-2A34--2026-MEDILINK.git
