@@ -2,9 +2,11 @@
 require_once __DIR__ . '/Utilisateur.php';
 
 /**
- * Classe ProfessionnelSante — Hérite de Utilisateur
+ * Classe ProfessionnelSante — Hérite de Utilisateur (Modèle)
+ * Contient les attributs et les signatures de méthodes.
+ * L'implémentation des méthodes se trouve dans controllers/ProfessionnelSante.php
  */
-class ProfessionnelSante extends Utilisateur
+abstract class ProfessionnelSante extends Utilisateur
 {
     // ── Propriétés spécifiques ──
     private string  $specialite  = '';
@@ -39,75 +41,19 @@ class ProfessionnelSante extends Utilisateur
     public function setNumeroOrdre(string $n): void  { $this->numeroOrdre = $n; }
     public function setBiographie(?string $b): void  { $this->biographie = $b; }
 
+
     /**
      * Inscription professionnel — insère dans utilisateur + professionnel_sante
      */
-    public function sInscrire(): int
-    {
-        $id = parent::sInscrire();
-
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare(
-            "INSERT INTO professionnel_sante (id, specialite, numero_ordre, biographie)
-             VALUES (:id, :spec, :ordre, :bio)"
-        );
-        $stmt->execute([
-            ':id'    => $id,
-            ':spec'  => $this->specialite,
-            ':ordre' => $this->numeroOrdre,
-            ':bio'   => $this->biographie,
-        ]);
-
-        return $id;
-    }
+    abstract public function sInscrire(): int;
 
     /**
      * Modifier le profil professionnel
      */
-    public function modifierProfil(): bool
-    {
-        parent::modifierProfil();
-
-        $pdo = Database::getInstance();
-
-        $check = $pdo->prepare("SELECT COUNT(*) FROM professionnel_sante WHERE id = :id");
-        $check->execute([':id' => $this->getId()]);
-
-        if ((int) $check->fetchColumn() > 0) {
-            $stmt = $pdo->prepare(
-                "UPDATE professionnel_sante
-                 SET specialite = :spec, numero_ordre = :ordre, biographie = :bio
-                 WHERE id = :id"
-            );
-        } else {
-            $stmt = $pdo->prepare(
-                "INSERT INTO professionnel_sante (id, specialite, numero_ordre, biographie)
-                 VALUES (:id, :spec, :ordre, :bio)"
-            );
-        }
-
-        return $stmt->execute([
-            ':id'    => $this->getId(),
-            ':spec'  => $this->specialite,
-            ':ordre' => $this->numeroOrdre,
-            ':bio'   => $this->biographie,
-        ]);
-    }
+    abstract public function modifierProfil(): bool;
 
     /**
      * Récupérer les données complètes d'un professionnel par ID
      */
-    public static function getProById(int $id): ?array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare(
-            "SELECT u.*, ps.specialite, ps.numero_ordre, ps.biographie
-             FROM utilisateur u
-             LEFT JOIN professionnel_sante ps ON u.id = ps.id
-             WHERE u.id = :id AND u.role = 'Professionnel'"
-        );
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch();
-        return $row ?: null;
-    }
+    abstract public static function getProById(int $id): ?array;
 }

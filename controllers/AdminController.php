@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/Utilisateur.php';
+require_once __DIR__ . '/Patient.php';
+require_once __DIR__ . '/ProfessionnelSante.php';
+require_once __DIR__ . '/Administrateur.php';
 require_once __DIR__ . '/../models/Patient.php';
 require_once __DIR__ . '/../models/ProfessionnelSante.php';
 require_once __DIR__ . '/../models/Administrateur.php';
@@ -8,19 +12,12 @@ require_once __DIR__ . '/../models/Administrateur.php';
  */
 class AdminController
 {
-    private Administrateur $admin;
-
-    public function __construct()
-    {
-        $this->admin = new Administrateur();
-    }
-
     /**
      * Lister tous les utilisateurs avec données jointes
      */
     public function list(): array
     {
-        return $this->admin->gererUtilisateurs();
+        return AdministrateurModelController::gererUtilisateurs();
     }
 
     /**
@@ -28,7 +25,7 @@ class AdminController
      */
     public function getUser(int $id): ?array
     {
-        return $this->admin->getUtilisateurComplet($id);
+        return AdministrateurModelController::getUtilisateurComplet($id);
     }
 
     /**
@@ -37,10 +34,10 @@ class AdminController
     public function getStats(): array
     {
         return [
-            'total'    => Utilisateur::countByRole(),
-            'patients' => Utilisateur::countByRole('Patient'),
-            'pros'     => Utilisateur::countByRole('Professionnel'),
-            'actifs'   => Utilisateur::countActifs(),
+            'total'    => UtilisateurController::countByRole(),
+            'patients' => UtilisateurController::countByRole('Patient'),
+            'pros'     => UtilisateurController::countByRole('Professionnel'),
+            'actifs'   => UtilisateurController::countActifs(),
         ];
     }
 
@@ -77,7 +74,7 @@ class AdminController
             $errors['email'] = 'Email obligatoire.';
         } elseif (!preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
             $errors['email'] = 'Email invalide.';
-        } elseif (Utilisateur::emailExiste($email, $editingId)) {
+        } elseif (UtilisateurController::emailExiste($email, $editingId)) {
             $errors['email'] = 'Cet email est déjà utilisé.';
         }
 
@@ -155,47 +152,52 @@ class AdminController
         try {
             switch ($data['role']) {
                 case 'Patient':
-                    $user = new Patient(
-                        trim($data['nom']),
-                        trim($data['prenom']),
-                        trim($data['email']),
-                        $data['mot_de_passe'],
-                        trim($data['telephone']),
-                        $data['statut'] ?? 'Actif',
-                        $data['date_naissance'] ?? null,
-                        $data['sexe'] ?? null,
-                        $data['adresse'] ?? null,
-                        $data['groupe_sanguin'] ?? null
-                    );
+                    $user = [
+                        'nom'            => trim($data['nom']),
+                        'prenom'         => trim($data['prenom']),
+                        'email'          => trim($data['email']),
+                        'mot_de_passe'   => $data['mot_de_passe'],
+                        'telephone'      => trim($data['telephone']),
+                        'statut_compte'  => $data['statut'] ?? 'Actif',
+                        'role'           => 'Patient',
+                        'date_naissance' => $data['date_naissance'] ?? null,
+                        'sexe'           => $data['sexe'] ?? null,
+                        'adresse'        => $data['adresse'] ?? null,
+                        'groupe_sanguin' => $data['groupe_sanguin'] ?? null
+                    ];
+                    $id = PatientModelController::sInscrire($user);
                     break;
 
                 case 'Professionnel':
-                    $user = new ProfessionnelSante(
-                        trim($data['nom']),
-                        trim($data['prenom']),
-                        trim($data['email']),
-                        $data['mot_de_passe'],
-                        trim($data['telephone']),
-                        $data['statut'] ?? 'Actif',
-                        trim($data['specialite']),
-                        trim($data['numero_ordre']),
-                        $data['biographie'] ?? null
-                    );
+                    $user = [
+                        'nom'            => trim($data['nom']),
+                        'prenom'         => trim($data['prenom']),
+                        'email'          => trim($data['email']),
+                        'mot_de_passe'   => $data['mot_de_passe'],
+                        'telephone'      => trim($data['telephone']),
+                        'statut_compte'  => $data['statut'] ?? 'Actif',
+                        'role'           => 'Professionnel',
+                        'specialite'     => trim($data['specialite']),
+                        'numero_ordre'   => trim($data['numero_ordre']),
+                        'biographie'     => $data['biographie'] ?? null
+                    ];
+                    $id = ProfessionnelSanteModelController::sInscrire($user);
                     break;
 
                 case 'Administrateur':
-                    $user = new Administrateur(
-                        trim($data['nom']),
-                        trim($data['prenom']),
-                        trim($data['email']),
-                        $data['mot_de_passe'],
-                        trim($data['telephone']),
-                        $data['statut'] ?? 'Actif'
-                    );
+                    $user = [
+                        'nom'            => trim($data['nom']),
+                        'prenom'         => trim($data['prenom']),
+                        'email'          => trim($data['email']),
+                        'mot_de_passe'   => $data['mot_de_passe'],
+                        'telephone'      => trim($data['telephone']),
+                        'statut_compte'  => $data['statut'] ?? 'Actif',
+                        'role'           => 'Administrateur'
+                    ];
+                    $id = AdministrateurModelController::sInscrire($user);
                     break;
             }
 
-            $id = $user->sInscrire();
             return ['success' => true, 'id' => $id];
         } catch (Exception $e) {
             return ['success' => false, 'errors' => ['global' => 'Erreur : ' . $e->getMessage()]];
@@ -216,45 +218,48 @@ class AdminController
             $role = $data['role'];
 
             if ($role === 'Patient') {
-                $user = new Patient();
-                $user->setId($id);
-                $user->setNom(trim($data['nom']));
-                $user->setPrenom(trim($data['prenom']));
-                $user->setEmail(trim($data['email']));
-                $user->setTelephone(trim($data['telephone']));
-                $user->setStatutCompte($data['statut'] ?? 'Actif');
-                $user->setDateNaissance($data['date_naissance'] ?? null);
-                $user->setSexe($data['sexe'] ?? null);
-                $user->setAdresse($data['adresse'] ?? null);
-                $user->setGroupeSanguin($data['groupe_sanguin'] ?? null);
-                $user->modifierProfil();
+                $user = [
+                    'id'             => $id,
+                    'nom'            => trim($data['nom']),
+                    'prenom'         => trim($data['prenom']),
+                    'email'          => trim($data['email']),
+                    'telephone'      => trim($data['telephone']),
+                    'statut_compte'  => $data['statut'] ?? 'Actif',
+                    'date_naissance' => $data['date_naissance'] ?? null,
+                    'sexe'           => $data['sexe'] ?? null,
+                    'adresse'        => $data['adresse'] ?? null,
+                    'groupe_sanguin' => $data['groupe_sanguin'] ?? null
+                ];
+                PatientModelController::modifierProfil($user);
             } elseif ($role === 'Professionnel') {
-                $user = new ProfessionnelSante();
-                $user->setId($id);
-                $user->setNom(trim($data['nom']));
-                $user->setPrenom(trim($data['prenom']));
-                $user->setEmail(trim($data['email']));
-                $user->setTelephone(trim($data['telephone']));
-                $user->setStatutCompte($data['statut'] ?? 'Actif');
-                $user->setSpecialite(trim($data['specialite']));
-                $user->setNumeroOrdre(trim($data['numero_ordre']));
-                $user->setBiographie($data['biographie'] ?? null);
-                $user->modifierProfil();
+                $user = [
+                    'id'             => $id,
+                    'nom'            => trim($data['nom']),
+                    'prenom'         => trim($data['prenom']),
+                    'email'          => trim($data['email']),
+                    'telephone'      => trim($data['telephone']),
+                    'statut_compte'  => $data['statut'] ?? 'Actif',
+                    'specialite'     => trim($data['specialite']),
+                    'numero_ordre'   => trim($data['numero_ordre']),
+                    'biographie'     => $data['biographie'] ?? null
+                ];
+                ProfessionnelSanteModelController::modifierProfil($user);
             } else {
-                $user = new Administrateur();
-                $user->setId($id);
-                $user->setNom(trim($data['nom']));
-                $user->setPrenom(trim($data['prenom']));
-                $user->setEmail(trim($data['email']));
-                $user->setTelephone(trim($data['telephone']));
-                $user->setStatutCompte($data['statut'] ?? 'Actif');
-                $user->modifierProfil();
+                $user = [
+                    'id'             => $id,
+                    'nom'            => trim($data['nom']),
+                    'prenom'         => trim($data['prenom']),
+                    'email'          => trim($data['email']),
+                    'telephone'      => trim($data['telephone']),
+                    'statut_compte'  => $data['statut'] ?? 'Actif'
+                ];
+                UtilisateurController::modifierProfil($user);
             }
 
             // Mettre à jour le mot de passe si fourni
             $mdp = $data['mot_de_passe'] ?? '';
             if (!empty($mdp)) {
-                $user->changerMotDePasse($mdp);
+                UtilisateurController::changerMotDePasse($id, $mdp);
             }
 
             return ['success' => true];
@@ -269,7 +274,7 @@ class AdminController
     public function delete(int $id): array
     {
         try {
-            Utilisateur::supprimer($id);
+            UtilisateurController::supprimer($id);
             return ['success' => true];
         } catch (Exception $e) {
             return ['success' => false, 'errors' => ['global' => 'Erreur : ' . $e->getMessage()]];

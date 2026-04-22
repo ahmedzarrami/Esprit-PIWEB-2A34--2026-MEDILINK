@@ -1,10 +1,8 @@
 <?php
 require_once __DIR__ . '/Utilisateur.php';
 
-/**
- * Classe Administrateur — Hérite de Utilisateur
- */
-class Administrateur extends Utilisateur
+
+abstract class Administrateur extends Utilisateur
 {
     // ── Constructeur ──
     public function __construct(
@@ -18,70 +16,18 @@ class Administrateur extends Utilisateur
         parent::__construct($nom, $prenom, $email, $motDePasse, $telephone, $statutCompte, 'Administrateur');
     }
 
-    /**
-     * Inscription administrateur — insère dans utilisateur + administrateur
-     */
-    public function sInscrire(): int
-    {
-        $id = parent::sInscrire();
+    
+    abstract public function sInscrire(): int;
 
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("INSERT INTO administrateur (id) VALUES (:id)");
-        $stmt->execute([':id' => $id]);
+    
+    abstract public function gererUtilisateurs(): array;
 
-        return $id;
-    }
+    
+    abstract public function getUtilisateurComplet(int $id): ?array;
 
-    /**
-     * Gérer les utilisateurs — Récupérer la liste complète avec données jointes
-     */
-    public function gererUtilisateurs(): array
-    {
-        $pdo = Database::getInstance();
-        $sql = "SELECT u.*,
-                       p.date_naissance, p.sexe, p.adresse, p.groupe_sanguin,
-                       ps.specialite, ps.numero_ordre, ps.biographie
-                FROM utilisateur u
-                LEFT JOIN patient p ON u.id = p.id
-                LEFT JOIN professionnel_sante ps ON u.id = ps.id
-                ORDER BY u.date_creation DESC";
-        $stmt = $pdo->query($sql);
-        return $stmt->fetchAll();
-    }
+    
+    abstract public function modererForum(): void;
 
-    /**
-     * Récupérer un utilisateur complet par ID (avec données spécifiques au rôle)
-     */
-    public function getUtilisateurComplet(int $id): ?array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare(
-            "SELECT u.*,
-                    p.date_naissance, p.sexe, p.adresse, p.groupe_sanguin,
-                    ps.specialite, ps.numero_ordre, ps.biographie
-             FROM utilisateur u
-             LEFT JOIN patient p ON u.id = p.id
-             LEFT JOIN professionnel_sante ps ON u.id = ps.id
-             WHERE u.id = :id"
-        );
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch();
-        return $row ?: null;
-    }
-
-    /**
-     * Modérer le forum (placeholder — Module 4)
-     */
-    public function modererForum(): void
-    {
-        // À implémenter dans le module Forum
-    }
-
-    /**
-     * Gérer les produits (placeholder — Module 5)
-     */
-    public function gererProduits(): void
-    {
-        // À implémenter dans le module Parapharmacie
-    }
+    
+    abstract public function gererProduits(): void;
 }

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/Utilisateur.php';
+require_once __DIR__ . '/Patient.php';
 require_once __DIR__ . '/../models/Patient.php';
 
 /**
@@ -11,7 +13,7 @@ class PatientController
      */
     public function getProfil(int $userId): ?array
     {
-        return Patient::getPatientById($userId);
+        return PatientModelController::getPatientById($userId);
     }
 
     /**
@@ -39,7 +41,7 @@ class PatientController
         }
         if (empty($email) || !preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
             $errors['email'] = 'Email invalide.';
-        } elseif (Utilisateur::emailExiste($email, $userId)) {
+        } elseif (UtilisateurController::emailExiste($email, $userId)) {
             $errors['email'] = 'Cet email est déjà utilisé.';
         }
         $telDigits = preg_replace('/\D/', '', $tel);
@@ -52,19 +54,20 @@ class PatientController
         }
 
         try {
-            $patient = new Patient();
-            $patient->setId($userId);
-            $patient->setNom($nom);
-            $patient->setPrenom($prenom);
-            $patient->setEmail($email);
-            $patient->setTelephone($tel);
-            $patient->setStatutCompte($data['statut_compte'] ?? 'Actif');
-            $patient->setDateNaissance($data['date_naissance'] ?? null);
-            $patient->setSexe($data['sexe'] ?? null);
-            $patient->setAdresse($data['adresse'] ?? null);
-            $patient->setGroupeSanguin($data['groupe_sanguin'] ?? null);
+            $patient = [
+                'id'             => $userId,
+                'nom'            => $nom,
+                'prenom'         => $prenom,
+                'email'          => $email,
+                'telephone'      => $tel,
+                'statut_compte'  => $data['statut_compte'] ?? 'Actif',
+                'date_naissance' => $data['date_naissance'] ?? null,
+                'sexe'           => $data['sexe'] ?? null,
+                'adresse'        => $data['adresse'] ?? null,
+                'groupe_sanguin' => $data['groupe_sanguin'] ?? null
+            ];
 
-            $patient->modifierProfil();
+            PatientModelController::modifierProfil($patient);
 
             // Mettre à jour la session
             $_SESSION['user_nom']   = $prenom . ' ' . $nom;
@@ -98,15 +101,13 @@ class PatientController
         }
 
         // Vérifier l'ancien mot de passe
-        $userData = Utilisateur::getById($userId);
+        $userData = UtilisateurController::getById($userId);
         if (!$userData || !password_verify($oldPw, $userData['mot_de_passe'])) {
             return ['success' => false, 'errors' => ['old_password' => 'Mot de passe actuel incorrect.']];
         }
 
         try {
-            $patient = new Patient();
-            $patient->setId($userId);
-            $patient->changerMotDePasse($newPw);
+            UtilisateurController::changerMotDePasse($userId, $newPw);
             return ['success' => true];
         } catch (Exception $e) {
             return ['success' => false, 'errors' => ['global' => 'Erreur : ' . $e->getMessage()]];

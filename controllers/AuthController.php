@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/Utilisateur.php';
+require_once __DIR__ . '/Patient.php';
+require_once __DIR__ . '/ProfessionnelSante.php';
+require_once __DIR__ . '/Administrateur.php';
 require_once __DIR__ . '/../models/Patient.php';
 require_once __DIR__ . '/../models/ProfessionnelSante.php';
 require_once __DIR__ . '/../models/Administrateur.php';
@@ -42,7 +46,7 @@ class AuthController
             $errors['email'] = 'L\'email est obligatoire.';
         } elseif (!preg_match('/^[^\s@]+@[^\s@]+\.[^\s@]+$/', $email)) {
             $errors['email'] = 'Format d\'email invalide.';
-        } elseif (Utilisateur::emailExiste($email)) {
+        } elseif (UtilisateurController::emailExiste($email)) {
             $errors['email'] = 'Cet email est déjà utilisé.';
         }
 
@@ -96,19 +100,20 @@ class AuthController
 
         try {
             // Seul Patient est permis via inscription
-            $user = new Patient(
-                trim($data['nom']),
-                trim($data['prenom']),
-                trim($data['email']),
-                $data['mot_de_passe'],
-                trim($data['telephone']),
-                'Actif',
-                !empty($data['date_naissance']) ? $data['date_naissance'] : null,
-                $data['sexe'] ?? null,
-                $data['adresse'] ?? null
-            );
+            $user = [
+                'nom'            => trim($data['nom']),
+                'prenom'         => trim($data['prenom']),
+                'email'          => trim($data['email']),
+                'mot_de_passe'   => $data['mot_de_passe'],
+                'telephone'      => trim($data['telephone']),
+                'statut_compte'  => 'Actif',
+                'role'           => 'Patient',
+                'date_naissance' => !empty($data['date_naissance']) ? $data['date_naissance'] : null,
+                'sexe'           => $data['sexe'] ?? null,
+                'adresse'        => $data['adresse'] ?? null
+            ];
 
-            $id = $user->sInscrire();
+            $id = PatientModelController::sInscrire($user);
 
             // Démarrer la session
             $_SESSION['user_id']   = $id;
@@ -137,7 +142,7 @@ class AuthController
             return ['success' => false, 'errors' => ['password' => 'Le mot de passe est obligatoire.']];
         }
 
-        $user = Utilisateur::seConnecter(trim($email), $motDePasse);
+        $user = UtilisateurController::seConnecter(trim($email), $motDePasse);
 
         if (!$user) {
             return ['success' => false, 'errors' => ['global' => 'Email ou mot de passe incorrect.']];

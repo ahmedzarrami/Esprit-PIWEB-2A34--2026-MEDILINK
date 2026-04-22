@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/../config/Database.php';
 
 /**
- * Classe abstraite Utilisateur
- * Classe parente pour Patient, ProfessionnelSante, Administrateur
+ * Classe abstraite Utilisateur (Modèle)
+ * Contient les attributs et les signatures de méthodes.
+ * L'implémentation des méthodes se trouve dans controllers/Utilisateur.php
  */
 abstract class Utilisateur
 {
@@ -63,166 +63,62 @@ abstract class Utilisateur
     public function setRole(string $role): void       { $this->role = $role; }
     public function setDateCreation(?string $d): void { $this->dateCreation = $d; }
 
-    // ══════════════════════════════════════════
-    // MÉTHODES CRUD — Utilisateur (table parent)
-    // ══════════════════════════════════════════
+    
 
     /**
      * Inscription — Insère dans la table utilisateur
      * Retourne l'ID inséré
      */
-    public function sInscrire(): int
-    {
-        $pdo = Database::getInstance();
-        $sql = "INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, telephone, statut_compte, role)
-                VALUES (:nom, :prenom, :email, :mdp, :tel, :statut, :role)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':nom'    => $this->nom,
-            ':prenom' => $this->prenom,
-            ':email'  => $this->email,
-            ':mdp'    => password_hash($this->motDePasse, PASSWORD_DEFAULT),
-            ':tel'    => $this->telephone,
-            ':statut' => $this->statutCompte,
-            ':role'   => $this->role,
-        ]);
-        $this->id = (int) $pdo->lastInsertId();
-        return $this->id;
-    }
+    abstract public function sInscrire(): int;
 
     /**
      * Connexion — Vérifie email et mot de passe
      * Retourne les données utilisateur ou false
      */
-    public static function seConnecter(string $email, string $motDePasse)
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = :email");
-        $stmt->execute([':email' => $email]);
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($motDePasse, $user['mot_de_passe'])) {
-            return $user;
-        }
-        return false;
-    }
+    abstract public static function seConnecter(string $email, string $motDePasse);
 
     /**
      * Modifier le profil (table utilisateur)
      */
-    public function modifierProfil(): bool
-    {
-        $pdo = Database::getInstance();
-        $sql = "UPDATE utilisateur
-                SET nom = :nom, prenom = :prenom, email = :email,
-                    telephone = :tel, statut_compte = :statut
-                WHERE id = :id";
-        $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
-            ':nom'    => $this->nom,
-            ':prenom' => $this->prenom,
-            ':email'  => $this->email,
-            ':tel'    => $this->telephone,
-            ':statut' => $this->statutCompte,
-            ':id'     => $this->id,
-        ]);
-    }
+    abstract public function modifierProfil(): bool;
 
     /**
      * Modifier le mot de passe
      */
-    public function changerMotDePasse(string $nouveauMdp): bool
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("UPDATE utilisateur SET mot_de_passe = :mdp WHERE id = :id");
-        return $stmt->execute([
-            ':mdp' => password_hash($nouveauMdp, PASSWORD_DEFAULT),
-            ':id'  => $this->id,
-        ]);
-    }
+    abstract public function changerMotDePasse(string $nouveauMdp): bool;
 
     /**
      * Récupérer un utilisateur par ID
      */
-    public static function getById(int $id): ?array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE id = :id");
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch();
-        return $row ?: null;
-    }
+    abstract public static function getById(int $id): ?array;
 
     /**
      * Récupérer un utilisateur par email
      */
-    public static function getByEmail(string $email): ?array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE email = :email");
-        $stmt->execute([':email' => $email]);
-        $row = $stmt->fetch();
-        return $row ?: null;
-    }
+    abstract public static function getByEmail(string $email): ?array;
 
     /**
-     * Lister tous les utilisateurs (admin)
+     * Lister tous les utilisateurs
      */
-    public static function getAll(): array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->query("SELECT * FROM utilisateur ORDER BY date_creation DESC");
-        return $stmt->fetchAll();
-    }
+    abstract public static function getAll(): array;
 
     /**
      * Supprimer un utilisateur par ID
      */
-    public static function supprimer(int $id): bool
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare("DELETE FROM utilisateur WHERE id = :id");
-        return $stmt->execute([':id' => $id]);
-    }
+    abstract public static function supprimer(int $id): bool;
 
     /**
      * Compter le nombre d'utilisateurs par rôle
      */
-    public static function countByRole(string $role = ''): int
-    {
-        $pdo = Database::getInstance();
-        if ($role) {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM utilisateur WHERE role = :role");
-            $stmt->execute([':role' => $role]);
-        } else {
-            $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateur");
-        }
-        return (int) $stmt->fetchColumn();
-    }
+    abstract public static function countByRole(string $role = ''): int;
 
     /**
      * Compter les comptes actifs
      */
-    public static function countActifs(): int
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateur WHERE statut_compte = 'Actif'");
-        return (int) $stmt->fetchColumn();
-    }
+    abstract public static function countActifs(): int;
 
     /**
-     * Vérifier si un email existe déjà (optionnel: exclure un ID)
+     * Vérifier si un email existe déjà
      */
-    public static function emailExiste(string $email, ?int $excludeId = null): bool
-    {
-        $pdo = Database::getInstance();
-        if ($excludeId) {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM utilisateur WHERE email = :email AND id != :id");
-            $stmt->execute([':email' => $email, ':id' => $excludeId]);
-        } else {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM utilisateur WHERE email = :email");
-            $stmt->execute([':email' => $email]);
-        }
-        return (int) $stmt->fetchColumn() > 0;
-    }
+    abstract public static function emailExiste(string $email, ?int $excludeId = null): bool;
 }

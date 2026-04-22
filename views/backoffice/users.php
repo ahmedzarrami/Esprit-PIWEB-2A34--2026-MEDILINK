@@ -151,7 +151,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Téléphone <span class="required">*</span></label>
-          <input class="form-input" id="f-telephone" type="text" placeholder="8 chiffres" maxlength="8" oninput="Validator.filterPhone(this); validateField('telephone')">
+          <input class="form-input" id="f-telephone" type="text" placeholder="8 chiffres" oninput="Validator.filterPhone(this); validateField('telephone')">
           <div class="form-hint">Exactement 8 chiffres</div>
           <div class="form-error" id="e-telephone" style="display:none">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>

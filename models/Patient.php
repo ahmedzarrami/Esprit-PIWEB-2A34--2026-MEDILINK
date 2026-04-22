@@ -2,9 +2,11 @@
 require_once __DIR__ . '/Utilisateur.php';
 
 /**
- * Classe Patient — Hérite de Utilisateur
+ * Classe Patient — Hérite de Utilisateur (Modèle)
+ * Contient les attributs et les signatures de méthodes.
+ * L'implémentation des méthodes se trouve dans controllers/Patient.php
  */
-class Patient extends Utilisateur
+abstract class Patient extends Utilisateur
 {
     // ── Propriétés spécifiques au patient ──
     private ?string $dateNaissance  = null;
@@ -44,82 +46,19 @@ class Patient extends Utilisateur
     public function setAdresse(?string $a): void       { $this->adresse = $a; }
     public function setGroupeSanguin(?string $g): void { $this->groupeSanguin = $g; }
 
+    
     /**
      * Inscription patient — insère dans utilisateur + patient
      */
-    public function sInscrire(): int
-    {
-        // Insérer dans la table utilisateur (parent)
-        $id = parent::sInscrire();
-
-        // Insérer dans la table patient
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare(
-            "INSERT INTO patient (id, date_naissance, sexe, adresse, groupe_sanguin)
-             VALUES (:id, :dob, :sexe, :adresse, :gs)"
-        );
-        $stmt->execute([
-            ':id'      => $id,
-            ':dob'     => $this->dateNaissance,
-            ':sexe'    => $this->sexe,
-            ':adresse' => $this->adresse,
-            ':gs'      => $this->groupeSanguin,
-        ]);
-
-        return $id;
-    }
+    abstract public function sInscrire(): int;
 
     /**
      * Modifier le profil patient
      */
-    public function modifierProfil(): bool
-    {
-        // Mettre à jour la table utilisateur
-        parent::modifierProfil();
-
-        // Mettre à jour la table patient
-        $pdo  = Database::getInstance();
-
-        // Vérifier si la ligne patient existe
-        $check = $pdo->prepare("SELECT COUNT(*) FROM patient WHERE id = :id");
-        $check->execute([':id' => $this->getId()]);
-
-        if ((int) $check->fetchColumn() > 0) {
-            $stmt = $pdo->prepare(
-                "UPDATE patient
-                 SET date_naissance = :dob, sexe = :sexe, adresse = :adresse, groupe_sanguin = :gs
-                 WHERE id = :id"
-            );
-        } else {
-            $stmt = $pdo->prepare(
-                "INSERT INTO patient (id, date_naissance, sexe, adresse, groupe_sanguin)
-                 VALUES (:id, :dob, :sexe, :adresse, :gs)"
-            );
-        }
-
-        return $stmt->execute([
-            ':id'      => $this->getId(),
-            ':dob'     => $this->dateNaissance,
-            ':sexe'    => $this->sexe,
-            ':adresse' => $this->adresse,
-            ':gs'      => $this->groupeSanguin,
-        ]);
-    }
+    abstract public function modifierProfil(): bool;
 
     /**
      * Récupérer les données complètes d'un patient par ID
      */
-    public static function getPatientById(int $id): ?array
-    {
-        $pdo  = Database::getInstance();
-        $stmt = $pdo->prepare(
-            "SELECT u.*, p.date_naissance, p.sexe, p.adresse, p.groupe_sanguin
-             FROM utilisateur u
-             LEFT JOIN patient p ON u.id = p.id
-             WHERE u.id = :id AND u.role = 'Patient'"
-        );
-        $stmt->execute([':id' => $id]);
-        $row = $stmt->fetch();
-        return $row ?: null;
-    }
+    abstract public static function getPatientById(int $id): ?array;
 }
