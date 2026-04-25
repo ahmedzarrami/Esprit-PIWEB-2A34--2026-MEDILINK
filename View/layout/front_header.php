@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Styles -->
-    <link rel="stylesheet" href="public/css/style.css">
+    <link rel="stylesheet" href="public/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
@@ -25,31 +25,33 @@
         <!-- Brand -->
         <a href="index.php" class="navbar-brand">
             <div class="brand-icon">
-                <i class="fas fa-heartbeat"></i>
+                <i class="fas fa-plus"></i>
             </div>
             <span>MediLink</span>
         </a>
 
         <!-- Navigation Links -->
         <ul class="navbar-nav">
-            <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>"><i class="fas fa-home"></i> Accueil</a></li>
-            <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>"><i class="fas fa-comments"></i> Forums</a></li>
+            <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>">Accueil</a></li>
+            <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Forums</a></li>
+            <li><a href="#">Contact</a></li>
         </ul>
 
-        <!-- User Info -->
+        <!-- User Info / Actions -->
         <div class="navbar-user">
             <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'administrateur'): ?>
                 <a href="index.php?controller=forum&action=adminList" class="btn-admin-link">
-                    <i class="fas fa-cog"></i> Administration
+                    <i class="fas fa-th-large"></i> Administration
                 </a>
             <?php endif; ?>
-            <div class="user-avatar">
-                <?= strtoupper(substr($_SESSION['user']['prenom'] ?? 'U', 0, 1) . substr($_SESSION['user']['nom'] ?? '', 0, 1)) ?>
-            </div>
-            <div>
-                <div class="user-name"><?= htmlspecialchars(($_SESSION['user']['prenom'] ?? '') . ' ' . ($_SESSION['user']['nom'] ?? '')) ?></div>
-                <div class="user-role"><?= htmlspecialchars(ucfirst($_SESSION['user']['role'] ?? 'Utilisateur')) ?></div>
-            </div>
+            
+            <?php if (isset($_SESSION['user'])): ?>
+                <a href="index.php?controller=forum&action=list" class="btn-dark">
+                    <i class="fas fa-plus"></i> Nouveau Post
+                </a>
+            <?php else: ?>
+                <a href="#" class="btn-dark">Connexion</a>
+            <?php endif; ?>
         </div>
     </div>
 </nav>
