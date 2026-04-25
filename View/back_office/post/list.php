@@ -9,10 +9,17 @@ require __DIR__ . '/../../layout/back_header.php';
         <h2><i class="fas fa-file-alt" style="color: var(--admin-blue);"></i> Gestion des Posts</h2>
         <p>Consultez, modifiez et modérez les publications du forum.</p>
     </div>
+<<<<<<< HEAD
+=======
+    <a href="index.php?controller=post&action=adminCreate" class="admin-btn admin-btn-primary">
+        <i class="fas fa-plus"></i> Nouveau Post
+    </a>
+>>>>>>> master
 </div>
 
 <!-- Stats -->
 <div class="stats-grid">
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
         <div class="stat-info">
@@ -27,6 +34,57 @@ require __DIR__ . '/../../layout/back_header.php';
             <p>Commentaires au total</p>
         </div>
     </div>
+=======
+    <div class="stat-card c-blue">
+        <div class="stat-info">
+            <p>POSTS AU TOTAL</p>
+            <h3><?= $totalPosts ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-green">
+        <div class="stat-info">
+            <p>COMMENTAIRES AU TOTAL</p>
+            <h3><?= $totalComments ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-red">
+        <div class="stat-info">
+            <p>LE PLUS COMMENTÉ</p>
+            <?php if ($topPost): ?>
+                <h3 style="font-size: 1.5rem;">Post #<?= $topPost['id_post'] ?></h3>
+            <?php else: ?>
+                <h3 style="font-size: 1.5rem;">N/A</h3>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres et Recherche (Partie Métier : Recherche et Trie) -->
+<div class="admin-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: var(--admin-card); padding: 1rem; border-radius: 0.5rem; box-shadow: var(--admin-shadow);">
+    <form action="index.php" method="GET" style="display: flex; gap: 1rem; flex: 1; align-items: center; flex-wrap: wrap;">
+        <input type="hidden" name="controller" value="post">
+        <input type="hidden" name="action" value="adminList">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" placeholder="Rechercher par contenu, auteur ou forum..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" class="form-control" style="width: 100%;">
+        </div>
+        
+        <div>
+            <select name="sort" class="form-control">
+                <option value="date_desc" <?= ($_GET['sort'] ?? '') === 'date_desc' ? 'selected' : '' ?>>Plus récents en premier</option>
+                <option value="date_asc" <?= ($_GET['sort'] ?? '') === 'date_asc' ? 'selected' : '' ?>>Plus anciens en premier</option>
+                <option value="comments_desc" <?= ($_GET['sort'] ?? '') === 'comments_desc' ? 'selected' : '' ?>>Plus commentés</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="admin-btn admin-btn-primary">
+            <i class="fas fa-search"></i> Filtrer
+        </button>
+        <?php if (!empty($_GET['search']) || !empty($_GET['sort'])): ?>
+            <a href="index.php?controller=post&action=adminList" class="admin-btn admin-btn-secondary">Réinitialiser</a>
+        <?php endif; ?>
+    </form>
+>>>>>>> master
 </div>
 
 <!-- Posts Table -->
@@ -66,6 +124,7 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td><?= date('d/m/Y H:i', strtotime($p['date_publication'])) ?></td>
                         <td>
                             <div class="action-buttons">
+<<<<<<< HEAD
                                 <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action" title="Voir">
                                     <i class="fas fa-eye"></i>
                                 </a>
@@ -75,6 +134,17 @@ require __DIR__ . '/../../layout/back_header.php';
                                 <button class="btn-action delete" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=post&action=delete&id=<?= $p['id_post'] ?>', 'ce post')">
                                     <i class="fas fa-trash-alt"></i>
+=======
+                                <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action btn-voir" title="Voir">
+                                    Voir
+                                </a>
+                                <a href="index.php?controller=post&action=edit&id=<?= $p['id_post'] ?>" class="btn-action btn-modifier" title="Modifier">
+                                    Modifier
+                                </a>
+                                <button class="btn-action btn-supprimer" title="Supprimer"
+                                    onclick="confirmDelete('index.php?controller=post&action=delete&id=<?= $p['id_post'] ?>', 'ce post')">
+                                    Supprimer
+>>>>>>> master
                                 </button>
                             </div>
                         </td>

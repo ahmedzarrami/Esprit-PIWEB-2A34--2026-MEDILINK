@@ -1,7 +1,11 @@
 <?php
 /**
  * Classe Post — Modèle OOP
+<<<<<<< HEAD
  * Gestion des posts de forum avec PDO (prepared statements)
+=======
+ * Gestion des posts de forum (Entité)
+>>>>>>> master
  */
 class Post {
     // Propriétés privées (encapsulation)
@@ -40,6 +44,7 @@ class Post {
     public function setContenu(string $contenu): void { $this->contenu = $contenu; }
     public function setIdForum(int $idForum): void { $this->idForum = $idForum; }
     public function setIdAuteur(int $idAuteur): void { $this->idAuteur = $idAuteur; }
+<<<<<<< HEAD
 
     // ===== MÉTHODES CRUD =====
 
@@ -157,4 +162,6 @@ class Post {
         $stmt->execute([':id_auteur' => $idAuteur]);
         return $stmt->fetchAll();
     }
+=======
+>>>>>>> master
 }

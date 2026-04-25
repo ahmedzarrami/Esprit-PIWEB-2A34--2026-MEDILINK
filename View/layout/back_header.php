@@ -15,7 +15,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Admin Styles -->
+<<<<<<< HEAD
     <link rel="stylesheet" href="public/css/admin.css">
+=======
+    <link rel="stylesheet" href="public/css/admin.css?v=<?= time() ?>">
+>>>>>>> master
 </head>
 <body class="admin-body">
 
@@ -23,11 +27,19 @@
 <aside class="admin-sidebar">
     <div class="sidebar-brand">
         <div class="brand-icon">
+<<<<<<< HEAD
             <i class="fas fa-heartbeat"></i>
         </div>
         <div>
             <h2>MediLink</h2>
             <small>Panneau d'administration</small>
+=======
+            <i class="fas fa-plus"></i>
+        </div>
+        <div>
+            <h2>MediLink</h2>
+            <small style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; font-size: 0.65rem;">Back Office Admin</small>
+>>>>>>> master
         </div>
     </div>
 
@@ -104,3 +116,12 @@
 
     <!-- Admin Content -->
     <div class="admin-content">
+<<<<<<< HEAD
+=======
+        <!-- Horizontal Nav -->
+        <div class="admin-horizontal-nav">
+            <a href="index.php?controller=forum&action=adminList" class="nav-pill <?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Gestion des Forums</a>
+            <a href="index.php?controller=post&action=adminList" class="nav-pill <?= ($controller ?? '') === 'post' ? 'active' : '' ?>">Gestion des Posts</a>
+            <a href="index.php?controller=commentaire&action=adminList" class="nav-pill <?= ($controller ?? '') === 'commentaire' ? 'active' : '' ?>">Gestion des Commentaires</a>
+        </div>
+>>>>>>> master

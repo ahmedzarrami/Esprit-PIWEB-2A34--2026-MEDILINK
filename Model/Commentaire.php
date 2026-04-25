@@ -1,7 +1,11 @@
 <?php
 /**
  * Classe Commentaire — Modèle OOP
+<<<<<<< HEAD
  * Gestion des commentaires avec PDO (prepared statements)
+=======
+ * Gestion des commentaires (Entité)
+>>>>>>> master
  */
 class Commentaire {
     // Propriétés privées (encapsulation)
@@ -40,6 +44,7 @@ class Commentaire {
     public function setContenu(string $contenu): void { $this->contenu = $contenu; }
     public function setIdPost(int $idPost): void { $this->idPost = $idPost; }
     public function setIdAuteur(int $idAuteur): void { $this->idAuteur = $idAuteur; }
+<<<<<<< HEAD
 
     // ===== MÉTHODES CRUD =====
 
@@ -138,4 +143,6 @@ class Commentaire {
         $result = $stmt->fetch();
         return (int)$result['total'];
     }
+=======
+>>>>>>> master
 }

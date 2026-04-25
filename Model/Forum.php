@@ -35,6 +35,7 @@ class Forum {
     public function setIdForum(int $idForum): void { $this->idForum = $idForum; }
     public function setTitre(string $titre): void { $this->titre = $titre; }
     public function setDescription(?string $description): void { $this->description = $description; }
+<<<<<<< HEAD
 
     // ===== MÉTHODES CRUD =====
 
@@ -124,4 +125,6 @@ class Forum {
         $result = $stmt->fetch();
         return (int)$result['total'];
     }
+=======
+>>>>>>> master
 }

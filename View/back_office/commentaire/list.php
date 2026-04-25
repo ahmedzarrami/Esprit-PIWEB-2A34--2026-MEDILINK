@@ -13,6 +13,7 @@ require __DIR__ . '/../../layout/back_header.php';
 
 <!-- Stats -->
 <div class="stats-grid">
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon teal"><i class="fas fa-comments"></i></div>
         <div class="stat-info">
@@ -20,6 +21,52 @@ require __DIR__ . '/../../layout/back_header.php';
             <p>Commentaires au total</p>
         </div>
     </div>
+=======
+    <div class="stat-card c-blue">
+        <div class="stat-info">
+            <p>COMMENTAIRES AU TOTAL</p>
+            <h3><?= $totalComments ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-yellow">
+        <div class="stat-info">
+            <p>TOP CONTRIBUTEUR</p>
+            <?php if ($topUser && $topUser['nb'] > 0): ?>
+                <h3 style="font-size: 1.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($topUser['prenom'] . ' ' . $topUser['nom']) ?>">
+                    <?= htmlspecialchars($topUser['prenom'] . ' ' . $topUser['nom']) ?>
+                </h3>
+            <?php else: ?>
+                <h3 style="font-size: 1.5rem;">N/A</h3>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres et Recherche (Partie Métier : Recherche et Trie) -->
+<div class="admin-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: var(--admin-card); padding: 1rem; border-radius: 0.5rem; box-shadow: var(--admin-shadow);">
+    <form action="index.php" method="GET" style="display: flex; gap: 1rem; flex: 1; align-items: center; flex-wrap: wrap;">
+        <input type="hidden" name="controller" value="commentaire">
+        <input type="hidden" name="action" value="adminList">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" placeholder="Rechercher par contenu, auteur, post ou forum..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" class="form-control" style="width: 100%;">
+        </div>
+        
+        <div>
+            <select name="sort" class="form-control">
+                <option value="date_desc" <?= ($_GET['sort'] ?? '') === 'date_desc' ? 'selected' : '' ?>>Plus récents en premier</option>
+                <option value="date_asc" <?= ($_GET['sort'] ?? '') === 'date_asc' ? 'selected' : '' ?>>Plus anciens en premier</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="admin-btn admin-btn-primary">
+            <i class="fas fa-search"></i> Filtrer
+        </button>
+        <?php if (!empty($_GET['search']) || !empty($_GET['sort'])): ?>
+            <a href="index.php?controller=commentaire&action=adminList" class="admin-btn admin-btn-secondary">Réinitialiser</a>
+        <?php endif; ?>
+    </form>
+>>>>>>> master
 </div>
 
 <!-- Comments Table -->
@@ -62,12 +109,21 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td><?= date('d/m/Y H:i', strtotime($c['date_commentaire'])) ?></td>
                         <td>
                             <div class="action-buttons">
+<<<<<<< HEAD
                                 <a href="index.php?controller=post&action=show&id=<?= $c['id_post'] ?>" class="btn-action" title="Voir le post">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <button class="btn-action delete" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=commentaire&action=delete&id=<?= $c['id_commentaire'] ?>', 'ce commentaire')">
                                     <i class="fas fa-trash-alt"></i>
+=======
+                                <a href="index.php?controller=post&action=show&id=<?= $c['id_post'] ?>" class="btn-action btn-voir" title="Voir le post">
+                                    Voir Post
+                                </a>
+                                <button class="btn-action btn-supprimer" title="Supprimer"
+                                    onclick="confirmDelete('index.php?controller=commentaire&action=delete&id=<?= $c['id_commentaire'] ?>', 'ce commentaire')">
+                                    Supprimer
+>>>>>>> master
                                 </button>
                             </div>
                         </td>

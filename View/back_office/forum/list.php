@@ -16,6 +16,7 @@ require __DIR__ . '/../../layout/back_header.php';
 
 <!-- Stats -->
 <div class="stats-grid">
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon purple"><i class="fas fa-layer-group"></i></div>
         <div class="stat-info">
@@ -30,6 +31,59 @@ require __DIR__ . '/../../layout/back_header.php';
             <p>Posts au total</p>
         </div>
     </div>
+=======
+    <div class="stat-card c-blue">
+        <div class="stat-info">
+            <p>TOTAL FORUMS</p>
+            <h3><?= $totalForums ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-yellow">
+        <div class="stat-info">
+            <p>POSTS AU TOTAL</p>
+            <h3><?= $totalPosts ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-cyan">
+        <div class="stat-info">
+            <p>LE PLUS ACTIF</p>
+            <?php if ($topForum && $topForum['nb'] > 0): ?>
+                <h3 style="font-size: 1.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($topForum['titre']) ?>">
+                    <?= htmlspecialchars($topForum['titre']) ?>
+                </h3>
+            <?php else: ?>
+                <h3 style="font-size: 1.5rem;">N/A</h3>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres et Recherche (Partie Métier : Recherche et Trie) -->
+<div class="admin-filters" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: var(--admin-card); padding: 1rem; border-radius: 0.5rem; box-shadow: var(--admin-shadow);">
+    <form action="index.php" method="GET" style="display: flex; gap: 1rem; flex: 1; align-items: center; flex-wrap: wrap;">
+        <input type="hidden" name="controller" value="forum">
+        <input type="hidden" name="action" value="adminList">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" placeholder="Rechercher par titre ou description..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" class="form-control" style="width: 100%;">
+        </div>
+        
+        <div>
+            <select name="sort" class="form-control">
+                <option value="date_desc" <?= ($_GET['sort'] ?? '') === 'date_desc' ? 'selected' : '' ?>>Plus récents en premier</option>
+                <option value="date_asc" <?= ($_GET['sort'] ?? '') === 'date_asc' ? 'selected' : '' ?>>Plus anciens en premier</option>
+                <option value="posts_desc" <?= ($_GET['sort'] ?? '') === 'posts_desc' ? 'selected' : '' ?>>Plus de posts</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="admin-btn admin-btn-primary">
+            <i class="fas fa-search"></i> Filtrer
+        </button>
+        <?php if (!empty($_GET['search']) || !empty($_GET['sort'])): ?>
+            <a href="index.php?controller=forum&action=adminList" class="admin-btn admin-btn-secondary">Réinitialiser</a>
+        <?php endif; ?>
+    </form>
+>>>>>>> master
 </div>
 
 <!-- Forums Table -->
@@ -61,6 +115,7 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td><?= date('d/m/Y', strtotime($f['created_at'])) ?></td>
                         <td>
                             <div class="action-buttons">
+<<<<<<< HEAD
                                 <a href="index.php?controller=forum&action=show&id=<?= $f['id_forum'] ?>" class="btn-action" title="Voir">
                                     <i class="fas fa-eye"></i>
                                 </a>
@@ -70,6 +125,17 @@ require __DIR__ . '/../../layout/back_header.php';
                                 <button class="btn-action delete" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=forum&action=delete&id=<?= $f['id_forum'] ?>', 'le forum « <?= htmlspecialchars(addslashes($f['titre'])) ?> »')">
                                     <i class="fas fa-trash-alt"></i>
+=======
+                                <a href="index.php?controller=forum&action=show&id=<?= $f['id_forum'] ?>" class="btn-action btn-voir" title="Voir">
+                                    Voir
+                                </a>
+                                <a href="index.php?controller=forum&action=edit&id=<?= $f['id_forum'] ?>" class="btn-action btn-modifier" title="Modifier">
+                                    Modifier
+                                </a>
+                                <button class="btn-action btn-supprimer" title="Supprimer"
+                                    onclick="confirmDelete('index.php?controller=forum&action=delete&id=<?= $f['id_forum'] ?>', 'le forum « <?= htmlspecialchars(addslashes($f['titre'])) ?> »')">
+                                    Supprimer
+>>>>>>> master
                                 </button>
                             </div>
                         </td>
