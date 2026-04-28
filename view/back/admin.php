@@ -255,6 +255,22 @@ tbody tr:hover td { background:var(--gray-50); }
 
 /* Confirm modal */
 .confirm-modal { max-width:400px; text-align:center; padding:36px 32px; }
+
+/* Order details modal */
+.order-details { }
+.order-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+.order-info-item { display:flex; flex-direction:column; gap:4px; }
+.order-info-item label { font-size:12px; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; }
+.order-info-item span { font-size:14px; color:var(--gray-900); }
+.order-status-badge { display:inline-block; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600; text-transform:uppercase; }
+.order-total { font-weight:700; font-size:16px; color:var(--blue-600); }
+.order-products-section h4 { margin:0 0 16px 0; font-size:16px; font-weight:700; color:var(--gray-900); }
+.order-products-list { display:flex; flex-direction:column; gap:12px; }
+.order-detail-product { padding:12px; background:var(--gray-50); border-radius:8px; border:1px solid var(--gray-200); }
+.order-product-name { font-weight:600; font-size:14px; color:var(--gray-900); }
+.order-product-ref { font-size:12px; color:var(--gray-500); margin:2px 0; }
+.order-product-qty { font-size:12px; color:var(--gray-600); margin-bottom:4px; }
+.order-product-price { font-size:13px; color:var(--gray-700); }
 .confirm-icon { font-size:52px; margin-bottom:14px; }
 .confirm-title { font-size:19px; font-weight:700; margin-bottom:8px; }
 .confirm-msg { font-size:13px; color:var(--gray-600); margin-bottom:28px; line-height:1.6; }
@@ -434,6 +450,7 @@ tbody tr:hover td { background:var(--gray-50); }
                 </div>
                 <div class="form-group"><label class="form-label">Nom du produit *</label><input type="text" id="quickNom" class="form-input" placeholder="Ex : Crème hydratante SPF30"><span class="field-error" id="qerrNom"></span></div>
                 <div class="form-group"><label class="form-label">Description</label><textarea id="quickDesc" class="form-textarea" placeholder="Description, bienfaits, conseils..."></textarea></div>
+                <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="quickImage" class="form-input" placeholder="https://..." /></div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Prix (DT) *</label><input type="number" id="quickPrix" class="form-input" placeholder="0.000" min="0" step="0.001"><span class="field-error" id="qerrPrix"></span></div>
                     <div class="form-group"><label class="form-label">Stock (unités) *</label><input type="number" id="quickStock" class="form-input" placeholder="0" min="0"><span class="field-error" id="qerrStock"></span></div>
@@ -536,6 +553,7 @@ tbody tr:hover td { background:var(--gray-50); }
         </div>
         <div class="form-group"><label class="form-label">Nom du produit *</label><input type="text" id="fieldNom" class="form-input" placeholder="Crème hydratante SPF30"><span class="field-error" id="errNom"></span></div>
         <div class="form-group"><label class="form-label">Description</label><textarea id="fieldDesc" class="form-textarea" placeholder="Description, bienfaits..."></textarea></div>
+        <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="fieldImage" class="form-input" placeholder="https://..." /></div>
         <div class="form-row">
             <div class="form-group"><label class="form-label">Prix (DT) *</label><input type="number" id="fieldPrix" class="form-input" placeholder="0.000" min="0" step="0.001"><span class="field-error" id="errPrix"></span></div>
             <div class="form-group"><label class="form-label">Stock (unités) *</label><input type="number" id="fieldStock" class="form-input" placeholder="0" min="0"><span class="field-error" id="errStock"></span></div>
@@ -556,6 +574,22 @@ tbody tr:hover td { background:var(--gray-50); }
         <div class="confirm-actions">
             <button class="btn-cancel" onclick="closeConfirm()">Annuler</button>
             <button class="btn-confirm-del" id="btnConfirmDel">Confirmer</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ ORDER DETAILS MODAL ══ -->
+<div class="modal-overlay" id="orderDetailsOverlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">
+                <div class="modal-title-icon">📋</div>
+                <span>Détails de la commande</span>
+            </div>
+            <button class="modal-close" onclick="closeOrderDetails()">✕</button>
+        </div>
+        <div id="orderDetailsContent">
+            <!-- Content will be populated by JS -->
         </div>
     </div>
 </div>
@@ -588,12 +622,12 @@ async function apiRequest(resource, method, body = null) {
 }
 
 const DEMO_PRODUCTS = [
-    { id:171000000001, reference:"PHM-VIS-01", nom:"Crème Hydra Éclat SPF30",    description:"Protection UV et hydratation profonde, texture légère.", prix:42.500, stock:18, categorie:"Soins visage" },
-    { id:171000000002, reference:"PHM-COR-02", nom:"Beurre corporel karité",      description:"Beurre riche pour peaux sèches, 200ml.",              prix:29.900, stock:6,  categorie:"Soins corps" },
-    { id:171000000003, reference:"PHM-HYG-03", nom:"Gel douche douceur",          description:"Sans savon, pH neutre, 500ml.",                       prix:12.300, stock:2,  categorie:"Hygiène" },
-    { id:171000000004, reference:"PHM-COMP-04",nom:"Vitamine C + Zinc",           description:"Immunité & vitalité, 30 comprimés.",                  prix:18.750, stock:0,  categorie:"Compléments alimentaires" },
-    { id:171000000005, reference:"PHM-BEB-05", nom:"Lait nettoyant bébé",         description:"Sans parfum, hypoallergénique.",                      prix:15.200, stock:4,  categorie:"Bébé & Maman" },
-    { id:171000000006, reference:"PHM-CAP-06", nom:"Shampoing sec réparateur",    description:"Cheveux fragiles, 150ml.",                            prix:9.990,  stock:11, categorie:"Capillaire" }
+    { id:171000000001, reference:"PHM-VIS-01", nom:"Crème Hydra Éclat SPF30",    description:"Protection UV et hydratation profonde, texture légère.", prix:42.500, stock:18, categorie:"Soins visage", image:"https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80" },
+    { id:171000000002, reference:"PHM-COR-02", nom:"Beurre corporel karité",      description:"Beurre riche pour peaux sèches, 200ml.",              prix:29.900, stock:6,  categorie:"Soins corps", image:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80" },
+    { id:171000000003, reference:"PHM-HYG-03", nom:"Gel douche douceur",          description:"Sans savon, pH neutre, 500ml.",                       prix:12.300, stock:2,  categorie:"Hygiène", image:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80" },
+    { id:171000000004, reference:"PHM-COMP-04",nom:"Vitamine C + Zinc",           description:"Immunité & vitalité, 30 comprimés.",                  prix:18.750, stock:0,  categorie:"Compléments alimentaires", image:"https://images.unsplash.com/photo-1580281657521-98da17d80bd3?auto=format&fit=crop&w=600&q=80" },
+    { id:171000000005, reference:"PHM-BEB-05", nom:"Lait nettoyant bébé",         description:"Sans parfum, hypoallergénique.",                      prix:15.200, stock:4,  categorie:"Bébé & Maman", image:"https://images.unsplash.com/photo-1580542970540-e80b54a7f363?auto=format&fit=crop&w=600&q=80" },
+    { id:171000000006, reference:"PHM-CAP-06", nom:"Shampoing sec réparateur",    description:"Cheveux fragiles, 150ml.",                            prix:9.990,  stock:11, categorie:"Capillaire", image:"https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=600&q=80" }
 ];
 
 function getProducts() { const r=localStorage.getItem(STORAGE_KEY); if(!r||r==='[]'){saveProducts(DEMO_PRODUCTS);return[...DEMO_PRODUCTS];}try{return JSON.parse(r);}catch{return[...DEMO_PRODUCTS];} }
@@ -751,35 +785,76 @@ function renderOrdersTable(list, total) {
         return;
     }
     tbody.innerHTML='';
+
+    // Group orders by id to handle multiple products
+    const orderMap = new Map();
     list.forEach(o => {
-        const sc = STATUS_CLASS[o.status] || 'status-en_attente';
-        const payIcon = PAY_ICONS[o.paymentType]||'💳';
-        const payLabel = PAY_LABELS[o.paymentType]||o.paymentType;
-        const shortId = String(o.id).slice(-6);
-        // Display client info nicely
-        const clientDisplay = o.userNumber ? `#${o.userNumber}` : (typeof o.userId === 'string' ? o.userId.slice(-8) : `U${o.userId}`);
+        if (!orderMap.has(o.id)) {
+            orderMap.set(o.id, {
+                id: o.id,
+                clientId: o.clientId,
+                clientNumber: o.clientNumber || o.userNumber,
+                userId: o.userId,
+                paymentType: o.paymentType,
+                status: o.status,
+                date: o.date,
+                totalPrice: o.totalPrice || 0,
+                products: []
+            });
+        }
+        const order = orderMap.get(o.id);
+        if (o.products) {
+            // New format with products array
+            order.products = o.products;
+            order.totalPrice = o.totalPrice;
+        } else {
+            // Old format single product
+            order.products.push({
+                productId: o.productId,
+                productName: o.productName,
+                productRef: o.productRef,
+                unitPrice: o.unitPrice,
+                quantity: o.quantity,
+                totalPrice: o.totalPrice
+            });
+        }
+    });
+
+    Array.from(orderMap.values()).forEach(order => {
+        const sc = STATUS_CLASS[order.status] || 'status-en_attente';
+        const payIcon = PAY_ICONS[order.paymentType]||'💳';
+        const payLabel = PAY_LABELS[order.paymentType]||order.paymentType;
+        const shortId = String(order.id).slice(-6);
+        const clientDisplay = order.clientNumber ? `#${order.clientNumber}` : (typeof order.clientId === 'string' ? order.clientId.slice(-8) : `U${order.clientId}`);
+
+        // For multiple products, show first product and indicate more
+        const firstProduct = order.products[0] || {};
+        const productDisplay = order.products.length === 1
+            ? `<div style="font-weight:700;font-size:13px;">${escH(firstProduct.productName||'—')}</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px;">${escH(firstProduct.productRef||'')}</div>`
+            : `<div style="font-weight:700;font-size:13px;">${order.products.length} produits</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px;">${escH(firstProduct.productName||'')} + ${order.products.length - 1} autres</div>`;
+
+        const totalQty = order.products.reduce((sum, p) => sum + (p.quantity || 1), 0);
+
         const tr=document.createElement('tr');
         tr.innerHTML=`
             <td style="font-family:monospace;font-size:11px;color:var(--gray-400);">#${escH(shortId)}</td>
             <td><span class="td-user">👤 ${escH(clientDisplay)}</span></td>
+            <td>${productDisplay}</td>
+            <td style="font-weight:700;text-align:center;">${totalQty}</td>
+            <td class="td-total">${parseFloat(order.totalPrice).toFixed(3)} DT</td>
             <td>
-                <div style="font-weight:700;font-size:13px;">${escH(o.productName||'—')}</div>
-                <div style="font-size:10px;color:var(--gray-400);margin-top:2px;">${escH(o.productRef||'')}</div>
-            </td>
-            <td style="font-weight:700;text-align:center;">${escH(String(o.quantity||1))}</td>
-            <td class="td-total">${parseFloat(o.totalPrice||0).toFixed(3)} DT</td>
-            <td>
-                <select class="order-status-select ${sc}" onchange="updateOrderStatus(${o.id}, this.value, this)">
-                    <option ${o.status==='En attente'?'selected':''}>En attente</option>
-                    <option ${o.status==='Confirmée'?'selected':''}>Confirmée</option>
-                    <option ${o.status==='Livrée'?'selected':''}>Livrée</option>
-                    <option ${o.status==='Annulée'?'selected':''}>Annulée</option>
+                <select class="order-status-select ${sc}" onchange="updateOrderStatus('${order.id}', this.value, this)">
+                    <option ${order.status==='En attente'?'selected':''}>En attente</option>
+                    <option ${order.status==='Confirmée'?'selected':''}>Confirmée</option>
+                    <option ${order.status==='Livrée'?'selected':''}>Livrée</option>
+                    <option ${order.status==='Annulée'?'selected':''}>Annulée</option>
                 </select>
             </td>
             <td><span class="order-pay-badge">${payIcon} ${escH(payLabel)}</span></td>
-            <td class="td-date">${escH(o.date||'—')}</td>
+            <td class="td-date">${escH(order.date||'—')}</td>
             <td>
-                <button class="btn-td" onclick="confirmDeleteOrder(${o.id})">🗑️ Supprimer</button>
+                <button class="btn-td" onclick="viewOrderDetails('${order.id}')">👁️ Détails</button>
+                <button class="btn-td" onclick="confirmDeleteOrder('${order.id}')">🗑️</button>
             </td>`;
         tbody.appendChild(tr);
     });
@@ -787,7 +862,7 @@ function renderOrdersTable(list, total) {
 
 function updateOrderStatus(orderId, newStatus, selectEl) {
     const orders = getOrders();
-    const idx = orders.findIndex(o => o.id == orderId);
+    const idx = orders.findIndex(o => String(o.id) === String(orderId));
     if(idx === -1) return;
     orders[idx].status = newStatus;
     const sc = STATUS_CLASS[newStatus] || 'status-en_attente';
@@ -807,7 +882,7 @@ function updateSidebarBadges() {
 function openAddModal() {
     document.getElementById('modalTitleText').textContent = 'Ajouter un produit';
     document.getElementById('editId').value = '';
-    ['fieldRef','fieldNom','fieldDesc','fieldPrix','fieldStock'].forEach(id => document.getElementById(id).value='');
+    ['fieldRef','fieldNom','fieldDesc','fieldImage','fieldPrix','fieldStock'].forEach(id => document.getElementById(id).value='');
     document.getElementById('fieldCat').value = '';
     clearModalErrors();
     document.getElementById('modalOverlay').classList.add('open');
@@ -821,6 +896,7 @@ function openEditModal(id) {
     document.getElementById('fieldRef').value   = p.reference||'';
     document.getElementById('fieldNom').value   = p.nom||'';
     document.getElementById('fieldDesc').value  = p.description||'';
+    document.getElementById('fieldImage').value = p.image||'';
     document.getElementById('fieldPrix').value  = p.prix||'';
     document.getElementById('fieldStock').value = p.stock||0;
     document.getElementById('fieldCat').value   = p.categorie||'';
@@ -834,7 +910,7 @@ function closeModal() {
 }
 function clearModalErrors() {
     document.getElementById('formAlert').className='form-alert';
-    ['fieldRef','fieldNom','fieldCat','fieldPrix','fieldStock'].forEach(id => {
+    ['fieldRef','fieldNom','fieldCat','fieldImage','fieldPrix','fieldStock'].forEach(id => {
         const el=document.getElementById(id); if(el) el.classList.remove('error');
     });
     ['errRef','errNom','errCat','errPrix','errStock'].forEach(id => {
@@ -852,6 +928,7 @@ async function submitForm() {
     const cat=document.getElementById('fieldCat').value;
     const prix=parseFloat(document.getElementById('fieldPrix').value);
     const stock=parseInt(document.getElementById('fieldStock').value);
+    const image=document.getElementById('fieldImage').value.trim();
     if(!ref){showFieldErr('fieldRef','errRef','Référence obligatoire');ok=false;}else clearFieldErr('fieldRef','errRef');
     if(!nom){showFieldErr('fieldNom','errNom','Nom requis');ok=false;}else clearFieldErr('fieldNom','errNom');
     if(!cat){showFieldErr('fieldCat','errCat','Catégorie requise');ok=false;}else clearFieldErr('fieldCat','errCat');
@@ -860,7 +937,7 @@ async function submitForm() {
     if(!ok) return;
     const editIdRaw=document.getElementById('editId').value;
     const products=getProducts();
-    const newP={reference:ref,nom,description:document.getElementById('fieldDesc').value.trim(),prix,stock,categorie:cat};
+    const newP={reference:ref,nom,description:document.getElementById('fieldDesc').value.trim(),image,prix,stock,categorie:cat};
 
     try {
         if(editIdRaw) {
@@ -896,6 +973,7 @@ async function submitQuickForm() {
     const cat=document.getElementById('quickCat').value;
     const prix=parseFloat(document.getElementById('quickPrix').value);
     const stock=parseInt(document.getElementById('quickStock').value);
+    const image=document.getElementById('quickImage').value.trim();
     const qErr = (inputId,errId,msg) => { document.getElementById(inputId).classList.add('error'); const e=document.getElementById(errId); e.textContent=msg; e.classList.add('show'); ok=false; };
     const qOk  = (inputId,errId) => { document.getElementById(inputId).classList.remove('error'); document.getElementById(errId).classList.remove('show'); };
     if(!ref){qErr('quickRef','qerrRef','Référence obligatoire');}else qOk('quickRef','qerrRef');
@@ -908,13 +986,13 @@ async function submitQuickForm() {
     if(products.some(p=>p.reference&&p.reference.toLowerCase()===ref.toLowerCase())){
         qErr('quickRef','qerrRef','Référence déjà existante'); return;
     }
-    const newP={reference:ref,nom,description:document.getElementById('quickDesc').value.trim(),prix,stock,categorie:cat};
+    const newP={reference:ref,nom,description:document.getElementById('quickDesc').value.trim(),image,prix,stock,categorie:cat};
     try {
         const created = await apiRequest('produits','POST',newP);
         newP.id = created.id ?? Date.now();
         products.push(newP);
         saveProducts(products);
-        ['quickRef','quickNom','quickDesc','quickPrix','quickStock'].forEach(id=>document.getElementById(id).value='');
+        ['quickRef','quickNom','quickDesc','quickImage','quickPrix','quickStock'].forEach(id=>document.getElementById(id).value='');
         document.getElementById('quickCat').value='';
         const a=document.getElementById('quickAlert');
         a.className='form-alert show success';
@@ -950,7 +1028,7 @@ function confirmDeleteOrder(id) {
     document.getElementById('confirmTitle').textContent = 'Supprimer cette commande ?';
     document.getElementById('confirmMsg').textContent = 'Cette action est irréversible.';
     _pendingConfirm = () => {
-        const orders = getOrders().filter(o => o.id != id);
+        const orders = getOrders().filter(o => String(o.id) !== String(id));
         saveOrders(orders);
         showToast('Commande supprimée', 'success');
         closeConfirm();
@@ -984,6 +1062,85 @@ document.getElementById('btnConfirmDel').addEventListener('click', () => { if(_p
 // Click outside to close
 document.getElementById('confirmOverlay').addEventListener('click', function(e){ if(e.target===this) closeConfirm(); });
 document.getElementById('modalOverlay').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+document.getElementById('orderDetailsOverlay').addEventListener('click', function(e){ if(e.target===this) closeOrderDetails(); });
+
+function viewOrderDetails(orderId) {
+    const orders = getOrders();
+    const order = orders.find(o => String(o.id) === String(orderId));
+    if (!order) return;
+
+    const content = document.getElementById('orderDetailsContent');
+    const payIcon = PAY_ICONS[order.paymentType] || '💳';
+    const payLabel = PAY_LABELS[order.paymentType] || order.paymentType;
+    const clientDisplay = order.clientNumber ? `#${order.clientNumber}` : (typeof order.clientId === 'string' ? order.clientId.slice(-8) : `U${order.clientId}`);
+
+    let productsHtml = '';
+    if (order.products && order.products.length) {
+        productsHtml = order.products.map(p => `
+            <div class="order-detail-product">
+                <div class="order-product-name">${escH(p.productName || '—')}</div>
+                <div class="order-product-ref">${escH(p.productRef || '')}</div>
+                <div class="order-product-qty">Qté: ${p.quantity || 1}</div>
+                <div class="order-product-price">${parseFloat(p.unitPrice || 0).toFixed(3)} DT × ${p.quantity || 1} = ${parseFloat(p.totalPrice || 0).toFixed(3)} DT</div>
+            </div>
+        `).join('');
+    } else {
+        // Fallback for old format
+        productsHtml = `
+            <div class="order-detail-product">
+                <div class="order-product-name">${escH(order.productName || '—')}</div>
+                <div class="order-product-ref">${escH(order.productRef || '')}</div>
+                <div class="order-product-qty">Qté: ${order.quantity || 1}</div>
+                <div class="order-product-price">${parseFloat(order.unitPrice || 0).toFixed(3)} DT × ${order.quantity || 1} = ${parseFloat(order.totalPrice || 0).toFixed(3)} DT</div>
+            </div>
+        `;
+    }
+
+    content.innerHTML = `
+        <div class="order-details">
+            <div class="order-info-grid">
+                <div class="order-info-item">
+                    <label>ID Commande:</label>
+                    <span>#${String(order.id).slice(-6)}</span>
+                </div>
+                <div class="order-info-item">
+                    <label>Client:</label>
+                    <span>${escH(clientDisplay)}</span>
+                </div>
+                <div class="order-info-item">
+                    <label>Paiement:</label>
+                    <span>${payIcon} ${escH(payLabel)}</span>
+                </div>
+                <div class="order-info-item">
+                    <label>Statut:</label>
+                    <span class="order-status-badge ${STATUS_CLASS[order.status] || 'status-en_attente'}">${escH(order.status || 'En attente')}</span>
+                </div>
+                <div class="order-info-item">
+                    <label>Date:</label>
+                    <span>${escH(order.date || '—')}</span>
+                </div>
+                <div class="order-info-item">
+                    <label>Total:</label>
+                    <span class="order-total">${parseFloat(order.totalPrice || 0).toFixed(3)} DT</span>
+                </div>
+            </div>
+            <div class="order-products-section">
+                <h4>Produits commandés:</h4>
+                <div class="order-products-list">
+                    ${productsHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('orderDetailsOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeOrderDetails() {
+    document.getElementById('orderDetailsOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+}
 
 // ════════════════════════════════════
 //  TOAST

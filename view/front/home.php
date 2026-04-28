@@ -60,6 +60,18 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
     text-decoration: none; transition: .15s;
 }
 .btn-admin:hover { background: var(--navy2); color: #fff; }
+.nav-cart .cart-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; background: var(--green-light); color: var(--green-dark);
+    border: 1px solid rgba(13,162,113,.25); border-radius: 10px;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s;
+}
+.nav-cart .cart-btn:hover { background: var(--green); color: #fff; }
+.cart-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%; background: var(--green); color: #fff;
+    font-size: 11px; font-weight: 700;
+}
 
 /* ── HERO ── */
 .hero {
@@ -166,7 +178,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .product-thumb {
     height:130px; background:var(--gray-50);
     display:flex; align-items:center; justify-content:center; font-size:44px;
-    border-bottom:1px solid var(--gray-200);
+    border-bottom:1px solid var(--gray-200); overflow:hidden;
+}
+.product-thumb img {
+    width:100%; height:100%; object-fit:cover;
 }
 .product-body { padding:16px; }
 .product-ref { font-size:10px; font-weight:500; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
@@ -280,6 +295,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
     </div>
 
     <div style="display:flex;align-items:center;gap:10px">
+        <div class="nav-cart">
+            <button class="cart-btn" onclick="openCart()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                Panier
+                <span class="cart-badge" id="cartBadge">0</span>
+            </button>
+        </div>
         <a href="../back/admin.php" class="btn-admin">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="3"/>
@@ -437,14 +459,22 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
             <button class="modal-close" onclick="closeOrderModal()">✕</button>
         </div>
         <div class="form-alert" id="orderAlert"><span id="orderAlertMsg"></span></div>
-        <div class="form-group">
-            <label class="form-label">Produit</label>
-            <div id="orderProductInfo" style="padding:12px;background:var(--blue-light);border-radius:9px;color:var(--blue);font-weight:600;">—</div>
+        <div id="orderSingleSection">
+          <div class="form-group">
+              <label class="form-label">Produit</label>
+              <div id="orderProductInfo" style="padding:12px;background:var(--blue-light);border-radius:9px;color:var(--blue);font-weight:600;">—</div>
+          </div>
+          <div class="form-group">
+              <label class="form-label">Quantité *</label>
+              <input type="number" id="orderQty" class="form-input" value="1" min="1">
+              <span class="field-error" id="errQty">Quantité invalide</span>
+          </div>
         </div>
-        <div class="form-group">
-            <label class="form-label">Quantité *</label>
-            <input type="number" id="orderQty" class="form-input" value="1" min="1">
-            <span class="field-error" id="errQty">Quantité invalide</span>
+        <div id="orderCartSection" style="display:none;">
+          <div class="form-group">
+              <label class="form-label">Panier</label>
+              <div id="orderCartList" style="padding:12px;background:var(--gray-50);border-radius:9px;min-height:90px;">Aucun produit</div>
+          </div>
         </div>
         <div class="form-group">
             <label class="form-label">Mode de paiement *</label>
@@ -482,8 +512,70 @@ const CAT_ICONS = {
   'Compléments alimentaires':'💊','Bébé & Maman':'🍼',
   'Capillaire':'💆','Solaire':'☀️','Minceur':'⚖️','Orthopédie':'🦴','Autre':'📦'
 };
+const DEFAULT_PRODUCT_IMAGES = {
+  'PHM-VIS-01':'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80',
+  'PHM-COR-02':'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
+  'PHM-HYG-03':'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
+  'PHM-COMP-04':'https://images.unsplash.com/photo-1580281657521-98da17d80bd3?auto=format&fit=crop&w=600&q=80',
+  'PHM-BEB-05':'https://images.unsplash.com/photo-1580542970540-e80b54a7f363?auto=format&fit=crop&w=600&q=80',
+  'PHM-CAP-06':'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=600&q=80'
+};
+const CART_KEY = 'pharma_cart';
+let _currentOrderProduct = null;
+let _cartItems = [];
+let _orderMode = 'single';
+
 function getProducts() { return JSON.parse(localStorage.getItem('pharma_products')||'[]'); }
 function saveProducts(l){ localStorage.setItem('pharma_products',JSON.stringify(l)); }
+function getCart() { try { return JSON.parse(localStorage.getItem(CART_KEY)||'[]'); } catch(e) { return []; } }
+function saveCart(c){ localStorage.setItem(CART_KEY,JSON.stringify(c)); }
+function addToCart(productId, qty=1) {
+  const products = getProducts();
+  const product = products.find(p=>p.id==productId);
+  if(!product || parseInt(product.stock)<=0) {
+    showToast('Produit indisponible', 'error');
+    return;
+  }
+  const cart = getCart();
+  const item = cart.find(i=>i.productId==productId);
+  if(item) {
+    if(item.quantity + qty > parseInt(product.stock)) {
+      showToast('Stock insuffisant', 'error');
+      return;
+    }
+    item.quantity += qty;
+  } else {
+    cart.push({ productId, quantity: qty });
+  }
+  saveCart(cart);
+  updateCartBadge();
+  showToast('Produit ajouté au panier ✓', 'success');
+}
+function updateCartBadge(){
+  const cart = getCart();
+  const total = cart.reduce((sum,item)=>sum + item.quantity,0);
+  const badge = document.getElementById('cartBadge');
+  if(badge) badge.textContent = total;
+}
+function openCart(){
+  _cartItems = getCart();
+  if(!_cartItems.length) {
+    showToast('Votre panier est vide', 'info');
+    return;
+  }
+  _orderMode = 'cart';
+  _currentOrderProduct = null;
+  renderOrderModal();
+  document.getElementById('orderOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function showToast(msg,type){
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#0f1b2d;color:#fff;padding:12px 18px;border-radius:12px;z-index:9999;font-size:13px;font-weight:600;box-shadow:0 10px 24px rgba(0,0,0,.2);';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(),2500);
+}
 function escH(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 async function fetchProductsFromApi() {
@@ -504,6 +596,7 @@ async function initFrontProducts() {
   updateFrontStats();
   populateCatSelectAndTags();
   applyFilters();
+  updateCartBadge();
 }
 
 // ── STATS ──
@@ -563,9 +656,11 @@ function renderFrontGrid(products, total){
     const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
     const icon = CAT_ICONS[p.categorie] || '📦';
     const isOut = s === 0;
+    const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
+    const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
     return `
       <div class="product-card">
-        <div class="product-thumb">${icon}</div>
+        <div class="product-thumb">${thumb}</div>
         <div class="product-body">
           <div class="product-ref">${escH(p.reference||'N/R')}</div>
           <div class="product-name">${escH(p.nom)}</div>
@@ -575,7 +670,10 @@ function renderFrontGrid(products, total){
             <div class="product-price">${parseFloat(p.prix||0).toFixed(3)} <small>DT</small></div>
             <div class="stock-badge ${sc}">${sl}</div>
           </div>
-          <button class="btn-commander" onclick="openOrderModal(${p.id})" ${isOut?'disabled':''}>🛒 Commander</button>
+          <div class="product-actions">
+            <button class="btn-commander" onclick="openOrderModal(${p.id})" ${isOut?'disabled':''}>🛒 Commander</button>
+            <button class="btn-add-cart" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>+</button>
+          </div>
         </div>
       </div>
     `;
@@ -620,92 +718,152 @@ function getClientId() {
 function getOrders() { try { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); } catch(e) { return []; } }
 function saveOrders(list) { localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }
 
-let _currentOrderProduct = null;
-
 function openOrderModal(id) {
   const products = getProducts();
   const p = products.find(x => x.id == id);
   if(!p) return;
+  _orderMode = 'single';
   _currentOrderProduct = p;
-  document.getElementById('orderProductInfo').textContent = `${p.nom} - ${parseFloat(p.prix||0).toFixed(3)} DT`;
-  document.getElementById('orderQty').value = '1';
-  document.getElementById('orderPayment').value = '';
-  document.getElementById('orderAlert').className = 'form-alert';
-  ['errQty','errPayment'].forEach(id => document.getElementById(id).classList.remove('show'));
-  updateOrderTotal();
+  _cartItems = [];
+  renderOrderModal();
   document.getElementById('orderOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+
+function renderOrderModal() {
+  const title = document.getElementById('orderModalTitle');
+  const singleSection = document.getElementById('orderSingleSection');
+  const cartSection = document.getElementById('orderCartSection');
+  const alert = document.getElementById('orderAlert');
+  title.textContent = _orderMode === 'cart' ? 'Commander le panier' : 'Commander un produit';
+  alert.className = 'form-alert';
+  ['errQty','errPayment'].forEach(id => document.getElementById(id).classList.remove('show'));
+  document.getElementById('orderPayment').value = '';
+  if(_orderMode === 'single') {
+    singleSection.style.display = 'block';
+    cartSection.style.display = 'none';
+    document.getElementById('orderProductInfo').textContent = `${_currentOrderProduct.nom} - ${parseFloat(_currentOrderProduct.prix||0).toFixed(3)} DT`;
+    document.getElementById('orderQty').value = '1';
+  } else {
+    singleSection.style.display = 'none';
+    cartSection.style.display = 'block';
+    renderCartList();
+  }
+  updateOrderTotal();
+}
+
+function renderCartList() {
+  const list = document.getElementById('orderCartList');
+  const products = getProducts();
+  if(!_cartItems.length) {
+    list.innerHTML = 'Aucun produit';
+    return;
+  }
+  list.innerHTML = _cartItems.map(item => {
+    const p = products.find(prod => prod.id == item.productId);
+    if(!p) return '';
+    return `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(15,23,42,.09);">
+      <div>
+        <div style="font-weight:600;color:#0f172a;">${escH(p.nom)}</div>
+        <div style="font-size:12px;color:#64748b;">${item.quantity} × ${parseFloat(p.prix||0).toFixed(3)} DT</div>
+      </div>
+      <div style="font-weight:700;color:#0f172a;">${(item.quantity * p.prix).toFixed(3)} DT</div>
+    </div>`;
+  }).join('');
 }
 
 function closeOrderModal() {
   document.getElementById('orderOverlay').classList.remove('open');
   document.body.style.overflow = '';
   _currentOrderProduct = null;
+  _orderMode = 'single';
 }
 
 function updateOrderTotal() {
-  if(!_currentOrderProduct) return;
-  const qty = parseInt(document.getElementById('orderQty').value) || 0;
-  const total = (parseFloat(_currentOrderProduct.prix||0) * qty).toFixed(3);
-  document.getElementById('orderTotal').textContent = total;
+  if(_orderMode === 'single' && _currentOrderProduct) {
+    const qty = parseInt(document.getElementById('orderQty').value) || 0;
+    const total = (parseFloat(_currentOrderProduct.prix||0) * qty).toFixed(3);
+    document.getElementById('orderTotal').textContent = total;
+  } else if(_orderMode === 'cart') {
+    const products = getProducts();
+    const total = _cartItems.reduce((sum,item) => {
+      const p = products.find(prod => prod.id == item.productId);
+      return sum + (p ? item.quantity * parseFloat(p.prix||0) : 0);
+    }, 0);
+    document.getElementById('orderTotal').textContent = total.toFixed(3);
+  }
 }
 
 document.getElementById('orderQty')?.addEventListener('input', updateOrderTotal);
 
 async function submitOrder() {
-  if(!_currentOrderProduct) return;
-  const qty = parseInt(document.getElementById('orderQty').value);
   const payment = document.getElementById('orderPayment').value;
   const orderAlert = document.getElementById('orderAlert');
-  
   let ok = true;
-  if(!qty || qty < 1) { document.getElementById('errQty').classList.add('show'); ok = false; }
-  else { document.getElementById('errQty').classList.remove('show'); }
+  if(_orderMode === 'single') {
+    const qty = parseInt(document.getElementById('orderQty').value);
+    if(!qty || qty < 1) { document.getElementById('errQty').classList.add('show'); ok = false; }
+    else { document.getElementById('errQty').classList.remove('show'); }
+  }
   if(!payment) { document.getElementById('errPayment').classList.add('show'); ok = false; }
   else { document.getElementById('errPayment').classList.remove('show'); }
   if(!ok) return;
-  
-  const order = {
-    id: Date.now(),
-    clientId: getClientId(),
-    productId: _currentOrderProduct.id,
-    productRef: _currentOrderProduct.reference || '',
-    productNom: _currentOrderProduct.nom,
-    productPrix: parseFloat(_currentOrderProduct.prix||0),
-    qty: qty,
-    total: parseFloat(_currentOrderProduct.prix||0) * qty,
-    payment: payment,
-    status: 'En attente',
-    date: new Date().toLocaleString('fr-FR')
-  };
 
+  const clientId = getClientId();
+  const orders = getOrders();
   try {
-    const saved = await apiRequest('commandes','POST',{
-      clientId: order.clientId,
-      productId: order.productId,
-      productRef: order.productRef,
-      productNom: order.productNom,
-      productPrix: order.productPrix,
-      qty: order.qty,
-      total: order.total,
-      payment: order.payment,
-      status: order.status,
-      date: order.date
-    });
-    order.id = saved.id ?? order.id;
+    if(_orderMode === 'single') {
+      const qty = parseInt(document.getElementById('orderQty').value);
+      const order = {
+        id: Date.now(),
+        clientId: clientId,
+        productId: _currentOrderProduct.id,
+        productRef: _currentOrderProduct.reference || '',
+        productNom: _currentOrderProduct.nom,
+        productPrix: parseFloat(_currentOrderProduct.prix||0),
+        qty: qty,
+        total: parseFloat(_currentOrderProduct.prix||0) * qty,
+        payment: payment,
+        status: 'En attente',
+        date: new Date().toLocaleString('fr-FR')
+      };
+      await apiRequest('commandes','POST', order);
+      orders.push(order);
+      saveOrders(orders);
+      orderAlert.className = 'form-alert show success';
+      document.getElementById('orderAlertMsg').textContent = '✓ Commande créée avec succès !';
+    } else {
+      for(const item of _cartItems) {
+        const p = getProducts().find(prod => prod.id == item.productId);
+        if(!p) continue;
+        const order = {
+          id: Date.now() + Math.random(),
+          clientId: clientId,
+          productId: p.id,
+          productRef: p.reference || '',
+          productNom: p.nom,
+          productPrix: parseFloat(p.prix||0),
+          qty: item.quantity,
+          total: parseFloat(p.prix||0) * item.quantity,
+          payment: payment,
+          status: 'En attente',
+          date: new Date().toLocaleString('fr-FR')
+        };
+        await apiRequest('commandes','POST', order);
+        orders.push(order);
+      }
+      saveOrders(orders);
+      saveCart([]);
+      updateCartBadge();
+      orderAlert.className = 'form-alert show success';
+      document.getElementById('orderAlertMsg').textContent = '✓ Panier commandé avec succès !';
+    }
   } catch(error) {
     orderAlert.className = 'form-alert show err';
     document.getElementById('orderAlertMsg').textContent = error.message;
     return;
   }
-  
-  const orders = getOrders();
-  orders.push(order);
-  saveOrders(orders);
-  
-  orderAlert.className = 'form-alert show success';
-  document.getElementById('orderAlertMsg').textContent = '✓ Commande créée avec succès !';
-  
+
   setTimeout(() => {
     closeOrderModal();
     orderAlert.className = 'form-alert';

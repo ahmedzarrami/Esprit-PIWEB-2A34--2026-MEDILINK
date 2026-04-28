@@ -30,6 +30,58 @@ class Produit {
         $this->categorie   = $categorie;
     }
 
+    public function getId(): int {
+        return $this->id;
+    }
+
+    public function getReference(): string {
+        return $this->reference;
+    }
+
+    public function setReference(string $reference): void {
+        $this->reference = $reference;
+    }
+
+    public function getNom(): string {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): void {
+        $this->nom = $nom;
+    }
+
+    public function getDescription(): string {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): void {
+        $this->description = $description;
+    }
+
+    public function getPrix(): float {
+        return $this->prix;
+    }
+
+    public function setPrix(float $prix): void {
+        $this->prix = $prix;
+    }
+
+    public function getStock(): int {
+        return $this->stock;
+    }
+
+    public function setStock(int $stock): void {
+        $this->stock = $stock;
+    }
+
+    public function getCategorie(): string {
+        return $this->categorie;
+    }
+
+    public function setCategorie(string $categorie): void {
+        $this->categorie = $categorie;
+    }
+
     // Retourne le statut du stock
     public function statutStock(): string {
         if ($this->stock === 0)    return 'rupture';

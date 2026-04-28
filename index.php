@@ -208,6 +208,17 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 }
 .btn-commander:hover { background:linear-gradient(135deg,var(--blue-dark),var(--blue)); transform:translateY(-1px); box-shadow:0 6px 18px rgba(26,86,219,.35); }
 .btn-commander:disabled { background:var(--gray-200); color:var(--gray-400); cursor:not-allowed; box-shadow:none; transform:none; }
+.btn-add-cart {
+    position:absolute; top:10px; right:10px;
+    width:32px; height:32px; border-radius:50%;
+    background:var(--green); color:#fff;
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:bold;
+    transition:.2s;
+}
+.btn-add-cart:hover { background:var(--green-dark); transform:scale(1.1); }
+.btn-add-cart:disabled { background:var(--gray-200); color:var(--gray-400); cursor:not-allowed; }
 .empty-state { grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--gray-400); }
 .empty-state-icon { font-size:40px; margin-bottom:14px; opacity:.5; }
 .empty-state strong { display:block; font-size:16px; color:var(--gray-600); margin-bottom:6px; }
@@ -385,6 +396,13 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
             <span id="clientIdDisplay">—</span>
             <button class="btn-logout" onclick="resetClient()" title="Nouveau client">⟳</button>
         </div>
+        <div class="nav-cart">
+            <div class="cart-btn" onclick="openCart()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                Panier
+                <div class="cart-badge" id="cartBadge">0</div>
+            </div>
+        </div>
         <a href="admin.php" class="btn-admin">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
             Administration
@@ -456,7 +474,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
         </div>
 
         <!-- Body -->
-        <div class="modal-body">
+        <div class="modal-body" id="modal-body">
             <div class="form-alert" id="orderAlert"><span id="orderAlertMsg"></span></div>
 
             <div class="order-section-title">
@@ -559,6 +577,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 const STORAGE_KEY  = 'pharma_products';
 const ORDERS_KEY   = 'pharma_orders';
 const CLIENT_KEY   = 'pharma_client_id';
+const CART_KEY     = 'pharma_cart';
 
 const DEMO_PRODUCTS = [
     { id: 171000000001, reference:"PHM-VIS-01", nom:"Crème Hydra Éclat SPF30", description:"Protection UV et hydratation profonde, texture légère.", prix:42.500, stock:18, categorie:"Soins visage" },
@@ -621,6 +640,8 @@ function getProducts() {
 function saveProducts(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
 function getOrders() { try { return JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]'); } catch(e) { return []; } }
 function saveOrders(list) { localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }
+function getCart() { try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); } catch(e) { return []; } }
+function saveCart(cart) { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
 function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function showToast(msg, type) {
@@ -632,11 +653,45 @@ function showToast(msg, type) {
     setTimeout(() => toast.remove(), 2500);
 }
 
+function addToCart(productId, qty = 1) {
+    const products = getProducts();
+    const product = products.find(p => p.id == productId);
+    if (!product || (product.stock || 0) <= 0) {
+        showToast('Produit indisponible', 'error');
+        return;
+    }
+    const cart = getCart();
+    const existing = cart.find(item => item.productId == productId);
+    if (existing) {
+        if (existing.quantity + qty > (product.stock || 0)) {
+            showToast('Stock insuffisant', 'error');
+            return;
+        }
+        existing.quantity += qty;
+    } else {
+        cart.push({ productId, quantity: qty });
+    }
+    saveCart(cart);
+    updateCartBadge();
+    showToast('Produit ajouté au panier ✓', 'success');
+}
+
+function updateCartBadge() {
+    const cart = getCart();
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cartBadge').textContent = totalQty;
+}
+
+function openCart() {
+    openOrderModal();
+}
+
 // ════════════════════════════════════
 //  CATALOG UI
 // ════════════════════════════════════
 function loadFrontUI() {
     updateClientDisplay();
+    updateCartBadge();
     const products = getProducts();
     const uniqueCats = [...new Set(products.map(p => p.categorie).filter(Boolean))];
     const inStock = products.filter(p => (p.stock||0) > 0).length;
@@ -717,6 +772,7 @@ function renderCatalog(filtered, total) {
                         : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Commander'
                     }
                 </button>
+                <button class="btn-add-cart" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>+</button>
             </div>
         </div>`;
     }).join('');
@@ -726,38 +782,24 @@ function renderCatalog(filtered, total) {
 //  ORDER MODAL - FIXED WITH CLIENT ID
 // ════════════════════════════════════
 let _currentProduct = null;
+let _cartItems = null;
 
-function openOrderModal(id) {
-    const products = getProducts();
-    const p = products.find(x => x.id == id);
-    if(!p) return;
-    _currentProduct = p;
-
-    const emoji = CAT_ICONS[p.categorie] || '📦';
-    const stock = parseInt(p.stock)||0;
-    let stockClass = 'stock-ok', stockLabel = `En stock (${stock})`;
-    if(stock <= 5 && stock > 0) { stockClass='stock-low'; stockLabel=`Stock faible (${stock})`; }
-
-    document.getElementById('orderEmoji').textContent = emoji;
-    document.getElementById('orderRef').textContent   = p.reference || '—';
-    document.getElementById('orderName').textContent  = p.nom;
-    document.getElementById('orderCat').textContent   = p.categorie || 'Autre';
-    document.getElementById('orderPrice').textContent = parseFloat(p.prix||0).toFixed(3);
-    const badge = document.getElementById('orderStockBadge');
-    badge.textContent = stockLabel;
-    badge.className = `mph-stock-badge ${stockClass}`;
-
-    // FIXED: Use the client's unique ID
-    const clientNum = getClientNumber();
-    document.getElementById('orderUserId').value = 'Client #' + clientNum + ' (ID: ' + getClientId().slice(-8) + ')';
-    
-    document.getElementById('orderQty').value = '1';
-    document.getElementById('pay_virement').checked = true;
-    document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
-    document.querySelectorAll('.form-input,.form-select').forEach(e => e.classList.remove('error'));
-    document.getElementById('orderAlert').className = 'form-alert';
-
-    updateTotal();
+function openOrderModal(id = null) {
+    if (id !== null) {
+        const products = getProducts();
+        const p = products.find(x => x.id == id);
+        if(!p) return;
+        _currentProduct = p;
+        _cartItems = null;
+    } else {
+        _cartItems = getCart();
+        if (_cartItems.length === 0) {
+            showToast('Votre panier est vide', 'info');
+            return;
+        }
+        _currentProduct = null;
+    }
+    updateModalContent();
     document.getElementById('orderOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
@@ -766,12 +808,207 @@ function closeOrderModal() {
     document.getElementById('orderOverlay').classList.remove('open');
     document.body.style.overflow = '';
     _currentProduct = null;
+    _cartItems = null;
 }
 document.getElementById('orderOverlay').addEventListener('click', function(e) {
     if(e.target === this) closeOrderModal();
 });
 
+function updateModalContent() {
+    const header = document.getElementById('orderProductHeader');
+    const body = document.getElementById('modal-body');
+    if (_currentProduct) {
+        // single product header
+        const emoji = CAT_ICONS[_currentProduct.categorie] || '📦';
+        const stock = parseInt(_currentProduct.stock)||0;
+        let stockClass = 'stock-ok', stockLabel = `En stock (${stock})`;
+        if(stock <= 5 && stock > 0) { stockClass='stock-low'; stockLabel=`Stock faible (${stock})`; }
+        header.innerHTML = `
+            <button class="mph-close" onclick="closeOrderModal()">✕</button>
+            <span class="mph-emoji">${emoji}</span>
+            <div class="mph-ref">${escH(_currentProduct.reference || '—')}</div>
+            <div class="mph-name">${escH(_currentProduct.nom)}</div>
+            <span class="mph-cat">${escH(_currentProduct.categorie || 'Autre')}</span>
+            <div class="mph-price-row">
+                <div class="mph-price">${parseFloat(_currentProduct.prix||0).toFixed(3)} <small>DT</small></div>
+                <span class="mph-stock-badge ${stockClass}">${stockLabel}</span>
+            </div>
+        `;
+        // single body
+        body.innerHTML = `
+            <div class="form-alert" id="orderAlert"></div>
+            <div class="order-section-title">
+                <span>🛒</span> Votre commande
+            </div>
+            <div class="form-group">
+                <label class="form-label">Votre identifiant client</label>
+                <input type="text" id="orderUserId" class="form-input" readonly style="background:#f1f5f9; font-weight:600;">
+                <span style="font-size:10px; color:var(--gray-500);">✓ Identifiant automatique pour suivre vos commandes</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quantité *</label>
+                <div class="qty-stepper">
+                    <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
+                    <input type="number" id="orderQty" class="qty-input" value="1" min="1" oninput="updateTotal()">
+                    <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
+                </div>
+                <span class="field-error" id="errQty">Quantité invalide (min. 1)</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mode de paiement *</label>
+                <div class="payment-options">
+                    <div>
+                        <input type="radio" name="payment" id="pay_virement" value="virement" class="payment-option" checked>
+                        <label for="pay_virement" class="payment-label">
+                            <span class="payment-icon">🏦</span>
+                            <span class="payment-text">Virement</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_carte" value="carte_bancaire" class="payment-option">
+                        <label for="pay_carte" class="payment-label">
+                            <span class="payment-icon">💳</span>
+                            <span class="payment-text">Carte bancaire</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_paypal" value="paypal" class="payment-option">
+                        <label for="pay_paypal" class="payment-label">
+                            <span class="payment-icon">🅿️</span>
+                            <span class="payment-text">PayPal</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_especes" value="especes" class="payment-option">
+                        <label for="pay_especes" class="payment-label">
+                            <span class="payment-icon">💵</span>
+                            <span class="payment-text">Espèces</span>
+                        </label>
+                    </div>
+                </div>
+                <span class="field-error" id="errPayment">Veuillez choisir un mode de paiement</span>
+            </div>
+            <div class="order-total-box">
+                <div>
+                    <div class="otb-label">Total à payer</div>
+                    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;" id="totalCalc">1 × 0.000 DT</div>
+                </div>
+                <div class="otb-amount"><span id="orderTotal">0.000</span> <small>DT</small></div>
+            </div>
+            <button class="btn-submit" onclick="submitOrder()">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Commander maintenant
+            </button>
+        `;
+    } else {
+        // cart header
+        const products = getProducts();
+        const itemsHtml = _cartItems.map(item => {
+            const p = products.find(prod => prod.id == item.productId);
+            if (!p) return '';
+            const emoji = CAT_ICONS[p.categorie] || '📦';
+            return `<div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:14px;">
+                <span>${emoji}</span>
+                <div>
+                    <div style="font-weight:600;">${escH(p.nom)}</div>
+                    <div style="font-size:12px; color:var(--gray-500);">${item.quantity} × ${p.prix.toFixed(3)} DT</div>
+                </div>
+            </div>`;
+        }).join('');
+        header.innerHTML = `
+            <button class="mph-close" onclick="closeOrderModal()">✕</button>
+            <span class="mph-emoji">🛒</span>
+            <div class="mph-ref">Panier</div>
+            <div class="mph-name">Votre commande</div>
+            <span class="mph-cat">${_cartItems.length} produit${_cartItems.length > 1 ? 's' : ''}</span>
+            <div style="margin-top:16px;">${itemsHtml}</div>
+        `;
+        // cart body
+        const cartHtml = _cartItems.map(item => {
+            const p = products.find(prod => prod.id == item.productId);
+            if (!p) return '';
+            return `<div style="display:flex; align-items:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--gray-100);">
+                <div style="flex:1;">
+                    <div style="font-weight:600;">${escH(p.nom)}</div>
+                    <div style="font-size:12px; color:var(--gray-500);">${p.prix.toFixed(3)} DT l'unité</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; margin:0 12px;">
+                    <button class="qty-btn" onclick="changeCartQty(${item.productId}, -1)">−</button>
+                    <span style="font-weight:600; min-width:20px; text-align:center;">${item.quantity}</span>
+                    <button class="qty-btn" onclick="changeCartQty(${item.productId}, 1)">+</button>
+                </div>
+                <div style="font-weight:600; text-align:right; min-width:60px;">${(item.quantity * p.prix).toFixed(3)} DT</div>
+            </div>`;
+        }).join('');
+        body.innerHTML = `
+            <div class="form-alert" id="orderAlert"></div>
+            <div class="order-section-title">
+                <span>🛒</span> Produits dans votre panier
+            </div>
+            <div style="margin-bottom:20px;">${cartHtml}</div>
+            <div class="form-group">
+                <label class="form-label">Votre identifiant client</label>
+                <input type="text" id="orderUserId" class="form-input" readonly style="background:#f1f5f9; font-weight:600;">
+                <span style="font-size:10px; color:var(--gray-500);">✓ Identifiant automatique pour suivre vos commandes</span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Mode de paiement *</label>
+                <div class="payment-options">
+                    <div>
+                        <input type="radio" name="payment" id="pay_virement" value="virement" class="payment-option" checked>
+                        <label for="pay_virement" class="payment-label">
+                            <span class="payment-icon">🏦</span>
+                            <span class="payment-text">Virement</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_carte" value="carte_bancaire" class="payment-option">
+                        <label for="pay_carte" class="payment-label">
+                            <span class="payment-icon">💳</span>
+                            <span class="payment-text">Carte bancaire</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_paypal" value="paypal" class="payment-option">
+                        <label for="pay_paypal" class="payment-label">
+                            <span class="payment-icon">🅿️</span>
+                            <span class="payment-text">PayPal</span>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="payment" id="pay_especes" value="especes" class="payment-option">
+                        <label for="pay_especes" class="payment-label">
+                            <span class="payment-icon">💵</span>
+                            <span class="payment-text">Espèces</span>
+                        </label>
+                    </div>
+                </div>
+                <span class="field-error" id="errPayment">Veuillez choisir un mode de paiement</span>
+            </div>
+            <div class="order-total-box">
+                <div>
+                    <div class="otb-label">Total à payer</div>
+                    <div style="font-size:11px;color:var(--gray-400);margin-top:2px;" id="totalCalc">${_cartItems.length} produit${_cartItems.length > 1 ? 's' : ''}</div>
+                </div>
+                <div class="otb-amount"><span id="orderTotal">0.000</span> <small>DT</small></div>
+            </div>
+            <button class="btn-submit" onclick="submitOrder()">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Commander le panier
+            </button>
+        `;
+    }
+    // common
+    const clientNum = getClientNumber();
+    document.getElementById('orderUserId').value = 'Client #' + clientNum + ' (ID: ' + getClientId().slice(-8) + ')';
+    document.querySelectorAll('.field-error').forEach(e => e.classList.remove('show'));
+    document.querySelectorAll('.form-input,.form-select').forEach(e => e.classList.remove('error'));
+    document.getElementById('orderAlert').className = 'form-alert';
+    updateTotal();
+}
+
 function changeQty(delta) {
+    if (!_currentProduct) return;
     const input = document.getElementById('orderQty');
     const val = Math.max(1, (parseInt(input.value)||1) + delta);
     const maxStock = _currentProduct ? parseInt(_currentProduct.stock)||99 : 99;
@@ -779,32 +1016,83 @@ function changeQty(delta) {
     updateTotal();
 }
 
+function changeCartQty(productId, delta) {
+    const cart = getCart();
+    const item = cart.find(i => i.productId == productId);
+    if (!item) return;
+    const products = getProducts();
+    const p = products.find(prod => prod.id == productId);
+    if (!p) return;
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+        // remove item
+        const index = cart.indexOf(item);
+        cart.splice(index, 1);
+    } else if (item.quantity > (p.stock || 0)) {
+        showToast('Stock insuffisant', 'error');
+        item.quantity = p.stock || 0;
+    }
+    saveCart(cart);
+    updateCartBadge();
+    // refresh modal
+    if (_cartItems) {
+        _cartItems = getCart();
+        if (_cartItems.length === 0) {
+            closeOrderModal();
+            return;
+        }
+        updateModalContent();
+    }
+}
+
 function updateTotal() {
-    if(!_currentProduct) return;
-    const qty  = Math.max(1, parseInt(document.getElementById('orderQty').value)||1);
-    const prix = parseFloat(_currentProduct.prix||0);
-    const total = (qty * prix).toFixed(3);
-    document.getElementById('orderTotal').textContent = total;
-    document.getElementById('totalCalc').textContent  = `${qty} × ${prix.toFixed(3)} DT`;
+    if (_currentProduct) {
+        const qty = Math.max(1, parseInt(document.getElementById('orderQty').value)||1);
+        const prix = parseFloat(_currentProduct.prix||0);
+        const total = (qty * prix).toFixed(3);
+        document.getElementById('orderTotal').textContent = total;
+        document.getElementById('totalCalc').textContent = `${qty} × ${prix.toFixed(3)} DT`;
+    } else if (_cartItems) {
+        const products = getProducts();
+        let total = 0;
+        _cartItems.forEach(item => {
+            const p = products.find(prod => prod.id == item.productId);
+            if (p) total += item.quantity * p.prix;
+        });
+        document.getElementById('orderTotal').textContent = total.toFixed(3);
+        document.getElementById('totalCalc').textContent = `${_cartItems.length} produit${_cartItems.length > 1 ? 's' : ''}`;
+    }
 }
 
 function submitOrder() {
     let valid = true;
 
-    // FIXED: Store the actual client ID with the order
     const clientId = getClientId();
     const clientNum = getClientNumber();
 
-    // qty validation
-    const qty = parseInt(document.getElementById('orderQty').value);
-    const errQty = document.getElementById('errQty');
-    const elQty  = document.getElementById('orderQty');
-    const maxStk = parseInt(_currentProduct?.stock||99);
-    if(isNaN(qty) || qty < 1 || qty > maxStk) {
-        elQty.classList.add('error');
-        errQty.textContent = qty > maxStk ? `Max disponible : ${maxStk}` : 'Quantité invalide (min. 1)';
-        errQty.classList.add('show'); valid = false;
-    } else { elQty.classList.remove('error'); errQty.classList.remove('show'); }
+    if (_currentProduct) {
+        // single validation
+        const qty = parseInt(document.getElementById('orderQty').value);
+        const errQty = document.getElementById('errQty');
+        const elQty = document.getElementById('orderQty');
+        const maxStk = parseInt(_currentProduct?.stock||99);
+        if(isNaN(qty) || qty < 1 || qty > maxStk) {
+            elQty.classList.add('error');
+            errQty.textContent = qty > maxStk ? `Max disponible : ${maxStk}` : 'Quantité invalide (min. 1)';
+            errQty.classList.add('show'); valid = false;
+        } else { elQty.classList.remove('error'); errQty.classList.remove('show'); }
+    } else {
+        // cart validation
+        const products = getProducts();
+        for (const item of _cartItems) {
+            const p = products.find(prod => prod.id == item.productId);
+            if (!p || item.quantity > (p.stock || 0)) {
+                showToast('Stock insuffisant pour ' + (p ? p.nom : 'un produit'), 'error');
+                valid = false;
+                break;
+            }
+        }
+    }
 
     // payment
     const payEl = document.querySelector('input[name="payment"]:checked');
@@ -814,43 +1102,81 @@ function submitOrder() {
 
     if(!valid) return;
 
-    const order = {
-        id:          Date.now(),
-        productId:   _currentProduct.id,
-        productName: _currentProduct.nom,
-        productRef:  _currentProduct.reference || '—',
-        userId:      clientId,  // Store the unique client ID
-        userNumber:  clientNum,  // Store the readable client number
-        quantity:    qty,
-        unitPrice:   parseFloat(_currentProduct.prix||0),
-        totalPrice:  parseFloat((qty * parseFloat(_currentProduct.prix||0)).toFixed(3)),
-        paymentType: payEl.value,
-        status:      'En attente',
-        date:        new Date().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
-    };
-
-    // Save order
     const orders = getOrders();
-    orders.unshift(order);
-    saveOrders(orders);
+    const payType = payEl.value;
 
-    // Update stock
-    const products = getProducts();
-    const idx = products.findIndex(p => p.id == _currentProduct.id);
-    if(idx !== -1) {
-        products[idx].stock = Math.max(0, (parseInt(products[idx].stock)||0) - qty);
-        saveProducts(products);
+    if (_currentProduct) {
+        // single order
+        const qty = parseInt(document.getElementById('orderQty').value);
+        const order = {
+            id: Date.now(),
+            productId: _currentProduct.id,
+            productName: _currentProduct.nom,
+            productRef: _currentProduct.reference || '—',
+            userId: clientId,
+            userNumber: clientNum,
+            quantity: qty,
+            unitPrice: parseFloat(_currentProduct.prix||0),
+            totalPrice: parseFloat((qty * parseFloat(_currentProduct.prix||0)).toFixed(3)),
+            paymentType: payType,
+            status: 'En attente',
+            date: new Date().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+        };
+        orders.unshift(order);
+        // update stock
+        const products = getProducts();
+        const idx = products.findIndex(p => p.id == _currentProduct.id);
+        if(idx !== -1) {
+            products[idx].stock = Math.max(0, (parseInt(products[idx].stock)||0) - qty);
+            saveProducts(products);
+        }
+    } else {
+        // cart orders
+        const products = getProducts();
+        _cartItems.forEach(item => {
+            const p = products.find(prod => prod.id == item.productId);
+            if (!p) return;
+            const order = {
+                id: Date.now() + Math.random(),
+                productId: p.id,
+                productName: p.nom,
+                productRef: p.reference || '—',
+                userId: clientId,
+                userNumber: clientNum,
+                quantity: item.quantity,
+                unitPrice: parseFloat(p.prix||0),
+                totalPrice: parseFloat((item.quantity * p.prix).toFixed(3)),
+                paymentType: payType,
+                status: 'En attente',
+                date: new Date().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' })
+            };
+            orders.unshift(order);
+            // update stock
+            const idx = products.findIndex(prod => prod.id == p.id);
+            if(idx !== -1) {
+                products[idx].stock = Math.max(0, (parseInt(products[idx].stock)||0) - item.quantity);
+                saveProducts(products);
+            }
+        });
+        // clear cart
+        saveCart([]);
+        updateCartBadge();
     }
 
+    saveOrders(orders);
     closeOrderModal();
 
-    // Show success
-    document.getElementById('successOrderId').textContent = `Commande N° ${order.id}`;
+    // show success
+    document.getElementById('successOrderId').textContent = `Commande${_currentProduct ? '' : 's'} N° ${Date.now()}`;
     const payLabels = { virement:'Virement bancaire', carte_bancaire:'Carte bancaire', paypal:'PayPal', especes:'Espèces' };
-    document.getElementById('successMsg').innerHTML =
-        `<strong>${escH(order.productName)}</strong> — ${qty} unité${qty>1?'s':''}<br>
-         Total : <strong>${order.totalPrice.toFixed(3)} DT</strong><br>
-         Paiement : ${payLabels[order.paymentType]||order.paymentType}<br>
+    document.getElementById('successMsg').innerHTML = _currentProduct ?
+        `<strong>${escH(_currentProduct.nom)}</strong> — ${parseInt(document.getElementById('orderQty').value)} unité${parseInt(document.getElementById('orderQty').value)>1?'s':''}<br>
+         Total : <strong>${document.getElementById('orderTotal').textContent} DT</strong><br>
+         Paiement : ${payLabels[payType]||payType}<br>
+         <span style="font-size:11px;">Client #${clientNum}</span>` :
+        `Votre panier a été commandé.<br>
+         Total : <strong>${document.getElementById('orderTotal').textContent} DT</strong><br>
+         Paiement : ${payLabels[payType]||payType}<br>
          <span style="font-size:11px;">Client #${clientNum}</span>`;
     document.getElementById('successOverlay').classList.add('open');
 
@@ -868,7 +1194,6 @@ window.addEventListener('load', () => {
     loadFrontUI();
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('filterCat').addEventListener('change', applyFilters);
-    document.getElementById('orderQty').addEventListener('input', updateTotal);
 });
 
 // Add CSS animation for toast
