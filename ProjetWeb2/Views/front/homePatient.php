@@ -11,8 +11,11 @@ $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
 require_once $basePath . '/Controller/rendezvousC.php';
 require_once $basePath . '/Model/rendezvous.php';
+require_once $basePath . '/Controller/evaluationC.php';
+require_once $basePath . '/Model/evaluation.php';
 
 $rendezvousC    = new RendezvousC();
+$evaluationC    = new EvaluationC();
 $patient_id     = $_SESSION['patient_id'];
 $patient_nom    = $_SESSION['patient_nom']    ?? '';
 $patient_prenom = $_SESSION['patient_prenom'] ?? '';
@@ -120,11 +123,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add')
     }
 }
 
+// ── ÉVALUATION ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'evaluer') {
+    $rdv_id      = intval($_POST['rdv_id']      ?? 0);
+    $note        = intval($_POST['note']         ?? 0);
+    $commentaire = trim($_POST['commentaire']    ?? '');
+    $errors      = [];
+    if ($rdv_id <= 0)           $errors[] = 'RDV invalide.';
+    if ($note < 1 || $note > 5) $errors[] = 'Note invalide (1 à 5).';
+    if (empty($errors)) {
+        $rdv = $rendezvousC->getRendezvousById($rdv_id);
+        if ($rdv && $rdv['patient_id'] == $patient_id) {
+            if (strtotime($rdv['date_rdv']) < mktime(0,0,0)) {
+                if (!$evaluationC->evalExistsByRdv($rdv_id)) {
+                    $eval = new Evaluation(null, $patient_id, $rdv['medecin_id'], $rdv_id, $note, $commentaire ?: null);
+                    $evaluationC->addEvaluation($eval);
+                    $alert_message = '⭐ Merci pour votre évaluation !';
+                    $alert_type    = 'success';
+                } else {
+                    $alert_message = '❌ Vous avez déjà évalué ce rendez-vous.';
+                    $alert_type    = 'error';
+                }
+            } else {
+                $alert_message = '❌ Vous ne pouvez évaluer qu\'un RDV passé.';
+                $alert_type    = 'error';
+            }
+        } else {
+            $alert_message = '❌ Accès refusé.';
+            $alert_type    = 'error';
+        }
+    } else {
+        $alert_message = '❌ ' . implode(' ', $errors);
+        $alert_type    = 'error';
+    }
+}
+
 // ══════════════════════════════════════════
 // DONNÉES POUR L'AFFICHAGE
 // ══════════════════════════════════════════
 $medecins = $rendezvousC->listMedecins();
 $mes_rdvs = $rendezvousC->getRendezvousByPatientId($patient_id);
+
+// ── Évaluations ──
+// Stats par médecin (note moyenne)
+$eval_stats = []; // [medecin_id => ['moyenne'=>X,'total'=>Y]]
+foreach ($medecins as $doc) {
+    $eval_stats[$doc['id']] = $evaluationC->getStatsMedecin($doc['id']);
+}
+// RDV déjà évalués
+$rdvs_evalues = []; // [rdv_id => true]
+foreach ($mes_rdvs as $r) {
+    if ($evaluationC->evalExistsByRdv($r['id'])) {
+        $rdvs_evalues[$r['id']] = true;
+    }
+}
+
+// ── Recherche & tri RDV ──
+$rdv_search_medecin = trim($_GET['rdv_medecin'] ?? '');
+$rdv_search_date    = trim($_GET['rdv_date']    ?? '');
+$rdv_tri            = in_array($_GET['rdv_tri'] ?? '', ['asc','desc']) ? $_GET['rdv_tri'] : 'desc';
 
 $selected_medecin_id = intval($_GET['medecin_id'] ?? 0);
 $selected_date       = htmlspecialchars($_GET['date'] ?? '');
@@ -165,11 +222,28 @@ $AVATAR_COLORS = [
     ['bg'=>'#fff7ed','color'=>'#e05a2b'],
 ];
 
-$MEDECINS_STATIQUES = [
-    ['id'=>1,'nom'=>'Dr. Ahmed',  'spec'=>'Cardiologue', 'ville'=>'Tunis','note'=>'4.9','exp'=>'12 ans','initials'=>'AH','bg'=>'#eff4ff','color'=>'#1a56db'],
-    ['id'=>2,'nom'=>'Dr. Sara',   'spec'=>'Dermatologue','ville'=>'Sfax', 'note'=>'4.8','exp'=>'8 ans', 'initials'=>'SA','bg'=>'#ecfdf5','color'=>'#0da271'],
-    ['id'=>3,'nom'=>'Dr. Youssef','spec'=>'Dentiste',    'ville'=>'Tunis','note'=>'4.7','exp'=>'10 ans','initials'=>'YO','bg'=>'#fff7ed','color'=>'#e05a2b'],
+// ── Construire la liste des médecins depuis la BD (avec couleurs et initiales) ──
+$AVATAR_COLORS_RECH = [
+    ['bg'=>'#eff4ff','color'=>'#1a56db'],
+    ['bg'=>'#ecfdf5','color'=>'#0da271'],
+    ['bg'=>'#fff7ed','color'=>'#e05a2b'],
+    ['bg'=>'#f5f3ff','color'=>'#7c3aed'],
+    ['bg'=>'#fef9c3','color'=>'#ca8a04'],
 ];
+$MEDECINS_STATIQUES = [];
+foreach ($medecins as $idx_m => $doc_m) {
+    $c_m = $AVATAR_COLORS_RECH[$idx_m % count($AVATAR_COLORS_RECH)];
+    $MEDECINS_STATIQUES[] = [
+        'id'       => $doc_m['id'],
+        'nom'      => $doc_m['nom'],
+        'spec'     => $doc_m['specialite'],
+        'ville'    => $doc_m['ville']    ?? 'Tunis',
+        'exp'      => ($doc_m['experience'] ?? '') ?: '—',
+        'initials' => strtoupper(substr(str_replace('Dr. ','',str_replace('Dr.','', $doc_m['nom'])),0,2)),
+        'bg'       => $c_m['bg'],
+        'color'    => $c_m['color'],
+    ];
+}
 $filtre_spec  = trim($_GET['spec']  ?? '');
 $filtre_ville = trim($_GET['ville'] ?? '');
 $specialites  = array_unique(array_column($MEDECINS_STATIQUES, 'spec'));
@@ -243,28 +317,48 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 .rech-tag { padding:4px 14px; border-radius:100px; font-size:12px; font-weight:500; border:1px solid var(--gray-200); background:var(--gray-100); color:var(--gray-600); text-decoration:none; transition:.15s; }
 .rech-tag:hover,.rech-tag.active { background:var(--blue-light); border-color:var(--blue-mid); color:var(--blue-dark); }
 .rech-info { font-size:12px; color:var(--gray-400); margin-bottom:14px; }
-.rech-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
-.rech-doc-card { background:var(--gray-50); border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:20px 16px; text-align:center; transition:.2s ease; }
+.rech-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+.rech-doc-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:24px 20px; text-align:center; transition:.2s ease; }
 .rech-doc-card:hover { border-color:var(--blue-mid); transform:translateY(-2px); box-shadow:0 8px 24px rgba(26,86,219,.1); }
-.rech-avatar { width:56px; height:56px; border-radius:50%; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:600; }
-.rech-doc-name { font-size:14px; font-weight:600; color:var(--gray-900); margin-bottom:3px; }
+.rech-doc-card.selected-card { border-color:var(--blue); background:var(--blue-light); box-shadow:0 0 0 3px rgba(26,86,219,.15); }
+.rech-doc-rating { display:flex; align-items:center; justify-content:center; gap:5px; margin:6px 0 10px; flex-wrap:wrap; }
+.rech-stars { display:inline-flex; gap:1px; }
+.rstar { font-size:13px; color:#e2e8f0; }
+.rstar.on { color:#f59e0b; }
+.rech-note-val { font-size:13px; font-weight:700; color:var(--gray-900); }
+.rech-note-count { font-size:11px; color:var(--gray-400); }
+.rech-note-empty { font-size:11px; color:var(--gray-400); font-style:italic; }
+.btn-rech-rdv.selected { background:var(--blue); color:#fff; border-color:var(--blue); }
+
+/* ── MESSAGE SÉLECTION MÉDECIN ── */
+.select-banner {
+    display:none; align-items:center; gap:12px;
+    background:var(--blue-light); border:1px solid rgba(26,86,219,.25);
+    border-radius:var(--radius-lg); padding:14px 18px; margin-bottom:20px;
+    animation: slideIn .3s ease;
+}
+.select-banner.show { display:flex; }
+@keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.select-banner-icon { font-size:24px; flex-shrink:0; }
+.select-banner-text { flex:1; }
+.select-banner-name { font-size:14px; font-weight:700; color:var(--blue-dark); }
+.select-banner-sub  { font-size:12px; color:var(--blue); margin-top:2px; }
+.select-banner-ok { padding:7px 16px; background:var(--blue); color:#fff; border:none;
+                    border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;
+                    font-family:"Plus Jakarta Sans",sans-serif; text-decoration:none;
+                    display:inline-flex; align-items:center; gap:5px; transition:.15s; }
+.select-banner-ok:hover { background:var(--blue-dark); }
+.rech-avatar { width:64px; height:64px; border-radius:50%; margin:0 auto 14px; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:600; }
+.rech-doc-name { font-size:15px; font-weight:700; color:var(--gray-900); margin-bottom:4px; }
 .rech-doc-spec { font-size:12px; color:var(--gray-400); margin-bottom:6px; }
 .rech-doc-city { font-size:12px; color:var(--gray-600); margin-bottom:12px; }
 .rech-doc-meta { display:flex; justify-content:center; gap:20px; margin-bottom:14px; }
 .rech-meta-item { font-size:11px; color:var(--gray-600); text-align:center; }
 .rech-meta-item strong { display:block; font-size:13px; font-weight:600; color:var(--gray-900); margin-bottom:2px; }
-.btn-rech-rdv { display:inline-block; width:100%; background:var(--blue-light); color:var(--blue); border:1px solid rgba(26,86,219,.2); border-radius:8px; padding:8px 12px; font-size:13px; font-weight:500; text-decoration:none; text-align:center; transition:.15s; }
+.btn-rech-rdv { display:inline-block; width:100%; background:var(--blue-light); color:var(--blue); border:1px solid rgba(26,86,219,.2); border-radius:8px; padding:10px 12px; font-size:13px; font-weight:600; text-decoration:none; text-align:center; transition:.15s; }
 .btn-rech-rdv:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
 
 /* DOCTORS */
-.doctors-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:44px; }
-.doc-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:26px 20px; text-align:center; transition:.2s ease; }
-.doc-card:hover { border-color:var(--blue-mid); transform:translateY(-3px); box-shadow:0 12px 28px rgba(26,86,219,.12); }
-.doc-avatar { width:66px; height:66px; border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:21px; font-weight:600; }
-.doc-name { font-size:15px; font-weight:600; color:var(--gray-900); margin-bottom:4px; }
-.doc-spec { font-size:12px; color:var(--gray-400); margin-bottom:16px; }
-.btn-select-doc { display:inline-block; width:100%; background:var(--blue-light); color:var(--blue); border:1px solid rgba(26,86,219,.2); border-radius:8px; padding:9px 12px; font-size:13px; font-weight:500; text-decoration:none; text-align:center; transition:.15s; }
-.btn-select-doc:hover,.btn-select-doc.selected { background:var(--blue); color:#fff; border-color:var(--blue); }
 
 /* FORM */
 .form-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-xl); padding:30px 28px; margin-bottom:44px; }
@@ -309,6 +403,62 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 .empty-state { text-align:center; padding:56px 20px; color:var(--gray-400); }
 .empty-state strong { display:block; font-size:15px; color:var(--gray-600); margin:12px 0 4px; }
 
+/* ── RDV SEARCH BAR ── */
+.rdv-search-bar { display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:14px 18px; margin-bottom:14px; }
+.rdv-sg { display:flex; flex-direction:column; gap:5px; flex:1; min-width:150px; }
+.rdv-sg label { font-size:11px; font-weight:600; color:var(--gray-600); text-transform:uppercase; letter-spacing:.05em; }
+.rdv-sg input, .rdv-sg select { padding:8px 11px; border:1px solid var(--gray-200); border-radius:8px; font-size:13px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--gray-900); background:#fff; outline:none; transition:.15s; height:36px; }
+.rdv-sg input:focus, .rdv-sg select:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(26,86,219,.1); }
+.btn-rdv-search { height:36px; padding:0 16px; background:var(--blue); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; white-space:nowrap; transition:.15s; }
+.btn-rdv-search:hover { background:var(--blue-dark); }
+.btn-rdv-reset { height:36px; padding:0 12px; background:var(--gray-100); color:var(--gray-600); border:1px solid var(--gray-200); border-radius:8px; font-size:13px; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; white-space:nowrap; text-decoration:none; display:inline-flex; align-items:center; transition:.15s; }
+.btn-rdv-reset:hover { background:var(--gray-200); }
+.rdv-result-info { font-size:12px; color:var(--gray-400); margin-bottom:10px; }
+.rdv-sort-link { color:var(--gray-600); text-decoration:none; font-weight:600; font-size:12px; display:inline-flex; align-items:center; gap:3px; padding:3px 8px; border-radius:6px; transition:.15s; }
+.rdv-sort-link:hover { background:var(--blue-light); color:var(--blue); }
+.rdv-sort-link.active { background:var(--blue-light); color:var(--blue); }
+
+/* ── ÉTOILES ── */
+.stars { display:inline-flex; gap:2px; }
+.star { font-size:14px; color:#e2e8f0; }
+.star.on { color:#f59e0b; }
+.doc-rating { font-size:12px; color:var(--gray-600); margin:4px 0 12px; display:flex; align-items:center; justify-content:center; gap:6px; }
+.doc-rating strong { font-weight:700; color:var(--gray-900); font-size:13px; }
+
+/* ── BOUTON ÉVALUER ── */
+.btn-eval { padding:7px 12px; border-radius:6px; font-size:12px; font-weight:500; cursor:pointer;
+            background:#fef3c7; color:#d97706; border:1px solid #fde68a;
+            font-family:'Plus Jakarta Sans',sans-serif; transition:.15s; }
+.btn-eval:hover { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+.btn-evaluated { padding:7px 12px; border-radius:6px; font-size:12px; font-weight:500;
+                 background:var(--green-light); color:var(--green);
+                 border:1px solid rgba(13,162,113,.2); cursor:default; }
+
+/* ── MODAL ÉVALUATION ── */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
+                 z-index:2000; align-items:center; justify-content:center; padding:20px; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:#fff; border-radius:var(--radius-xl); padding:32px 28px;
+             max-width:460px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,.2); position:relative; }
+.modal-close { position:absolute; top:16px; right:16px; background:none; border:none;
+               font-size:20px; cursor:pointer; color:var(--gray-400); line-height:1; }
+.modal-close:hover { color:var(--gray-900); }
+.modal-title { font-size:17px; font-weight:700; color:var(--gray-900); margin-bottom:4px; }
+.modal-sub   { font-size:13px; color:var(--gray-600); margin-bottom:22px; }
+.star-picker { display:flex; gap:8px; justify-content:center; margin-bottom:18px; }
+.star-picker span { font-size:36px; cursor:pointer; color:#e2e8f0; transition:.15s; user-select:none; }
+.star-picker span.hover,.star-picker span.sel { color:#f59e0b; transform:scale(1.15); }
+.modal-textarea { width:100%; padding:10px 12px; border:1px solid var(--gray-200);
+                  border-radius:8px; font-size:13px; font-family:'Plus Jakarta Sans',sans-serif;
+                  resize:vertical; min-height:90px; outline:none; transition:.15s; }
+.modal-textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(26,86,219,.1); }
+.modal-note-label { font-size:12px; font-weight:600; color:var(--gray-600); text-align:center;
+                    margin-bottom:16px; min-height:18px; }
+.btn-submit-eval { width:100%; padding:12px; background:var(--blue); color:#fff; border:none;
+                   border-radius:10px; font-size:14px; font-weight:600; cursor:pointer;
+                   font-family:'Plus Jakarta Sans',sans-serif; margin-top:14px; transition:.15s; }
+.btn-submit-eval:hover { background:var(--blue-dark); }
+
 @media (max-width:700px) {
     .navbar-medilink { padding:0 16px; gap:8px; }
     .user-info { display:none; }
@@ -316,7 +466,6 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     .hero h1 { font-size:28px; }
     .main-content { padding:28px 20px 48px; }
     .form-row { grid-template-columns:1fr; }
-    .doctors-grid { grid-template-columns:1fr; }
     .rech-filters { grid-template-columns:1fr; }
     .rdv-item { flex-wrap:wrap; }
     .rdv-actions { width:100%; }
@@ -399,49 +548,64 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                     <strong>Aucun résultat</strong>
                 </div>
             <?php else: ?>
-                <?php foreach ($med_filtres as $m): ?>
-                    <div class="rech-doc-card">
+                <?php foreach ($med_filtres as $m):
+                    $st_m  = $eval_stats[$m['id']] ?? [];
+                    $moy_m = floatval($st_m['moyenne'] ?? 0);
+                    $tot_m = intval($st_m['total']   ?? 0);
+                    $isSel_m = ($selected_medecin_id == $m['id']);
+                ?>
+                    <div class="rech-doc-card <?php echo $isSel_m ? 'selected-card' : ''; ?>">
                         <div class="rech-avatar" style="background:<?php echo $m['bg']; ?>;color:<?php echo $m['color']; ?>">
                             <?php echo $m['initials']; ?>
                         </div>
                         <div class="rech-doc-name"><?php echo htmlspecialchars($m['nom']); ?></div>
                         <div class="rech-doc-spec"><?php echo htmlspecialchars($m['spec']); ?></div>
                         <div class="rech-doc-city">📍 <?php echo htmlspecialchars($m['ville']); ?></div>
+                        <!-- Note évaluations réelles -->
+                        <div class="rech-doc-rating">
+                            <span class="rech-stars">
+                                <?php for ($s=1;$s<=5;$s++): ?>
+                                    <span class="rstar <?php echo $s<=$moy_m?'on':''; ?>">★</span>
+                                <?php endfor; ?>
+                            </span>
+                            <?php if ($tot_m > 0): ?>
+                                <span class="rech-note-val"><?php echo number_format($moy_m,1); ?></span>
+                                <span class="rech-note-count">(<?php echo $tot_m; ?> avis)</span>
+                            <?php else: ?>
+                                <span class="rech-note-empty">Pas encore d'avis</span>
+                            <?php endif; ?>
+                        </div>
                         <div class="rech-doc-meta">
-                            <div class="rech-meta-item"><strong><?php echo $m['note']; ?></strong>Note</div>
                             <div class="rech-meta-item"><strong><?php echo $m['exp']; ?></strong>Exp.</div>
                         </div>
-                        <a href="homePatient.php?medecin_id=<?php echo $m['id']; ?>#formRDV"
-                           class="btn-rech-rdv">Prendre RDV</a>
+                        <a href="homePatient.php?medecin_id=<?php echo $m['id']; ?>&date=<?php echo urlencode($selected_date); ?>#formRDV"
+                           class="btn-rech-rdv <?php echo $isSel_m?'selected':''; ?>">
+                            <?php echo $isSel_m ? '✓ Sélectionné' : 'Sélectionner'; ?>
+                        </a>
                     </div>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- ══ NOS MÉDECINS ══ -->
-    <div class="section-heading">👨‍⚕️ Nos Médecins</div>
-    <div class="doctors-grid">
-        <?php foreach ($medecins as $idx => $doc):
-            $c = $AVATAR_COLORS[$idx % count($AVATAR_COLORS)];
-            $ini = strtoupper(substr($doc['nom'],0,1).substr($doc['specialite'],0,1));
-            $isSel = ($selected_medecin_id == $doc['id']);
-        ?>
-            <div class="doc-card">
-                <div class="doc-avatar" style="background:<?php echo $c['bg']; ?>;color:<?php echo $c['color']; ?>">
-                    <?php echo $ini; ?>
-                </div>
-                <div class="doc-name"><?php echo htmlspecialchars($doc['nom']); ?></div>
-                <div class="doc-spec"><?php echo htmlspecialchars($doc['specialite']); ?></div>
-                <a href="homePatient.php?medecin_id=<?php echo $doc['id']; ?>&date=<?php echo urlencode($selected_date); ?>#formRDV"
-                   class="btn-select-doc <?php echo $isSel?'selected':''; ?>">
-                    <?php echo $isSel?'✓ Sélectionné':'Sélectionner'; ?>
-                </a>
-            </div>
-        <?php endforeach; ?>
-    </div>
 
     <!-- ══ FORMULAIRE RDV ══ -->
+    <!-- Banner confirmation sélection -->
+    <?php if ($selected_medecin_id > 0):
+        $doc_sel = null;
+        foreach ($medecins as $d) { if ($d['id'] == $selected_medecin_id) { $doc_sel = $d; break; } }
+    ?>
+    <?php if ($doc_sel): ?>
+    <div class="select-banner show" id="selectBanner">
+        <div class="select-banner-icon">👨‍⚕️</div>
+        <div class="select-banner-text">
+            <div class="select-banner-name">✓ <?php echo htmlspecialchars($doc_sel['nom']); ?> sélectionné</div>
+            <div class="select-banner-sub"><?php echo htmlspecialchars($doc_sel['specialite']); ?> · Choisissez maintenant une date et un créneau</div>
+        </div>
+        <a href="#formRDV" class="select-banner-ok">Réserver ↓</a>
+    </div>
+    <?php endif; ?>
+    <?php endif; ?>
     <div class="section-heading" id="formRDV">
         <?php echo $edit_rdv ? '✏️ Modifier le rendez-vous' : 'Réserver un nouveau rendez-vous'; ?>
     </div>
@@ -510,7 +674,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
             </div>
 
             <button type="submit" class="btn-confirm">
-                <?php echo $edit_rdv?'💾 Modifier le rendez-vous':'✓ Confirmer le rendez-vous'; ?>
+                <?php echo $edit_rdv?'Modifier le rendez-vous':'✓ Confirmer le rendez-vous'; ?>
             </button>
             <?php if ($edit_rdv): ?>
                 <a href="homePatient.php" class="btn-cancel">❌ Annuler la modification</a>
@@ -519,16 +683,91 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     </div>
 
     <!-- ══ MES RENDEZ-VOUS ══ -->
-    <div class="section-heading">📋 Mes rendez-vous</div>
+    <div class="section-heading" id="mesRDV">📋 Mes rendez-vous</div>
+
+    <!-- Barre de recherche & tri -->
+    <form method="GET" action="homePatient.php#mesRDV">
+        <div class="rdv-search-bar">
+            <div class="rdv-sg">
+                <label>👨‍⚕️ Nom du médecin</label>
+                <input type="text" name="rdv_medecin"
+                       placeholder="Ex: Ahmed, Sara…"
+                       value="<?php echo htmlspecialchars($rdv_search_medecin); ?>">
+            </div>
+            <div class="rdv-sg">
+                <label>📅 Date du RDV</label>
+                <input type="date" name="rdv_date"
+                       value="<?php echo htmlspecialchars($rdv_search_date); ?>">
+            </div>
+            <div class="rdv-sg" style="flex:0 0 auto">
+                <label>🔃 Tri par date</label>
+                <select name="rdv_tri">
+                    <option value="desc" <?php echo $rdv_tri==='desc'?'selected':''; ?>>↓ Plus récent</option>
+                    <option value="asc"  <?php echo $rdv_tri==='asc' ?'selected':''; ?>>↑ Plus ancien</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-rdv-search">Rechercher</button>
+            <a href="homePatient.php#mesRDV" class="btn-rdv-reset">✕ Réinitialiser</a>
+        </div>
+    </form>
+
+    <?php
+    // ── Filtrage ──
+    $rdvs_affiches = $mes_rdvs;
+
+    if ($rdv_search_medecin !== '') {
+        $rdvs_affiches = array_filter($rdvs_affiches, function($r) use ($rdv_search_medecin) {
+            return stripos($r['medecin_nom'], $rdv_search_medecin) !== false;
+        });
+    }
+    if ($rdv_search_date !== '') {
+        $rdvs_affiches = array_filter($rdvs_affiches, function($r) use ($rdv_search_date) {
+            return $r['date_rdv'] === $rdv_search_date;
+        });
+    }
+
+    // ── Tri par date + heure ──
+    usort($rdvs_affiches, function($a, $b) use ($rdv_tri) {
+        $da = $a['date_rdv'] . ' ' . $a['heure_rdv'];
+        $db = $b['date_rdv'] . ' ' . $b['heure_rdv'];
+        return $rdv_tri === 'asc' ? strcmp($da, $db) : strcmp($db, $da);
+    });
+
+    $total_rdvs = count($rdvs_affiches);
+    ?>
+
+    <div class="rdv-result-info">
+        <strong><?php echo $total_rdvs; ?></strong>
+        rendez-vous<?php if ($rdv_search_medecin || $rdv_search_date): ?> — filtre actif<?php endif; ?>
+        &nbsp;·&nbsp;
+        <?php
+        $next = $rdv_tri === 'asc' ? 'desc' : 'asc';
+        $icon = $rdv_tri === 'asc' ? '↑ Plus ancien' : '↓ Plus récent';
+        $q = http_build_query([
+            'rdv_medecin' => $rdv_search_medecin,
+            'rdv_date'    => $rdv_search_date,
+            'rdv_tri'     => $next,
+        ]);
+        ?>
+        <a href="homePatient.php?<?php echo $q; ?>#mesRDV"
+           class="rdv-sort-link active">
+            Trier <?php echo $rdv_tri === 'asc' ? '↓ Plus récent' : '↑ Plus ancien'; ?>
+        </a>
+    </div>
+
     <div id="rdvList">
-        <?php if (empty($mes_rdvs)): ?>
+        <?php if (empty($rdvs_affiches)): ?>
             <div class="empty-state">
-                <div style="font-size:28px;margin-bottom:10px">📭</div>
-                <strong>Aucun rendez-vous</strong>
-                <p style="color:var(--gray-400);margin-top:6px">Réservez votre premier rendez-vous ci-dessus !</p>
+                <div style="font-size:28px;margin-bottom:10px"><?php echo ($rdv_search_medecin || $rdv_search_date) ? '🔍' : '📭'; ?></div>
+                <strong><?php echo ($rdv_search_medecin || $rdv_search_date) ? 'Aucun résultat' : 'Aucun rendez-vous'; ?></strong>
+                <p style="color:var(--gray-400);margin-top:6px">
+                    <?php echo ($rdv_search_medecin || $rdv_search_date)
+                        ? 'Aucun rendez-vous ne correspond à votre recherche.'
+                        : 'Réservez votre premier rendez-vous ci-dessus !'; ?>
+                </p>
             </div>
         <?php else: ?>
-            <?php foreach ($mes_rdvs as $rdv): ?>
+            <?php foreach ($rdvs_affiches as $rdv): ?>
                 <div class="rdv-item">
                     <div class="rdv-icon">📅</div>
                     <div class="rdv-info">
@@ -543,14 +782,27 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                         <?php echo ucfirst(htmlspecialchars($rdv['statut'])); ?>
                     </div>
                     <div class="rdv-actions">
-                        <a href="homePatient.php?edit=<?php echo $rdv['id']; ?>#formRDV"
-                           class="btn-action btn-edit">Modifier</a>
-                        <form method="POST" action="homePatient.php" style="display:inline"
-                              onsubmit="return confirm('Supprimer ce rendez-vous ?')">
-                            <input type="hidden" name="action"  value="delete">
-                            <input type="hidden" name="rdv_id" value="<?php echo $rdv['id']; ?>">
-                            <button type="submit" class="btn-action btn-delete">Supprimer</button>
-                        </form>
+                        <?php
+                        $est_passe = strtotime($rdv['date_rdv']) < mktime(0,0,0);
+                        $deja_evalue = isset($rdvs_evalues[$rdv['id']]);
+                        ?>
+                        <?php if ($est_passe && !$deja_evalue): ?>
+                            <button class="btn-eval"
+                                    onclick="ouvrirModal(<?php echo $rdv['id']; ?>, '<?php echo addslashes($rdv['medecin_nom']); ?>', '<?php echo htmlspecialchars(substr($rdv['heure_rdv'],0,5)); ?>', '<?php echo $rdv['date_rdv']; ?>')">
+                                ⭐ Évaluer
+                            </button>
+                        <?php elseif ($est_passe && $deja_evalue): ?>
+                            <span class="btn-evaluated">✅ Évalué</span>
+                        <?php else: ?>
+                            <a href="homePatient.php?edit=<?php echo $rdv['id']; ?>#formRDV"
+                               class="btn-action btn-edit">✏️ Modifier</a>
+                            <form method="POST" action="homePatient.php" style="display:inline"
+                                  onsubmit="return confirm('Supprimer ce rendez-vous ?')">
+                                <input type="hidden" name="action"  value="delete">
+                                <input type="hidden" name="rdv_id" value="<?php echo $rdv['id']; ?>">
+                                <button type="submit" class="btn-action btn-delete">🗑️ Supprimer</button>
+                            </form>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -558,6 +810,35 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     </div>
 
 </div><!-- .main-content -->
+
+<!-- ══ MODAL ÉVALUATION ══ -->
+<div class="modal-overlay" id="evalModal">
+    <div class="modal-box">
+        <button class="modal-close" onclick="fermerModal()">✕</button>
+        <div class="modal-title">⭐ Évaluer votre consultation</div>
+        <div class="modal-sub" id="modal-sub">Dr. — · —</div>
+
+        <div class="star-picker" id="starPicker">
+            <span data-v="1">★</span>
+            <span data-v="2">★</span>
+            <span data-v="3">★</span>
+            <span data-v="4">★</span>
+            <span data-v="5">★</span>
+        </div>
+        <div class="modal-note-label" id="noteLabel">Choisissez une note</div>
+
+        <form method="POST" action="homePatient.php#mesRDV" id="evalForm">
+            <input type="hidden" name="action"  value="evaluer">
+            <input type="hidden" name="rdv_id"  id="modal-rdv-id">
+            <input type="hidden" name="note"    id="modal-note" value="0">
+            <textarea name="commentaire" class="modal-textarea"
+                      placeholder="Commentaire facultatif (expérience, attente, qualité de la consultation…)"></textarea>
+            <button type="submit" class="btn-submit-eval" id="btnSubmitEval" disabled>
+                Envoyer mon évaluation
+            </button>
+        </form>
+    </div>
+</div>
 
 <script>
 /* ── Validation date côté client : lundi–samedi uniquement ── */
@@ -590,6 +871,61 @@ function changerDate(dateVal, medecinId, editId) {
     if (editId) url += '&edit=' + editId;
     url += '#formRDV';
     location.href = url;
+}
+
+/* ── Modal évaluation ── */
+const LABELS = ["","😞 Très mauvais","😐 Insuffisant","🙂 Passable","😊 Bien","🤩 Excellent !"];
+let selectedNote = 0;
+
+function ouvrirModal(rdvId, medecin, heure, date) {
+    selectedNote = 0;
+    document.getElementById("modal-rdv-id").value = rdvId;
+    document.getElementById("modal-note").value   = 0;
+    document.getElementById("modal-sub").textContent = medecin + " · " + heure + " · " + formatDateModal(date);
+    document.getElementById("noteLabel").textContent = "Choisissez une note";
+    document.getElementById("btnSubmitEval").disabled = true;
+    document.querySelectorAll("#starPicker span").forEach(s => s.classList.remove("sel","hover"));
+    document.querySelector(".modal-textarea").value = "";
+    document.getElementById("evalModal").classList.add("open");
+}
+
+function fermerModal() {
+    document.getElementById("evalModal").classList.remove("open");
+}
+
+// Fermer en cliquant sur l'overlay
+document.getElementById("evalModal").addEventListener("click", function(e) {
+    if (e.target === this) fermerModal();
+});
+
+// Étoiles interactives
+document.querySelectorAll("#starPicker span").forEach(function(star) {
+    star.addEventListener("mouseover", function() {
+        const v = parseInt(this.dataset.v);
+        document.querySelectorAll("#starPicker span").forEach(s => {
+            s.classList.toggle("hover", parseInt(s.dataset.v) <= v);
+        });
+    });
+    star.addEventListener("mouseout", function() {
+        document.querySelectorAll("#starPicker span").forEach(s => s.classList.remove("hover"));
+    });
+    star.addEventListener("click", function() {
+        selectedNote = parseInt(this.dataset.v);
+        document.getElementById("modal-note").value = selectedNote;
+        document.getElementById("noteLabel").textContent = LABELS[selectedNote];
+        document.getElementById("btnSubmitEval").disabled = false;
+        document.querySelectorAll("#starPicker span").forEach(s => {
+            s.classList.toggle("sel", parseInt(s.dataset.v) <= selectedNote);
+        });
+    });
+});
+
+function formatDateModal(dateStr) {
+    const [y,m,d] = dateStr.split("-");
+    const jours = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+    const mois  = ["jan","fév","mar","avr","mai","juin","juil","août","sep","oct","nov","déc"];
+    const dt    = new Date(+y, +m-1, +d);
+    return jours[dt.getDay()] + " " + +d + " " + mois[+m-1] + ". " + y;
 }
 </script>
 </body>

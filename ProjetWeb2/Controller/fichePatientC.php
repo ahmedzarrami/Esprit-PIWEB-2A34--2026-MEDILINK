@@ -46,10 +46,13 @@ class FichePatientC {
     }
 
     public function listFichePatientByMedecinId($medecin_id) {
-        $sql = "SELECT fp.*, r.date_rdv, r.heure_rdv, m.nom as medecin_nom, m.specialite
+        $sql = "SELECT fp.*, r.date_rdv, r.heure_rdv, r.patient_id,
+                        m.nom as medecin_nom, m.specialite,
+                        p.nom as patient_nom, p.prenom as patient_prenom
                 FROM fiche_patient fp
                 JOIN rendezvous r ON fp.rendezvous_id = r.id
                 JOIN medecins m ON r.medecin_id = m.id
+                LEFT JOIN patients p ON r.patient_id = p.id
                 WHERE m.id = :medecin_id
                 ORDER BY fp.date_creation DESC";
         $db = config::getConnexion();

@@ -16,10 +16,15 @@ $medecin_nom = $_SESSION['medecin_nom'] ?? 'Médecin';
 $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
 require_once $basePath . '/Controller/fichePatientC.php';
+require_once $basePath . '/Controller/evaluationC.php';
+require_once $basePath . '/Model/evaluation.php';
 require_once $basePath . '/Controller/rendezvousC.php';
 require_once $basePath . '/Model/fichePatient.php';
 
 $fichePatientC = new FichePatientC();
+$evaluationC   = new EvaluationC();
+$eval_stats    = $evaluationC->getStatsMedecin($medecin_id);
+$mes_evals     = $evaluationC->getEvalsByMedecin($medecin_id);
 $rendezvousC = new RendezvousC();
 
 // Récupérer TOUS les rendez-vous de ce médecin
@@ -28,6 +33,12 @@ $rendezvous_list = $rendezvousC->getRendezvousByMedecinId($medecin_id);
 $action = $_GET['action'] ?? 'list';
 $edit_id = $_GET['edit_id'] ?? null;
 $edit_fiche = null;
+
+// ── Recherche & tri ──
+$search_patient = trim($_GET['search_patient'] ?? '');
+$search_date    = trim($_GET['search_date']    ?? '');
+$tri            = in_array($_GET['tri'] ?? '', ['asc','desc']) ? $_GET['tri'] : 'desc';
+
 
 if ($action === 'edit' && $edit_id) {
     $edit_fiche = $fichePatientC->getFichePatientById($edit_id);
@@ -227,6 +238,53 @@ tr:last-child td { border-bottom: none; }
 /* ── MODAL ── */
 h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-900); }
 .subtitle { font-size: 13px; color: var(--gray-600); margin-bottom: 20px; }
+
+/* ── ÉTOILES & ÉVALS ── */
+.stars-display { display:inline-flex; gap:2px; }
+.star-d { font-size:16px; color:#e2e8f0; }
+.star-d.on { color:#f59e0b; }
+.eval-summary { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-xl);
+                padding:24px 28px; margin-bottom:24px; display:flex; align-items:center; gap:32px; flex-wrap:wrap; }
+.eval-big-note { font-size:52px; font-weight:700; color:var(--gray-900); line-height:1; }
+.eval-big-sub  { font-size:13px; color:var(--gray-600); margin-top:4px; }
+.eval-bars { flex:1; min-width:200px; display:flex; flex-direction:column; gap:6px; }
+.eval-bar-row { display:flex; align-items:center; gap:8px; font-size:12px; }
+.eval-bar-track { flex:1; height:8px; background:var(--gray-100); border-radius:100px; overflow:hidden; }
+.eval-bar-fill  { height:100%; background:#f59e0b; border-radius:100px; }
+.eval-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg);
+             padding:16px 20px; margin-bottom:12px; }
+.eval-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
+.eval-patient { font-size:13px; font-weight:600; color:var(--gray-900); }
+.eval-date    { font-size:11px; color:var(--gray-400); }
+.eval-comment { font-size:13px; color:var(--gray-600); font-style:italic; margin-top:8px; padding-top:8px;
+                border-top:1px solid var(--gray-100); line-height:1.6; }
+.no-evals { text-align:center; padding:48px 20px; color:var(--gray-400); }
+.no-evals strong { display:block; font-size:15px; color:var(--gray-600); margin-top:10px; }
+
+/* ── SEARCH & SORT BAR ── */
+.search-bar {
+    display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+    background: #fff; border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    padding: 16px 20px; margin-bottom: 16px;
+}
+.search-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 160px; }
+.search-group label { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: .05em; }
+.search-group input, .search-group select {
+    padding: 9px 12px; border: 1px solid var(--gray-200); border-radius: 8px;
+    font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--gray-900); background: #fff; outline: none; transition: .15s; height: 38px;
+}
+.search-group input:focus, .search-group select:focus {
+    border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,86,219,.1);
+}
+.btn-search { height: 38px; padding: 0 18px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; transition: .15s; }
+.btn-search:hover { background: var(--blue-dark); }
+.btn-reset-search { height: 38px; padding: 0 14px; background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; transition: .15s; text-decoration: none; display: inline-flex; align-items: center; }
+.btn-reset-search:hover { background: var(--gray-200); }
+.result-info { font-size: 12px; color: var(--gray-400); padding: 0 4px 12px; }
+.sort-link { display: inline-flex; align-items: center; gap: 4px; color: var(--gray-600); text-decoration: none; font-weight: 600; font-size: 11px; transition: .15s; }
+.sort-link:hover { color: var(--blue); }
+.sort-link.active { color: var(--blue); }
 </style>
 </head>
 </head>
@@ -239,6 +297,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
         <div class="nav-links">
             <a href="home.php">Accueil</a>
             <a href="gestionFichePatient.php" class="active">Fiches Patients</a>
+            <a href="gestionFichePatient.php?action=evals">⭐ Mes évaluations</a>
             <a href="../admin/rapportFichesPatient.php">📊 Rapport</a>
         </div>
         <div style="display: flex; align-items: center; gap: 16px;">
@@ -247,7 +306,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                 <span style="color: var(--gray-400); font-size: 11px;">ID: #<?php echo htmlspecialchars($medecin_id); ?></span>
             </div>
             <a href="loginMedecin.php?logout=1" class="btn-admin" style="background: var(--red); padding: 8px 14px;">
-                 Déconnexion
+                🚪 Déconnexion
             </a>
         </div>
     </nav>
@@ -338,8 +397,35 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                 </form>
             </div>
 
-        <?php else: ?>
+        <?php elseif ($action === 'list' || $action === '' || $action === null): ?>
             <!-- ── LIST VIEW ── -->
+
+            <!-- Barre de recherche & tri -->
+            <form method="GET" action="gestionFichePatient.php">
+                <div class="search-bar">
+                    <div class="search-group">
+                        <label>👤 Nom du patient</label>
+                        <input type="text" name="search_patient"
+                               placeholder="Ex: Ben Ali, Trabelsi…"
+                               value="<?php echo htmlspecialchars($search_patient); ?>">
+                    </div>
+                    <div class="search-group">
+                        <label>📅 Date du RDV</label>
+                        <input type="date" name="search_date"
+                               value="<?php echo htmlspecialchars($search_date); ?>">
+                    </div>
+                    <div class="search-group" style="flex:0 0 auto">
+                        <label>🔃 Tri par date</label>
+                        <select name="tri">
+                            <option value="desc" <?php echo $tri==='desc'?'selected':''; ?>>↓ Plus récent</option>
+                            <option value="asc"  <?php echo $tri==='asc' ?'selected':''; ?>>↑ Plus ancien</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-search">Appliquer</button>
+                    <a href="gestionFichePatient.php" class="btn-reset-search">✕ Réinitialiser</a>
+                </div>
+            </form>
+
             <div class="list-card">
                 <div class="list-header">
                     <h2>📋 Fiches Patients Enregistrées</h2>
@@ -348,24 +434,80 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>🩸Groupe</th>
-                            <th>👨‍⚕️Médecin</th>
-                            <th>📅Date RDV</th>
-                            <th>🕐Heure</th>
-                            <th>⚕️Spécialité</th>
+                            <th>👤 Patient</th>
+                            <th>🩸 Groupe</th>
+                            <th>
+                                <?php
+                                $next_tri = ($tri === 'asc') ? 'desc' : 'asc';
+                                $icon_tri = ($tri === 'asc')  ? '↑' : '↓';
+                                $params = http_build_query([
+                                    'search_patient' => $search_patient,
+                                    'search_date'    => $search_date,
+                                    'tri'            => $next_tri,
+                                ]);
+                                ?>
+                                <a href="gestionFichePatient.php?<?php echo $params; ?>"
+                                   class="sort-link <?php echo 'active'; ?>"
+                                   title="Inverser le tri">
+                                    📅 Date RDV <?php echo $icon_tri; ?>
+                                </a>
+                            </th>
+                            <th>🕐 Heure</th>
+                            <th>⚕️ Spécialité</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         try {
+                            // Charger toutes les fiches du médecin
                             $fiches = $fichePatientC->listFichePatientByMedecinId($medecin_id);
+
+                            // ── FILTRAGE ──
+                            if ($search_patient !== '') {
+                                $fiches = array_filter($fiches, function($f) use ($search_patient) {
+                                    $full = trim(($f['patient_prenom'] ?? '') . ' ' . ($f['patient_nom'] ?? ''));
+                                    return stripos($full, $search_patient) !== false
+                                        || stripos($f['patient_nom']    ?? '', $search_patient) !== false
+                                        || stripos($f['patient_prenom'] ?? '', $search_patient) !== false;
+                                });
+                            }
+                            if ($search_date !== '') {
+                                $fiches = array_filter($fiches, function($f) use ($search_date) {
+                                    return $f['date_rdv'] === $search_date;
+                                });
+                            }
+
+                            // ── TRI par date + heure ──
+                            usort($fiches, function($a, $b) use ($tri) {
+                                // Combiner date et heure pour un tri précis
+                                $da = $a['date_rdv'] . ' ' . $a['heure_rdv'];
+                                $db = $b['date_rdv'] . ' ' . $b['heure_rdv'];
+                                return $tri === 'asc'
+                                    ? strcmp($da, $db)
+                                    : strcmp($db, $da);
+                            });
+
+                            $total = count($fiches);
+                        ?>
+                        <tr>
+                            <td colspan="7" style="padding:8px 28px 0; border:none">
+                                <span class="result-info">
+                                    <strong><?php echo $total; ?></strong>
+                                    fiche<?php echo $total > 1 ? 's' : ''; ?> trouvée<?php echo $total > 1 ? 's' : ''; ?>
+                                    <?php if ($search_patient || $search_date): ?>
+                                        — filtre actif
+                                    <?php endif; ?>
+                                </span>
+                            </td>
+                        </tr>
+                        <?php
                             if (empty($fiches)):
                         ?>
                             <tr>
                                 <td colspan="7" class="empty-state">
-                                    <div class="empty-icon">📋</div>
-                                    <div class="empty-text">Aucune fiche patient enregistrée</div>
+                                    <div class="empty-icon">🔍</div>
+                                    <div class="empty-text">Aucune fiche ne correspond à votre recherche</div>
                                 </td>
                             </tr>
                         <?php else:
@@ -373,14 +515,17 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                         ?>
                             <tr>
                                 <td><strong>#<?php echo htmlspecialchars($fiche['idfiche']); ?></strong></td>
+                                <td><?php
+                                    $pnom = trim(($fiche['patient_prenom'] ?? '') . ' ' . ($fiche['patient_nom'] ?? ''));
+                                    echo $pnom ? htmlspecialchars($pnom) : '<em style="color:var(--gray-400)">—</em>';
+                                ?></td>
                                 <td><?php echo htmlspecialchars($fiche['groupsanguin'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($fiche['medecin_nom']); ?></td>
                                 <td><?php echo htmlspecialchars($fiche['date_rdv']); ?></td>
-                                <td><?php echo htmlspecialchars($fiche['heure_rdv']); ?></td>
+                                <td><?php echo htmlspecialchars(substr($fiche['heure_rdv'],0,5)); ?></td>
                                 <td><?php echo htmlspecialchars($fiche['specialite']); ?></td>
                                 <td>
                                     <a href="?action=edit&edit_id=<?php echo $fiche['idfiche']; ?>">
-                                        <button class="btn btn-small btn-edit">Modifier</button>
+                                        <button class="btn btn-small btn-edit">✏️ Modifier</button>
                                     </a>
                                 </td>
                             </tr>
@@ -391,6 +536,66 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                         ?>
                     </tbody>
                 </table>
+            </div>
+        <?php elseif ($action === 'evals'): ?>
+            <div class="eval-summary">
+                <div style="text-align:center">
+                    <div class="eval-big-note"><?php echo $eval_stats['total']>0?number_format($eval_stats['moyenne'],1):'—'; ?></div>
+                    <div class="stars-display" style="margin:6px 0">
+                        <?php for($s=1;$s<=5;$s++): ?>
+                            <span class="star-d <?php echo $s<=round($eval_stats['moyenne'])?'on':''; ?>">★</span>
+                        <?php endfor; ?>
+                    </div>
+                    <div class="eval-big-sub"><?php echo $eval_stats['total']; ?> avis reçus</div>
+                </div>
+                <div class="eval-bars">
+                    <?php
+                    $total_e = max(1, $eval_stats['total']);
+                    foreach ([5,4,3,2,1] as $niv):
+                        $nb  = intval($eval_stats['nb'.$niv] ?? 0);
+                        $pct = round($nb / $total_e * 100);
+                    ?>
+                    <div class="eval-bar-row">
+                        <span style="min-width:16px;font-size:12px;color:var(--gray-600)"><?php echo $niv; ?>★</span>
+                        <div class="eval-bar-track"><div class="eval-bar-fill" style="width:<?php echo $pct; ?>%"></div></div>
+                        <span style="min-width:24px;font-size:11px;color:var(--gray-400);text-align:right"><?php echo $nb; ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <div class="list-card">
+                <div class="list-header"><h2>⭐ Avis de mes patients</h2></div>
+                <div style="padding:8px 20px 20px">
+                <?php if (empty($mes_evals)): ?>
+                    <div class="no-evals">
+                        <div style="font-size:32px">⭐</div>
+                        <strong>Aucune évaluation pour l'instant</strong>
+                        <p style="margin-top:6px;font-size:13px;color:var(--gray-400)">Les patients peuvent vous évaluer après chaque consultation.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($mes_evals as $ev): ?>
+                        <div class="eval-card">
+                            <div class="eval-card-header">
+                                <div>
+                                    <div class="eval-patient">👤 <?php echo htmlspecialchars(trim(($ev['patient_prenom']??'').' '.($ev['patient_nom']??'')) ?: 'Patient'); ?></div>
+                                    <div style="font-size:11px;color:var(--gray-400);margin-top:2px">RDV du <?php echo $ev['date_rdv']; ?> à <?php echo substr($ev['heure_rdv'],0,5); ?></div>
+                                </div>
+                                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                                    <div class="stars-display">
+                                        <?php for($s=1;$s<=5;$s++): ?>
+                                            <span class="star-d <?php echo $s<=$ev['note']?'on':''; ?>">★</span>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <span class="eval-date"><?php echo date('d/m/Y', strtotime($ev['date_eval'])); ?></span>
+                                </div>
+                            </div>
+                            <?php if (!empty($ev['commentaire'])): ?>
+                                <div class="eval-comment">"<?php echo htmlspecialchars($ev['commentaire']); ?>"</div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </div>
             </div>
         <?php endif; ?>
     </div>

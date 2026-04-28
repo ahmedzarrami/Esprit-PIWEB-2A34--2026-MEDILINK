@@ -13,6 +13,8 @@ $fichePatientC = new FichePatientC();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediLink — Rapport Fiches Patients</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -258,10 +260,39 @@ $fichePatientC = new FichePatientC();
             font-size: 14px;
         }
 
+        /* ── BOUTON PDF ── */
+        .btn-pdf {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: .15s;
+        }
+        .btn-pdf:hover { background: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,.3); }
+        .btn-pdf:disabled { opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+        .fiche-actions {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 0 18px;
+            margin-top: 0;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .fiche-actions:last-child {
+            border-bottom: none;
+        }
+
         /* ── PRINT ── */
         @media print {
             body { background: white; }
-            .navbar-medilink, .btn-print { display: none; }
+            .navbar-medilink, .btn-print, .btn-pdf, .fiche-actions { display: none; }
         }
 
         /* ── RESPONSIVE ── */
@@ -345,7 +376,7 @@ $fichePatientC = new FichePatientC();
                         </div>
                     <?php else: ?>
                         <?php foreach ($fiches as $fiche): ?>
-                            <div class="fiche-item">
+                            <div class="fiche-item" id="fiche-<?php echo $fiche['idfiche']; ?>">
                                 <div class="fiche-title">
                                     Fiche #<?php echo htmlspecialchars($fiche['idfiche']); ?> &mdash;
                                     <?php
@@ -398,6 +429,12 @@ $fichePatientC = new FichePatientC();
                                         <p><?php echo htmlspecialchars($fiche['notesGenerales']); ?></p>
                                     </div>
                                 <?php endif; ?>
+                            </div><!-- fin fiche-item -->
+                            <div class="fiche-actions">
+                                <button class="btn-pdf"
+                                        onclick="exporterPDF(<?php echo $fiche['idfiche']; ?>, this)">
+                                    &#128196; Exporter cette fiche en PDF
+                                </button>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -409,5 +446,78 @@ $fichePatientC = new FichePatientC();
         }
         ?>
     </div>
+    <script>
+    async function exporterPDF(ficheId, btn) {
+        const { jsPDF } = window.jspdf;
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = "&#9203; Generation...";
+        try {
+            const el = document.getElementById("fiche-" + ficheId);
+            if (!el) { alert("Fiche introuvable"); return; }
+            const canvas = await html2canvas(el, {
+                scale: 2, useCORS: true,
+                backgroundColor: "#ffffff", logging: false
+            });
+            const imgData = canvas.toDataURL("image/png");
+            const pdf     = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
+            const pageW   = pdf.internal.pageSize.getWidth();
+            const pageH   = pdf.internal.pageSize.getHeight();
+            const margin  = 15;
+            const imgW    = pageW - margin * 2;
+            const imgH    = (canvas.height * imgW) / canvas.width;
+            // En-tete bleu
+            pdf.setFillColor(26, 86, 219);
+            pdf.rect(0, 0, pageW, 22, "F");
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(12); pdf.setFont("helvetica", "bold");
+            pdf.text("MediLink  Fiche Patient #" + ficheId, margin, 14);
+            pdf.setFontSize(8); pdf.setFont("helvetica", "normal");
+            const now = new Date().toLocaleDateString("fr-FR", {
+                day:"2-digit", month:"2-digit", year:"numeric",
+                hour:"2-digit", minute:"2-digit"
+            });
+            pdf.text("Exporte le " + now, pageW - margin, 14, { align: "right" });
+            // Contenu (multi-pages si fiche longue)
+            const startY = 28;
+            if (imgH + startY <= pageH - 15) {
+                pdf.addImage(imgData, "PNG", margin, startY, imgW, imgH);
+            } else {
+                const ratio = canvas.width / imgW;
+                let srcY = 0, posY = startY, heightLeft = imgH;
+                while (heightLeft > 0.5) {
+                    const sliceH  = Math.min(pageH - posY - 15, heightLeft);
+                    const slicePx = Math.round(sliceH * ratio);
+                    const sc = document.createElement("canvas");
+                    sc.width = canvas.width; sc.height = slicePx;
+                    const ctx = sc.getContext("2d");
+                    ctx.fillStyle = "#fff"; ctx.fillRect(0,0,sc.width,sc.height);
+                    ctx.drawImage(canvas, 0, srcY, canvas.width, slicePx, 0, 0, canvas.width, slicePx);
+                    pdf.addImage(sc.toDataURL("image/png"), "PNG", margin, posY, imgW, sliceH);
+                    heightLeft -= sliceH; srcY += slicePx;
+                    if (heightLeft > 0.5) { pdf.addPage(); posY = 10; }
+                }
+            }
+            // Pied de page
+            const total = pdf.internal.getNumberOfPages();
+            for (let i = 1; i <= total; i++) {
+                pdf.setPage(i);
+                pdf.setDrawColor(220,220,220);
+                pdf.line(margin, pageH-13, pageW-margin, pageH-13);
+                pdf.setFontSize(8); pdf.setTextColor(150,150,150);
+                pdf.setFont("helvetica","normal");
+                pdf.text("MediLink  Document confidentiel", margin, pageH-7);
+                pdf.text("Page "+i+" / "+total, pageW-margin, pageH-7, {align:"right"});
+            }
+            pdf.save("fiche-patient-" + ficheId + ".pdf");
+        } catch(err) {
+            console.error("Erreur PDF:", err);
+            alert("Erreur lors de la generation du PDF.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+    </script>
 </body>
 </html>

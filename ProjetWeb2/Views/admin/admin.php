@@ -126,7 +126,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--gray-50);color:var(--gray
 .page-section.active{display:block}
 
 /* ── STAT CARDS ── */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
 .stat-card{
   background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);
   padding:20px 22px;display:flex;align-items:flex-start;gap:14px;
@@ -137,6 +137,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--gray-50);color:var(--gray
 .stat-card.teal::before{background:var(--teal)}
 .stat-card.amber::before{background:var(--amber)}
 .stat-card.purple::before{background:var(--purple)}
+.stat-card.green::before{background:#0da271}
+.stat-card.coral::before{background:#ea580c}
+.stat-icon.green{background:#ecfdf5;color:#0da271}
+.stat-icon.coral{background:#fff1ee;color:#ea580c}
+.doc-bar-wrap{display:flex;flex-direction:column;gap:4px}
+.doc-bar-label{display:flex;justify-content:space-between;font-size:12px;color:var(--gray-600)}
+.doc-bar-label strong{color:var(--gray-900);font-weight:600}
+.doc-bar-track{height:10px;background:#f1f5f9;border-radius:100px;overflow:hidden}
+.doc-bar-fill{height:100%;border-radius:100px;transition:width .6s ease}
 .stat-icon{
   width:42px;height:42px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;
@@ -403,7 +412,7 @@ tbody td:first-child{color:var(--gray-900);font-weight:500}
         <div class="stat-icon blue">📅</div>
         <div class="stat-body">
           <div class="stat-label">Total RDV</div>
-          <div class="stat-value" id="st-total">0</div>
+          <div class="stat-value" id="st-total">—</div>
           <div class="stat-sub">Tous les rendez-vous</div>
         </div>
       </div>
@@ -411,15 +420,15 @@ tbody td:first-child{color:var(--gray-900);font-weight:500}
         <div class="stat-icon teal">📆</div>
         <div class="stat-body">
           <div class="stat-label">Cette semaine</div>
-          <div class="stat-value" id="st-week">0</div>
-          <div class="stat-sub">Lun — Sam</div>
+          <div class="stat-value" id="st-week">—</div>
+          <div class="stat-sub" id="st-week-sub">Lun — Sam</div>
         </div>
       </div>
       <div class="stat-card amber">
         <div class="stat-icon amber">🕐</div>
         <div class="stat-body">
           <div class="stat-label">Aujourd'hui</div>
-          <div class="stat-value" id="st-today">0</div>
+          <div class="stat-value" id="st-today">—</div>
           <div class="stat-sub" id="st-today-date">—</div>
         </div>
       </div>
@@ -431,6 +440,28 @@ tbody td:first-child{color:var(--gray-900);font-weight:500}
           <div class="stat-sub" id="st-top-doc-sub">—</div>
         </div>
       </div>
+      <div class="stat-card green">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-body">
+          <div class="stat-label">Confirmés</div>
+          <div class="stat-value" id="st-confirmed">—</div>
+          <div class="stat-sub" id="st-confirmed-pct">—</div>
+        </div>
+      </div>
+      <div class="stat-card coral">
+        <div class="stat-icon coral">⏭️</div>
+        <div class="stat-body">
+          <div class="stat-label">Prochain RDV</div>
+          <div class="stat-value" style="font-size:14px;margin-top:4px" id="st-next">—</div>
+          <div class="stat-sub" id="st-next-sub">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barres de progression par médecin -->
+    <div class="chart-card" style="margin-bottom:20px">
+      <div class="chart-title">📊 Répartition des RDV par médecin</div>
+      <div id="docBars" style="display:flex;flex-direction:column;gap:12px;margin-top:12px"></div>
     </div>
 
     <!-- Prochains RDV + Répartition -->
@@ -760,20 +791,25 @@ function updateBadge() {
    DASHBOARD
 ══════════════════════════════════════════ */
 function renderDashboard(rdvs) {
-  // Stat cards
-  document.getElementById('st-total').textContent = rdvs.length;
-
-  const weekRdvs  = rdvs.filter(r => isThisWeek(r.date));
-  document.getElementById('st-week').textContent = weekRdvs.length;
-
   const todayStr  = toISO(new Date());
-  const todayRdvs = rdvs.filter(r => r.date === todayStr);
-  document.getElementById('st-today').textContent    = todayRdvs.length;
   const todayDate = new Date();
+
+  // ── Total ──
+  animCount('st-total', rdvs.length);
+
+  // ── Cette semaine ──
+  const weekRdvs = rdvs.filter(r => isThisWeek(r.date));
+  animCount('st-week', weekRdvs.length);
+  const pctWeek = rdvs.length ? Math.round(weekRdvs.length / rdvs.length * 100) : 0;
+  document.getElementById('st-week-sub').textContent = pctWeek + ' % du total';
+
+  // ── Aujourd'hui ──
+  const todayRdvs = rdvs.filter(r => r.date === todayStr);
+  animCount('st-today', todayRdvs.length);
   document.getElementById('st-today-date').textContent =
     JOURS_LONG[todayDate.getDay()] + ' ' + todayDate.getDate() + ' ' + MOIS_FR[todayDate.getMonth()];
 
-  // Top médecin
+  // ── Médecin le + sollicité ──
   const docCount = {};
   rdvs.forEach(r => { docCount[r.medecin] = (docCount[r.medecin] || 0) + 1; });
   const topDoc = Object.entries(docCount).sort((a,b) => b[1]-a[1])[0];
@@ -785,17 +821,62 @@ function renderDashboard(rdvs) {
     document.getElementById('st-top-doc-sub').textContent = 'Aucune donnée';
   }
 
-  // Timeline prochains RDV
-  const now = new Date();
-  const upcoming = rdvs
-    .filter(r => parseDate(r.date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
-    .slice(0,6);
+  // ── Confirmés ──
+  const confirmed = rdvs.filter(r => (r.statut || '').toLowerCase() === 'confirmé').length;
+  animCount('st-confirmed', confirmed);
+  const pctConf = rdvs.length ? Math.round(confirmed / rdvs.length * 100) : 0;
+  document.getElementById('st-confirmed-pct').textContent = pctConf + ' % des RDV';
 
+  // ── Prochain RDV ──
+  const now = new Date();
+  const nowStr = todayStr + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const upcoming = rdvs
+    .filter(r => (r.date + ' ' + r.heure) >= nowStr)
+    .sort((a,b) => (a.date+a.heure).localeCompare(b.date+b.heure));
+  if (upcoming.length) {
+    const next = upcoming[0];
+    document.getElementById('st-next').textContent     = next.heure + ' · ' + formatFR(next.date);
+    document.getElementById('st-next-sub').textContent = next.medecin;
+  } else {
+    document.getElementById('st-next').textContent     = 'Aucun';
+    document.getElementById('st-next-sub').textContent = 'Pas de RDV à venir';
+  }
+
+  // ── Barres de progression par médecin ──
+  const COLORS = ['#2563eb','#0d9488','#ea580c','#7c3aed','#d97706'];
+  const total  = rdvs.length || 1;
+  const bars   = Object.entries(docCount).sort((a,b) => b[1]-a[1]);
+  const docBars = document.getElementById('docBars');
+  docBars.innerHTML = bars.map(([doc, cnt], i) => {
+    const pct = Math.round(cnt / total * 100);
+    const col = COLORS[i % COLORS.length];
+    return `<div class="doc-bar-wrap">
+      <div class="doc-bar-label">
+        <span>${doc}</span>
+        <strong>${cnt} RDV (${pct} %)</strong>
+      </div>
+      <div class="doc-bar-track">
+        <div class="doc-bar-fill" style="width:0%;background:${col}"
+             data-target="${pct}"></div>
+      </div>
+    </div>`;
+  }).join('');
+  // Animer les barres après rendu
+  setTimeout(() => {
+    docBars.querySelectorAll('.doc-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+  }, 50);
+
+  // ── Timeline prochains RDV ──
+  const upcomingList = rdvs
+    .filter(r => parseDate(r.date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+    .slice(0, 6);
   const tl = document.getElementById('timelineList');
-  if (!upcoming.length) {
+  if (!upcomingList.length) {
     tl.innerHTML = '<div style="text-align:center;padding:24px;color:var(--gray-400);font-size:12px">Aucun RDV à venir</div>';
   } else {
-    tl.innerHTML = upcoming.map(r => `
+    tl.innerHTML = upcomingList.map(r => `
       <div class="tl-item">
         <div class="tl-time">${r.heure}</div>
         <div class="tl-dot ${docColor(r.medecin)}"></div>
@@ -806,8 +887,21 @@ function renderDashboard(rdvs) {
       </div>`).join('');
   }
 
-  // Donut
+  // ── Donut ──
   renderDonut('donutSvg','donutLegend', docCount);
+}
+
+// Animation compteur
+function animCount(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const step  = Math.ceil(target / 20);
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = current;
+  }, 30);
 }
 
 /* ══════════════════════════════════════════
