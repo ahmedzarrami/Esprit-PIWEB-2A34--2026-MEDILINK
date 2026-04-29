@@ -231,3 +231,17 @@ body{font-family:var(--font);background:var(--off);color:var(--text);min-height:
 .dp-footer{margin-top:10px;border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:center}
 .dp-today-btn{background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);padding:4px 10px;border-radius:6px}
 .dp-today-btn:hover{background:var(--blue-light)}
+
+/* ===== PROFESSIONNEL DASHBOARD ===== */
+.pro-header{background:linear-gradient(135deg,#ecfeff 0%,#eff6ff 100%);border:1px solid #a5f3fc}
+.pro-avatar{background:linear-gradient(135deg,var(--teal),var(--blue))}
+.pro-badge{background:var(--teal-light);color:var(--teal)}
+.pro-stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.pro-stat-item{background:white;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;text-align:center;box-shadow:var(--shadow)}
+.pro-stat-num{font-size:28px;font-weight:700;color:var(--teal);font-family:var(--font-serif)}
+.pro-stat-label{font-size:12px;color:var(--text3);margin-top:4px;font-weight:500}
+.pro-empty-state{text-align:center;padding:48px 0;color:var(--text3)}
+.pro-empty-state svg{margin:0 auto 16px;display:block;opacity:.3}
+.pro-empty-state p{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.pro-empty-state span{font-size:13px}
+@media(max-width:640px){.pro-stats-bar{grid-template-columns:repeat(2,1fr)}}
