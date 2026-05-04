@@ -88,6 +88,10 @@ class FrontOrdonnanceController extends FrontController
             if (empty(trim($ligne['posologie'] ?? ''))) $errors[] = "Ligne $n : la posologie est requise.";
         }
 
+        /* Validation métier (doublons, quantités) */
+        $metierErrors = $this->validateMetier($lignes, $patientAge !== '' ? (int) $patientAge : null);
+        $errors       = array_merge($errors, $metierErrors);
+
         if (!empty($errors)) {
             $this->render('ordonnance/create', [
                 'medicaments' => $this->getAllMedicaments(),
@@ -133,6 +137,13 @@ class FrontOrdonnanceController extends FrontController
             ]);
         }
 
+        /* Vérification d'incompatibilités (avertissements non bloquants) */
+        $warnings = $this->checkIncompatibilities($lignes);
+        if (!empty($warnings)) {
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $_SESSION['ord_warnings'] = $warnings;
+        }
+
         $this->redirect('index.php?action=show_ordonnance&id=' . $id . '&success=created');
     }
 
@@ -149,10 +160,15 @@ class FrontOrdonnanceController extends FrontController
             return;
         }
 
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $warnings = $_SESSION['ord_warnings'] ?? [];
+        unset($_SESSION['ord_warnings']);
+
         $this->render('ordonnance/show', [
             'ordonnance' => $this->rowToArray($row),
             'lignes'     => $this->findLignes($id),
             'success'    => $_GET['success'] ?? null,
+            'warnings'   => $warnings,
         ]);
     }
 
@@ -221,6 +237,10 @@ class FrontOrdonnanceController extends FrontController
             if (empty(trim($ligne['posologie'] ?? ''))) $errors[] = "Ligne $n : la posologie est requise.";
         }
 
+        /* Validation métier (doublons, quantités) */
+        $metierErrors = $this->validateMetier($lignes, $patientAge !== '' ? (int) $patientAge : null);
+        $errors       = array_merge($errors, $metierErrors);
+
         if (!empty($errors)) {
             $stmt = $this->db->prepare('SELECT * FROM ordonnances WHERE id = :id');
             $stmt->execute([':id' => $id]);
@@ -265,6 +285,13 @@ class FrontOrdonnanceController extends FrontController
             ]);
         }
 
+        /* Vérification d'incompatibilités (avertissements non bloquants) */
+        $warnings = $this->checkIncompatibilities($lignes);
+        if (!empty($warnings)) {
+            if (session_status() === PHP_SESSION_NONE) session_start();
+            $_SESSION['ord_warnings'] = $warnings;
+        }
+
         $this->redirect('index.php?action=show_ordonnance&id=' . $id . '&success=updated');
     }
 
@@ -281,6 +308,79 @@ class FrontOrdonnanceController extends FrontController
         }
 
         $this->redirect('index.php?action=ordonnances&success=deleted');
+    }
+
+    /**
+     * Validation métier bloquante : doublons de médicaments.
+     */
+    private function validateMetier(array $lignes, ?int $patientAge): array
+    {
+        $errors  = [];
+        $seenIds = [];
+
+        foreach ($lignes as $i => $ligne) {
+            $medId = (int) ($ligne['medicament_id'] ?? 0);
+            if ($medId <= 0) continue;
+
+            if (isset($seenIds[$medId])) {
+                $errors[] = 'Doublon détecté : le médicament de la ligne ' . ($i + 1)
+                    . ' est identique à la ligne ' . $seenIds[$medId]
+                    . '. Supprimez le doublon ou fusionnez les lignes.';
+            } else {
+                $seenIds[$medId] = $i + 1;
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Contrôle d'incompatibilités non bloquant (avertissements session).
+     * Vérifie des paires connues par correspondance partielle sur le nom du médicament.
+     */
+    private function checkIncompatibilities(array $lignes): array
+    {
+        $ids = [];
+        foreach ($lignes as $ligne) {
+            $id = (int) ($ligne['medicament_id'] ?? 0);
+            if ($id > 0) $ids[] = $id;
+        }
+        if (count($ids) < 2) return [];
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $stmt = $this->db->prepare("SELECT id, nom FROM medicaments WHERE id IN ($placeholders)");
+        $stmt->execute(array_values($ids));
+
+        $names = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $names[(int) $row['id']] = strtolower($row['nom']);
+        }
+
+        /* Paires incompatibles connues (vérification par sous-chaîne) */
+        $pairs = [
+            ['doliprane',    'ibuprofène',   'Association Doliprane + Ibuprofène : risque de surdosage en antalgiques'],
+            ['doliprane',    'ibuprofene',   'Association Doliprane + Ibuprofène : risque de surdosage en antalgiques'],
+            ['paracetamol',  'ibuprofène',   'Association paracétamol + ibuprofène : consulter le prescripteur'],
+            ['amoxicilline', 'augmentin',    'Amoxicilline + Augmentin contiennent tous deux de l\'amoxicilline — doublon de principe actif'],
+            ['amoxicilline', 'clamoxyl',     'Amoxicilline + Clamoxyl sont équivalents — prescription en doublon de principe actif'],
+        ];
+
+        $warnings = [];
+        $prescribedNames = array_values($names);
+
+        foreach ($pairs as [$a, $b, $msg]) {
+            $hasA = false;
+            $hasB = false;
+            foreach ($prescribedNames as $name) {
+                if (strpos($name, $a) !== false) $hasA = true;
+                if (strpos($name, $b) !== false) $hasB = true;
+            }
+            if ($hasA && $hasB) {
+                $warnings[] = '⚠ ' . $msg . '.';
+            }
+        }
+
+        return $warnings;
     }
 
     private function findLignes(int $ordonnanceId): array
