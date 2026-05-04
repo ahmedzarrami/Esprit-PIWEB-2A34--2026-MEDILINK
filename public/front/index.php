@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../app/controllers/front/HomeController.php';
 require_once __DIR__ . '/../../app/controllers/front/MedicamentController.php';
 require_once __DIR__ . '/../../app/controllers/front/OrdonnanceController.php';
+require_once __DIR__ . '/../../app/controllers/front/AssistantController.php';
 
 $action = $_GET['action'] ?? 'home';
 
@@ -51,6 +52,10 @@ switch ($action) {
 
     case 'delete_ordonnance':
         (new FrontOrdonnanceController())->delete();
+        break;
+
+    case 'assistant':
+        (new FrontAssistantController())->index();
         break;
 
     default:

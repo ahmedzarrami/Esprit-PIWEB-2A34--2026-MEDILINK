@@ -20,6 +20,7 @@
         <a href="index.php?action=home"        class="<?= $currentAction === 'home' ? 'active' : '' ?>">Accueil</a>
         <a href="index.php?action=medicaments" class="<?= $currentAction === 'medicaments' ? 'active' : '' ?>">Médicaments</a>
         <a href="index.php?action=ordonnances" class="<?= in_array($currentAction, ['ordonnances', 'create_ordonnance', 'show_ordonnance'], true) ? 'active' : '' ?>">Ordonnances</a>
+        <a href="index.php?action=assistant" class="<?= $currentAction === 'assistant' ? 'active' : '' ?>">🤖 Assistant</a>
         <a href="#contact">Contact</a>
     </div>
 

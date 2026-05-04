@@ -12,6 +12,20 @@
         <div class="alert-success">Ordonnance modifiée avec succès.</div>
     <?php endif; ?>
 
+    <?php if (!empty($warnings)): ?>
+        <div class="alert-warnings">
+            <strong>⚠ Avertissements de prescription :</strong>
+            <ul>
+                <?php foreach ($warnings as $w): ?>
+                    <li><?= htmlspecialchars($w) ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <p style="margin-top:8px;font-size:12px;color:#b45309;">
+                Ces avertissements sont informatifs. Veuillez consulter le médecin prescripteur si nécessaire.
+            </p>
+        </div>
+    <?php endif; ?>
+
     <!-- En-tête ordonnance -->
     <div class="detail-card" style="margin-bottom:20px;">
         <div class="detail-header">
@@ -29,6 +43,7 @@
             <div class="ord-show-actions">
                 <a href="index.php?action=edit_ordonnance&id=<?= $ordonnance['id'] ?>" class="btn-edit-lg">Modifier</a>
                 <a href="index.php?action=print_ordonnance&id=<?= $ordonnance['id'] ?>" target="_blank" class="btn-print-lg">Imprimer</a>
+                <button type="button" id="btn-resume-patient" class="btn-resume">📄 Résumé patient</button>
                 <form method="POST" action="index.php?action=delete_ordonnance"
                       onsubmit="return confirm('Supprimer cette ordonnance définitivement ?')">
                     <input type="hidden" name="id" value="<?= $ordonnance['id'] ?>">
@@ -99,6 +114,30 @@
         </div>
     <?php endif; ?>
 
+    <!-- Résumé patient IA -->
+    <div id="resume-section" style="display:none;margin-top:20px;"></div>
+
 </div>
+
+<script>
+var ORDONNANCE_DATA = <?= json_encode([
+    'patient' => [
+        'nom'  => $ordonnance['patient_nom'],
+        'age'  => $ordonnance['patient_age'],
+        'sexe' => $ordonnance['patient_sexe'],
+    ],
+    'lignes' => array_map(function ($l) {
+        return [
+            'nom'      => $l['medicament_nom'],
+            'dosage'   => $l['dosage']    ?? '',
+            'forme'    => $l['forme']     ?? '',
+            'posologie'=> $l['posologie'],
+            'duree'    => $l['duree']     ?? '',
+            'quantite' => (int) $l['quantite'],
+        ];
+    }, $lignes),
+], JSON_UNESCAPED_UNICODE) ?>;
+</script>
+<script src="js/resume-patient.js"></script>
 
 <?php require __DIR__ . '/../layouts/footer.php'; ?>
