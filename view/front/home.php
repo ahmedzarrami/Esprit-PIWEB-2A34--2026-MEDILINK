@@ -187,6 +187,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .product-ref { font-size:10px; font-weight:500; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
 .product-name { font-size:14px; font-weight:600; color:var(--gray-900); margin-bottom:4px; line-height:1.35; }
 .product-desc { font-size:12px; color:var(--gray-400); margin-bottom:10px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.product-rating { display:flex; align-items:center; gap:4px; margin-bottom:8px; }
+.star-rating { display:flex; gap:1px; }
+.star { font-size:12px; color:#ddd; }
+.star.filled { color:#fbbf24; }
+.rating-text { font-size:11px; color:var(--gray-500); }
 .product-cat { display:inline-block; font-size:11px; font-weight:500; padding:2px 9px; border-radius:100px; margin-bottom:10px; background:var(--blue-light); color:var(--blue); }
 .product-footer { display:flex; align-items:center; justify-content:space-between; }
 .product-price { font-size:17px; font-weight:700; color:var(--gray-900); }
@@ -205,9 +210,29 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 }
 .btn-commander:hover { background:var(--blue-dark); transform:translateY(-1px); }
 .btn-commander:disabled { background:var(--gray-200); color:var(--gray-400); cursor:not-allowed; }
+.btn-add-cart {
+    width:36px; height:36px; border:none; border-radius:8px;
+    font-size:16px; font-weight:600; cursor:pointer;
+    font-family:'Plus Jakarta Sans',sans-serif; transition:.15s;
+    background:var(--green-light); color:var(--green-dark);
+}
+.btn-add-cart:hover { background:var(--green); color:#fff; }
+.btn-add-cart:disabled { background:var(--gray-200); color:var(--gray-400); cursor:not-allowed; }
+.btn-rate {
+    width:36px; height:36px; border:none; border-radius:8px;
+    font-size:14px; cursor:pointer;
+    font-family:'Plus Jakarta Sans',sans-serif; transition:.15s;
+    background:var(--orange-light); color:var(--orange);
+}
+.btn-rate:hover { background:var(--orange); color:#fff; }
 .empty-state { grid-column:1/-1; text-align:center; padding:56px 20px; color:var(--gray-400); }
 .empty-state-icon { font-size:32px; margin-bottom:12px; opacity:.5; }
 .empty-state strong { display:block; font-size:15px; color:var(--gray-600); margin-bottom:6px; }
+
+/* ── RATING STYLES ── */
+.star-input { display:flex; gap:4px; font-size:24px; cursor:pointer; }
+.star-option { color:#ddd; transition:.15s; }
+.star-option:hover, .star-option.filled { color:#fbbf24; }
 
 /* ── FAB ── */
 .fab-add {
@@ -236,30 +261,62 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .modal-title-icon { width:36px; height:36px; border-radius:9px; background:var(--blue-light); display:flex; align-items:center; justify-content:center; }
 .modal-close { width:32px; height:32px; border:none; background:var(--gray-100); border-radius:8px; cursor:pointer; font-size:18px; color:var(--gray-600); display:flex; align-items:center; justify-content:center; transition:.15s; }
 .modal-close:hover { background:var(--gray-200); }
-.form-alert { display:none; padding:12px 16px; border-radius:9px; font-size:13px; margin-bottom:20px; align-items:center; gap:8px; }
+.rating-modal {
+    padding: 28px 28px 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+    border: 1px solid rgba(59,130,246,.18);
+    border-radius: 28px;
+}
+.rating-modal .modal-title-icon {
+    background: rgba(59,130,246,.12);
+    color: #2563eb;
+}
+.rating-modal .modal-title span {
+    font-size: 18px;
+    font-weight: 700;
+}
+.rating-modal .form-group {
+    margin-bottom: 18px;
+}
+.rating-modal .form-label {
+    font-size: 11px; font-weight: 700; color: #475569;
+    letter-spacing: .08em; text-transform: uppercase;
+}
+.rating-modal .product-chip {
+    display: inline-flex; align-items:center; gap:8px;
+    width:100%; padding:14px 16px; border-radius:18px;
+    border:1px solid rgba(59,130,246,.18); background:#eff6ff;
+    color:#1d4ed8; font-weight:700; font-size:14px;
+}
+.star-input { display:flex; gap:8px; font-size:28px; }
+.star-option {
+    width:46px; height:46px; display:inline-flex; align-items:center; justify-content:center;
+    border-radius:14px; cursor:pointer; background:#f8fafc; color:#94a3b8;
+    transition:.18s;
+    border:1px solid transparent;
+}
+.star-option:hover { background:#eff6ff; color:#2563eb; }
+.star-option.filled { background:#fef3c7; color:#f59e0b; border-color:#fbbf24; }
+.rating-modal .form-textarea {
+    min-height:120px; border-radius:18px; padding:18px;
+    border:1px solid rgba(148,163,184,.3);
+    background:#f8fafc;
+}
+.rating-modal .btn-submit {
+    width:100%; min-height:50px; border-radius:16px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    box-shadow:0 14px 28px rgba(59,130,246,.18);
+    font-size:15px; letter-spacing:.02em;
+}
+.rating-modal .btn-submit:hover { background: linear-gradient(135deg, #1d4ed8, #2563eb); }
+.form-alert {
+    display:none; padding:14px 16px; border-radius:16px; font-size:14px; margin-bottom:20px;
+    align-items:center; gap:10px; font-weight:600;
+}
 .form-alert.show { display:flex; }
-.form-alert.success { background:var(--green-light); color:#065f46; }
-.form-alert.err { background:var(--red-light); color:#991b1b; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
-.form-label { font-size:12px; font-weight:500; color:var(--gray-600); text-transform:uppercase; letter-spacing:.05em; }
-.form-input, .form-select, .form-textarea {
-    padding:10px 14px; border:1px solid var(--gray-200); border-radius:9px;
-    font-size:14px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--gray-900);
-    background:#fff; outline:none; transition:.15s;
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(26,86,219,.1); }
-.form-textarea { resize:vertical; min-height:90px; }
-.form-input.error, .form-select.error { border-color:var(--red); }
-.field-error { font-size:11px; color:var(--red); display:none; }
-.field-error.show { display:block; }
-.btn-submit {
-    width:100%; height:44px; background:var(--blue); color:#fff;
-    border:none; border-radius:10px; font-size:14px; font-weight:600;
-    cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; transition:.15s;
-    margin-top:8px; display:flex; align-items:center; justify-content:center; gap:8px;
-}
-.btn-submit:hover { background:var(--blue-dark); }
+.form-alert.success { background: #dcfce7; color: #166534; }
+.form-alert.err { background: #fee2e2; color: #9b1234; }
+.form-row { display:grid; grid-template-columns:1fr; gap:16px; }
 
 /* ── CONFIRM MODAL ── */
 .confirm-modal { max-width:400px; text-align:center; }
@@ -477,6 +534,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
           </div>
         </div>
         <div class="form-group">
+            <label class="form-label">Adresse de livraison 📍 *</label>
+            <input type="text" id="orderAddress" class="form-input" placeholder="Ex: 123 Rue Habib Bourguiba, Tunis">
+            <span class="field-error" id="errAddress">Adresse requise</span>
+        </div>
+        <div class="form-group">
             <label class="form-label">Mode de paiement *</label>
             <select id="orderPayment" class="form-select">
                 <option value="">— Sélectionner —</option>
@@ -599,6 +661,15 @@ async function initFrontProducts() {
   updateCartBadge();
 }
 
+window.addEventListener('storage', (event) => {
+  if (event.key === 'pharma_products') {
+    updateFrontStats();
+    populateCatSelectAndTags();
+    applyFilters();
+    updateCartBadge();
+  }
+});
+
 // ── STATS ──
 function updateFrontStats(){
   const products = getProducts();
@@ -650,34 +721,76 @@ function renderFrontGrid(products, total){
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><strong>Aucun produit trouvé</strong>Essayez de modifier votre recherche ou ajoutez un produit.</div>`;
     return;
   }
-  grid.innerHTML = products.map(p=>{
-    const s = parseInt(p.stock)||0;
-    const sc = s===0?'stock-out':s<=5?'stock-low':'stock-ok';
-    const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
-    const icon = CAT_ICONS[p.categorie] || '📦';
-    const isOut = s === 0;
-    const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
-    const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
-    return `
-      <div class="product-card">
-        <div class="product-thumb">${thumb}</div>
-        <div class="product-body">
-          <div class="product-ref">${escH(p.reference||'N/R')}</div>
-          <div class="product-name">${escH(p.nom)}</div>
-          <div class="product-desc">${escH(p.description||'Aucune description')}</div>
-          <div class="product-cat">${escH(p.categorie||'Autre')}</div>
-          <div class="product-footer">
-            <div class="product-price">${parseFloat(p.prix||0).toFixed(3)} <small>DT</small></div>
-            <div class="stock-badge ${sc}">${sl}</div>
-          </div>
-          <div class="product-actions">
-            <button class="btn-commander" onclick="openOrderModal(${p.id})" ${isOut?'disabled':''}>🛒 Commander</button>
-            <button class="btn-add-cart" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>+</button>
+  // Load ratings for all products
+  loadAllRatings(products).then(ratingsMap => {
+    grid.innerHTML = products.map(p=>{
+      const s = parseInt(p.stock)||0;
+      const sc = s===0?'stock-out':s<=5?'stock-low':'stock-ok';
+      const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
+      const icon = CAT_ICONS[p.categorie] || '📦';
+      const isOut = s === 0;
+      const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
+      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
+      const ratingData = ratingsMap[p.id] || { average_rating: 0, total_ratings: 0 };
+      const stars = renderStars(ratingData.average_rating);
+      return `
+        <div class="product-card">
+          <div class="product-thumb">${thumb}</div>
+          <div class="product-body">
+            <div class="product-ref">${escH(p.reference||'N/R')}</div>
+            <div class="product-name">${escH(p.nom)}</div>
+            <div class="product-desc">${escH(p.description||'Aucune description')}</div>
+            <div class="product-rating">
+              <div class="star-rating">${stars}</div>
+              <span class="rating-text">(${ratingData.total_ratings})</span>
+            </div>
+            <div class="product-cat">${escH(p.categorie||'Autre')}</div>
+            <div class="product-footer">
+              <div class="product-price">${parseFloat(p.prix||0).toFixed(3)} <small>DT</small></div>
+              <div class="stock-badge ${sc}">${sl}</div>
+            </div>
+            <div class="product-actions">
+              <button class="btn-commander" onclick="openOrderModal(${p.id})" ${isOut?'disabled':''}>🛒 Commander</button>
+              <button class="btn-add-cart" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>+</button>
+              <button class="btn-rate" onclick="openRatingModal(${p.id}, '${escH(p.nom)}')">⭐ Noter</button>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }).catch(err => {
+    console.error('Erreur chargement ratings:', err);
+    // Render without ratings
+    grid.innerHTML = products.map(p=>{
+      const s = parseInt(p.stock)||0;
+      const sc = s===0?'stock-out':s<=5?'stock-low':'stock-ok';
+      const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
+      const icon = CAT_ICONS[p.categorie] || '📦';
+      const isOut = s === 0;
+      const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
+      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
+      return `
+        <div class="product-card">
+          <div class="product-thumb">${thumb}</div>
+          <div class="product-body">
+            <div class="product-ref">${escH(p.reference||'N/R')}</div>
+            <div class="product-name">${escH(p.nom)}</div>
+            <div class="product-desc">${escH(p.description||'Aucune description')}</div>
+            <div class="product-cat">${escH(p.categorie||'Autre')}</div>
+            <div class="product-footer">
+              <div class="product-price">${parseFloat(p.prix||0).toFixed(3)} <small>DT</small></div>
+              <div class="stock-badge ${sc}">${sl}</div>
+            </div>
+            <div class="product-actions">
+              <button class="btn-commander" onclick="openOrderModal(${p.id})" ${isOut?'disabled':''}>🛒 Commander</button>
+              <button class="btn-add-cart" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>+</button>
+              <button class="btn-rate" onclick="openRatingModal(${p.id}, '${escH(p.nom)}')">⭐ Noter</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  });
 }
 
 function resetFilters(){
@@ -691,14 +804,141 @@ document.getElementById('filterCat').addEventListener('change', applyFilters);
 populateCatSelectAndTags();
 applyFilters();
 
+// ── RATINGS ──
+async function loadAllRatings(products) {
+  const ratingsMap = {};
+  const promises = products.map(async (p) => {
+    try {
+      const data = await apiRequest('ratings', 'GET', null, { produit_id: p.id });
+      ratingsMap[p.id] = data;
+    } catch (err) {
+      console.warn(`Erreur chargement ratings pour ${p.id}:`, err);
+      ratingsMap[p.id] = { average_rating: 0, total_ratings: 0 };
+    }
+  });
+  await Promise.all(promises);
+  return ratingsMap;
+}
+
+function renderStars(rating) {
+  const fullStars = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+  let stars = '';
+  for (let i = 1; i <= 5; i++) {
+    if (i <= fullStars) {
+      stars += '<span class="star filled">★</span>';
+    } else if (i === fullStars + 1 && hasHalf) {
+      stars += '<span class="star filled">☆</span>';
+    } else {
+      stars += '<span class="star">☆</span>';
+    }
+  }
+  return stars;
+}
+
+function openRatingModal(productId, productName) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal rating-modal">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-icon">⭐</div>
+          <span>Noter le produit</span>
+        </div>
+        <button class="modal-close" onclick="closeRatingModal()">✕</button>
+      </div>
+      <div class="form-alert" id="ratingAlert"><span id="ratingAlertMsg"></span></div>
+      <div class="form-group">
+        <label class="form-label">Produit</label>
+        <div class="product-chip">${escH(productName)}</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Votre note *</label>
+        <div class="star-input" id="starInput">
+          <span class="star-option" data-rating="1">☆</span>
+          <span class="star-option" data-rating="2">☆</span>
+          <span class="star-option" data-rating="3">☆</span>
+          <span class="star-option" data-rating="4">☆</span>
+          <span class="star-option" data-rating="5">☆</span>
+        </div>
+        <span class="field-error" id="errRating">Veuillez sélectionner une note</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Commentaire (optionnel)</label>
+        <textarea id="ratingComment" class="form-textarea" placeholder="Partagez votre expérience..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="submitRating(${productId})">Envoyer la note</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  let selectedRating = 0;
+  const stars = modal.querySelectorAll('.star-option');
+  stars.forEach((star, index) => {
+    star.addEventListener('click', () => {
+      selectedRating = index + 1;
+      stars.forEach((s, i) => {
+        s.classList.toggle('filled', i < selectedRating);
+        s.textContent = i < selectedRating ? '★' : '☆';
+      });
+    });
+  });
+}
+
+function closeRatingModal() {
+  const modal = document.querySelector('.modal-overlay');
+  if (modal) {
+    modal.remove();
+    document.body.style.overflow = '';
+  }
+}
+
+async function submitRating(productId) {
+  const rating = document.querySelectorAll('.star-option.filled').length;
+  const comment = document.getElementById('ratingComment').value.trim();
+  const alert = document.getElementById('ratingAlert');
+
+  if (rating === 0) {
+    document.getElementById('errRating').classList.add('show');
+    return;
+  }
+  document.getElementById('errRating').classList.remove('show');
+
+  try {
+    await apiRequest('ratings', 'POST', {
+      produit_id: productId,
+      client_id: getClientId(),
+      rating: rating,
+      comment: comment
+    });
+    alert.className = 'form-alert show success';
+    document.getElementById('ratingAlertMsg').textContent = 'Merci pour votre note !';
+    setTimeout(() => {
+      closeRatingModal();
+      applyFilters(); // Refresh to show updated ratings
+    }, 1500);
+  } catch (error) {
+    alert.className = 'form-alert show err';
+    document.getElementById('ratingAlertMsg').textContent = error.message;
+  }
+}
+
 const ORDERS_KEY = 'pharma_orders';
 const CLIENT_KEY = 'pharma_client_id';
 const API_URL    = new URL('../../api.php', window.location.href).href;
 
-async function apiRequest(resource, method, body = null) {
+async function apiRequest(resource, method, body = null, queryParams = {}) {
   const options = { method, headers: { 'Content-Type': 'application/json' } };
   if (body !== null) options.body = JSON.stringify(body);
-  const response = await fetch(`${API_URL}?resource=${encodeURIComponent(resource)}`, options);
+  let url = `${API_URL}?resource=${encodeURIComponent(resource)}`;
+  if (Object.keys(queryParams).length > 0) {
+    const params = new URLSearchParams(queryParams);
+    url += '&' + params.toString();
+  }
+  const response = await fetch(url, options);
   const result = await response.json();
   if (!response.ok || !result.success) {
       throw new Error(result.message || 'Erreur API');
@@ -798,13 +1038,17 @@ document.getElementById('orderQty')?.addEventListener('input', updateOrderTotal)
 
 async function submitOrder() {
   const payment = document.getElementById('orderPayment').value;
+  const address = document.getElementById('orderAddress').value.trim();
   const orderAlert = document.getElementById('orderAlert');
   let ok = true;
+  
   if(_orderMode === 'single') {
     const qty = parseInt(document.getElementById('orderQty').value);
     if(!qty || qty < 1) { document.getElementById('errQty').classList.add('show'); ok = false; }
     else { document.getElementById('errQty').classList.remove('show'); }
   }
+  if(!address) { document.getElementById('errAddress').classList.add('show'); ok = false; }
+  else { document.getElementById('errAddress').classList.remove('show'); }
   if(!payment) { document.getElementById('errPayment').classList.add('show'); ok = false; }
   else { document.getElementById('errPayment').classList.remove('show'); }
   if(!ok) return;
@@ -825,6 +1069,7 @@ async function submitOrder() {
         total: parseFloat(_currentOrderProduct.prix||0) * qty,
         payment: payment,
         status: 'En attente',
+        adresse: address,
         date: new Date().toLocaleString('fr-FR')
       };
       await apiRequest('commandes','POST', order);
@@ -847,6 +1092,7 @@ async function submitOrder() {
           total: parseFloat(p.prix||0) * item.quantity,
           payment: payment,
           status: 'En attente',
+          adresse: address,
           date: new Date().toLocaleString('fr-FR')
         };
         await apiRequest('commandes','POST', order);

@@ -207,6 +207,216 @@ tbody tr:hover td { background:var(--gray-50); }
 .table-empty-icon { font-size:36px; margin-bottom:10px; opacity:.5; }
 .table-empty strong { display:block; font-size:15px; color:var(--gray-600); margin-bottom:4px; }
 
+/* ── RATINGS CARD LAYOUT ── */
+.ratings-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 22px;
+    padding: 24px;
+}
+.rating-card {
+    position: relative;
+    background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    border: 1px solid rgba(59, 130, 246, 0.18);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 24px 50px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.rating-card::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.18), transparent 60%);
+}
+.rating-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 30px 68px rgba(15, 23, 42, 0.14);
+}
+.rating-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.rating-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rating-card-product {
+    font-weight: 800;
+    color: var(--gray-900);
+    font-size: 15px;
+}
+.rating-card-ref {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #2563eb;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.rating-stars {
+    font-size: 16px;
+    letter-spacing: 3px;
+    line-height: 1;
+}
+.rating-card-client {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--gray-600);
+}
+.rating-card-client::before {
+    content: '👤';
+    font-size: 14px;
+}
+.rating-card-comment {
+    background: rgba(249, 250, 255, 0.95);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--gray-700);
+    min-height: 84px;
+    white-space: pre-line;
+}
+.rating-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--gray-500);
+}
+.rating-card-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.rating-card-date::before {
+    content: '📅';
+    font-size: 12px;
+}
+.btn-detail {
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #fff;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-detail:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(59, 130, 246, 0.22);
+}
+.review-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.56);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.review-modal-overlay.active {
+    display: flex;
+}
+.review-modal {
+    width: min(640px, 100%);
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 32px 90px rgba(15, 23, 42, 0.18);
+    position: relative;
+}
+.review-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #f3f4f6;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-size: 16px;
+}
+.review-modal-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+.review-modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 8px;
+}
+.review-modal-ref {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+.review-modal-stars {
+    font-size: 18px;
+    letter-spacing: 4px;
+    color: #f59e0b;
+}
+.review-modal-comment {
+    background: #f8fafc;
+    border-radius: 22px;
+    padding: 20px;
+    color: var(--gray-700);
+    line-height: 1.8;
+    margin-bottom: 18px;
+    min-height: 100px;
+}
+.review-modal-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    font-size: 13px;
+    color: var(--gray-600);
+}
+.review-modal-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.review-modal-row span::before {
+    content: '•';
+    color: #93c5fd;
+}
+
 /* ── ORDERS TABLE specific ── */
 .order-status-select {
     padding:4px 8px; border-radius:7px; border:1.5px solid transparent;
@@ -335,6 +545,11 @@ tbody tr:hover td { background:var(--gray-50); }
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
             Commandes
             <span class="sb-nav-badge" id="sbBadgeOrders">0</span>
+        </button>
+        <button class="sb-nav-item" onclick="showSection('ratings')" id="nav-ratings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Avis & Notations
+            <span class="sb-nav-badge" id="sbBadgeRatings">0</span>
         </button>
 
         <div class="sb-section-label">Navigation</div>
@@ -507,6 +722,17 @@ tbody tr:hover td { background:var(--gray-50); }
             </div>
         </div>
 
+        <!-- Weather Section -->
+        <div class="weather-section" style="padding:0 32px 24px;">
+            <div class="stat-card" style="background:linear-gradient(135deg,var(--blue-light),#e0f2fe); border-color:var(--blue-mid);">
+                <div class="sc-icon" id="weatherIcon">🌤️</div>
+                <div class="sc-num" id="weatherTemp">--°C</div>
+                <div class="sc-label" id="weatherDesc">Chargement météo...</div>
+                <div class="weather-advice" id="weatherAdvice">Analyse de la météo en cours...</div>
+                <button class="btn-te" style="margin-top:8px; padding:6px 12px; font-size:11px;" onclick="loadWeather()">Actualiser</button>
+            </div>
+        </div>
+
         <div class="table-wrap-outer">
             <div class="table-wrap">
                 <table id="ordersTable">
@@ -533,7 +759,71 @@ tbody tr:hover td { background:var(--gray-50); }
         </div>
     </div>
 
+    <!-- ══════ SECTION RATINGS ══════ -->
+    <div class="page-section" id="section-ratings">
+        <div class="section-hero">
+            <div class="section-hero-inner">
+                <div>
+                    <div class="section-hero-tag">⭐ AVIS</div>
+                    <h2>Gestion des <em>avis clients</em></h2>
+                    <p>Consultez les évaluations et commentaires laissés par vos clients sur les produits.</p>
+                </div>
+                <div class="section-hero-icon">⭐</div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card blue"><div class="sc-icon">⭐</div><div class="sc-num blue" id="rStatTotal">0</div><div class="sc-label">Total avis</div></div>
+            <div class="stat-card green"><div class="sc-icon">📊</div><div class="sc-num green" id="rStatAvg" style="font-size:18px">0.0</div><div class="sc-label">Note moyenne</div></div>
+            <div class="stat-card orange"><div class="sc-icon">📝</div><div class="sc-num orange" id="rStatCommented">0</div><div class="sc-label">Avec commentaire</div></div>
+            <div class="stat-card purple"><div class="sc-icon">🆕</div><div class="sc-num purple" id="rStatRecent">0</div><div class="sc-label">Derniers 7 jours</div></div>
+        </div>
+
+        <div class="toolbar-wrap">
+            <div class="toolbar">
+                <input type="text" id="rSearch" class="tb-input" placeholder="🔍 Rechercher (produit, client)">
+                <select id="rFilterRating" class="tb-select">
+                    <option value="">⭐ Toutes les notes</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 étoiles</option>
+                    <option value="4">⭐⭐⭐⭐ 4 étoiles</option>
+                    <option value="3">⭐⭐⭐ 3 étoiles</option>
+                    <option value="2">⭐⭐ 2 étoiles</option>
+                    <option value="1">⭐ 1 étoile</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-wrap-outer">
+            <div class="table-wrap">
+                <div id="ratingsTableBody" class="ratings-card-grid"></div>
+                <div class="table-footer">
+                    <span id="ratingsTableInfo">—</span>
+                    <span style="font-size:11px;color:var(--gray-400)">Actualisé le <span id="ratingsTableDate">—</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div><!-- end main-wrapper -->
+
+<div class="review-modal-overlay" id="reviewModalOverlay" onclick="closeReviewModal(event)">
+    <div class="review-modal" onclick="event.stopPropagation();">
+        <button class="review-modal-close" onclick="closeReviewModal()">✕</button>
+        <div class="review-modal-header">
+            <div>
+                <div class="review-modal-title" id="reviewModalTitle">Titre du produit</div>
+                <div class="review-modal-ref" id="reviewModalRef">Référence du produit</div>
+            </div>
+            <div class="review-modal-stars" id="reviewModalStars">⭐⭐⭐⭐⭐</div>
+        </div>
+        <div class="review-modal-comment" id="reviewModalComment">Commentaire complet du client.</div>
+        <div class="review-modal-row">
+            <span>Client: <strong id="reviewModalClient">CLT_...</strong></span>
+            <span>Note: <strong id="reviewModalScore">5/5</strong></span>
+            <span>Date: <strong id="reviewModalDate">01/05/2026</strong></span>
+        </div>
+    </div>
+</div>
 
 <!-- ══ MODAL PRODUCT ADD/EDIT ══ -->
 <div class="modal-overlay" id="modalOverlay">
@@ -608,12 +898,17 @@ const STORAGE_KEY = 'pharma_products';
 const ORDERS_KEY  = 'pharma_orders';
 const API_URL      = new URL('../../api.php', window.location.href).href;
 
-async function apiRequest(resource, method, body = null) {
+async function apiRequest(resource, method, body = null, queryParams = {}) {
     const options = { method, headers: { 'Content-Type': 'application/json' } };
     if (body !== null) {
         options.body = JSON.stringify(body);
     }
-    const response = await fetch(`${API_URL}?resource=${encodeURIComponent(resource)}`, options);
+    let url = `${API_URL}?resource=${encodeURIComponent(resource)}`;
+    if (Object.keys(queryParams).length > 0) {
+        const params = new URLSearchParams(queryParams);
+        url += '&' + params.toString();
+    }
+    const response = await fetch(url, options);
     const result = await response.json();
     if (!response.ok || !result.success) {
         throw new Error(result.message || 'Erreur API');
@@ -639,8 +934,8 @@ function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;
 // ════════════════════════════════════
 //  NAVIGATION
 // ════════════════════════════════════
-const SECTIONS = { products:'Gestion des produits', 'add-product':'Ajouter un produit', orders:'Gestion des commandes' };
-const SUBTITLES = { products:'Catalogue', 'add-product':'Nouveau', orders:'Commandes' };
+const SECTIONS = { products:'Gestion des produits', 'add-product':'Ajouter un produit', orders:'Gestion des commandes', ratings:'Gestion des avis clients' };
+const SUBTITLES = { products:'Catalogue', 'add-product':'Nouveau', orders:'Commandes', ratings:'Avis' };
 
 function showSection(name) {
     document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
@@ -650,7 +945,13 @@ function showSection(name) {
     if(navBtn) navBtn.classList.add('active');
     document.getElementById('topbarTitle').innerHTML =
         `${SECTIONS[name]||name} <span>${SUBTITLES[name]||''}</span>`;
-    if(name === 'orders') refreshOrders();
+    if(name === 'orders') {
+        refreshOrders();
+        loadWeather();
+    }
+    if(name === 'ratings') {
+        refreshRatings();
+    }
 }
 
 // ════════════════════════════════════
@@ -739,10 +1040,30 @@ function renderProductTable(list, total) {
 // ════════════════════════════════════
 //  ORDERS — RENDER (FIXED to show client numbers)
 // ════════════════════════════════════
+function getOrderTotal(order) {
+    const normalizedTotal = parseFloat(order.totalPrice);
+    if (!Number.isNaN(normalizedTotal) && normalizedTotal > 0) {
+        return normalizedTotal;
+    }
+
+    if (order.products && order.products.length) {
+        return order.products.reduce((sum, p) => {
+            const qty = parseInt(p.quantity || 1, 10) || 1;
+            const unit = parseFloat(p.unitPrice || 0) || 0;
+            const lineTotal = parseFloat(p.totalPrice) || (qty * unit);
+            return sum + (Number.isNaN(lineTotal) ? 0 : lineTotal);
+        }, 0);
+    }
+
+    const qty = parseInt(order.quantity || 1, 10) || 1;
+    const unit = parseFloat(order.unitPrice || 0) || 0;
+    return qty * unit;
+}
+
 function refreshOrders() {
     const orders = getOrders();
     // Stats
-    const revenue  = orders.reduce((acc,o) => acc+(o.totalPrice||0), 0);
+    const revenue  = orders.reduce((acc,o) => acc + getOrderTotal(o), 0);
     const pending  = orders.filter(o => o.status==='En attente').length;
     const confirmed= orders.filter(o => o.status==='Confirmée').length;
     document.getElementById('oStatTotal').textContent     = orders.length;
@@ -834,6 +1155,7 @@ function renderOrdersTable(list, total) {
             : `<div style="font-weight:700;font-size:13px;">${order.products.length} produits</div><div style="font-size:10px;color:var(--gray-400);margin-top:2px;">${escH(firstProduct.productName||'')} + ${order.products.length - 1} autres</div>`;
 
         const totalQty = order.products.reduce((sum, p) => sum + (p.quantity || 1), 0);
+        const orderTotal = getOrderTotal(order);
 
         const tr=document.createElement('tr');
         tr.innerHTML=`
@@ -841,7 +1163,7 @@ function renderOrdersTable(list, total) {
             <td><span class="td-user">👤 ${escH(clientDisplay)}</span></td>
             <td>${productDisplay}</td>
             <td style="font-weight:700;text-align:center;">${totalQty}</td>
-            <td class="td-total">${parseFloat(order.totalPrice).toFixed(3)} DT</td>
+            <td class="td-total">${orderTotal.toFixed(3)} DT</td>
             <td>
                 <select class="order-status-select ${sc}" onchange="updateOrderStatus('${order.id}', this.value, this)">
                     <option ${order.status==='En attente'?'selected':''}>En attente</option>
@@ -874,11 +1196,153 @@ function updateOrderStatus(orderId, newStatus, selectEl) {
 function updateSidebarBadges() {
     document.getElementById('sbBadgeProducts').textContent = getProducts().length;
     document.getElementById('sbBadgeOrders').textContent   = getOrders().length;
+    loadRatingsCount();
 }
 
 // ════════════════════════════════════
-//  MODAL PRODUCT ADD/EDIT
+//  RATINGS — MANAGEMENT
 // ════════════════════════════════════
+let _allRatings = [];
+
+async function loadRatingsCount() {
+    try {
+        const products = getProducts();
+        let totalRatings = 0;
+        for (const p of products) {
+            try {
+                const data = await apiRequest('ratings', 'GET', null, { produit_id: p.id });
+                totalRatings += data.total_ratings || 0;
+            } catch (err) {
+                console.warn(`Erreur chargement ratings count pour ${p.id}:`, err);
+            }
+        }
+        document.getElementById('sbBadgeRatings').textContent = totalRatings;
+    } catch (err) {
+        console.warn('Erreur loadRatingsCount:', err);
+    }
+}
+
+async function refreshRatings() {
+    try {
+        const products = getProducts();
+        _allRatings = [];
+        
+        for (const p of products) {
+            try {
+                const data = await apiRequest('ratings', 'GET', null, { produit_id: p.id });
+                const ratings = data.ratings || [];
+                ratings.forEach(r => {
+                    _allRatings.push({
+                        ...r,
+                        product_id: p.id,
+                        product_name: p.nom,
+                        product_ref: p.reference
+                    });
+                });
+            } catch (err) {
+                console.warn(`Erreur fetch ratings pour produit ${p.id}:`, err);
+            }
+        }
+        
+        updateRatingsStats();
+        applyRatingsFilters();
+    } catch (err) {
+        console.error('Erreur refreshRatings:', err);
+        const container = document.getElementById('ratingsTableBody');
+        container.innerHTML = `<div class="table-empty" style="grid-column: 1/-1;"><div class="table-empty-icon">❌</div><strong>Erreur chargement des avis</strong><span>Vérifiez votre connexion et réessayez.</span></div>`;
+    }
+}
+
+function updateRatingsStats() {
+    const totalRatings = _allRatings.length;
+    const avgRating = totalRatings > 0 ? (_allRatings.reduce((sum, r) => sum + parseInt(r.rating), 0) / totalRatings).toFixed(1) : 0;
+    const withComment = _allRatings.filter(r => r.comment && r.comment.trim()).length;
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recent = _allRatings.filter(r => new Date(r.created_at) > sevenDaysAgo).length;
+    
+    document.getElementById('rStatTotal').textContent = totalRatings;
+    document.getElementById('rStatAvg').textContent = avgRating;
+    document.getElementById('rStatCommented').textContent = withComment;
+    document.getElementById('rStatRecent').textContent = recent;
+}
+
+function applyRatingsFilters() {
+    const search = document.getElementById('rSearch').value.toLowerCase().trim();
+    const rating = document.getElementById('rFilterRating').value;
+    
+    const filtered = _allRatings.filter(r => {
+        const matchQ = !search || (r.product_name||'').toLowerCase().includes(search) || 
+                       (r.client_id||'').toLowerCase().includes(search) ||
+                       String(r.rating).includes(search);
+        const matchR = !rating || parseInt(r.rating) === parseInt(rating);
+        return matchQ && matchR;
+    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    renderRatingsTable(filtered, _allRatings.length);
+}
+
+function renderRatingsTable(list, total) {
+    const container = document.getElementById('ratingsTableBody');
+    document.getElementById('ratingsTableInfo').innerHTML = `<strong>${list.length}</strong> avis affichés sur ${total}`;
+    document.getElementById('ratingsTableDate').textContent = new Date().toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    
+    if (!list.length) {
+        container.innerHTML = `<div class="table-empty" style="grid-column: 1/-1;"><div class="table-empty-icon">⭐</div><strong>Aucun avis trouvé</strong><span>Les avis des clients apparaîtront ici.</span></div>`;
+        return;
+    }
+    
+    container.innerHTML = '';
+    list.forEach(r => {
+        const stars = '⭐'.repeat(parseInt(r.rating)) + '☆'.repeat(5 - parseInt(r.rating));
+        const date = new Date(r.created_at).toLocaleDateString('fr-FR');
+        const comment = r.comment && r.comment.trim() ? r.comment : 'Aucun commentaire';
+        const payload = escH(JSON.stringify(r).replace(/'/g, "\\\'"));
+        
+        const card = document.createElement('div');
+        card.className = 'rating-card';
+        card.innerHTML = `
+            <div class="rating-card-header">
+                <div class="rating-card-meta">
+                    <div class="rating-badge">Avis client</div>
+                    <div class="rating-card-product">${escH(r.product_name)}</div>
+                    <div class="rating-card-ref">${escH(r.product_ref)}</div>
+                </div>
+                <div class="rating-stars">${stars}</div>
+            </div>
+            <div class="rating-card-client">${escH(r.client_id)}</div>
+            <div class="rating-card-comment">${escH(comment)}</div>
+            <div class="rating-card-footer">
+                <div class="rating-card-date">${date}</div>
+                <button class="btn-detail" onclick="showReviewModal('${payload}')">Voir le feedback</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function showReviewModal(ratingJson) {
+    try {
+        const r = JSON.parse(ratingJson);
+        const stars = '⭐'.repeat(parseInt(r.rating)) + '☆'.repeat(5 - parseInt(r.rating));
+        document.getElementById('reviewModalTitle').textContent = r.product_name;
+        document.getElementById('reviewModalRef').textContent = r.product_ref || 'Réf. indisponible';
+        document.getElementById('reviewModalStars').textContent = stars;
+        document.getElementById('reviewModalComment').textContent = r.comment && r.comment.trim() ? r.comment : 'Aucun commentaire fourni.';
+        document.getElementById('reviewModalClient').textContent = r.client_id;
+        document.getElementById('reviewModalScore').textContent = `${r.rating}/5`;
+        document.getElementById('reviewModalDate').textContent = new Date(r.created_at).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'});
+        document.getElementById('reviewModalOverlay').classList.add('active');
+    } catch (e) {
+        console.error('Erreur showReviewModal:', e);
+        showToast('Impossible d’ouvrir l’avis', 'err');
+    }
+}
+
+function closeReviewModal(event) {
+    if (!event || event.target.id === 'reviewModalOverlay') {
+        document.getElementById('reviewModalOverlay').classList.remove('active');
+    }
+}
 function openAddModal() {
     document.getElementById('modalTitleText').textContent = 'Ajouter un produit';
     document.getElementById('editId').value = '';
@@ -943,14 +1407,24 @@ async function submitForm() {
         if(editIdRaw) {
             const idNum=parseInt(editIdRaw);
             if(products.some(p=>p.id!==idNum&&p.reference&&p.reference.toLowerCase()===ref.toLowerCase())){showFieldErr('fieldRef','errRef','Référence déjà utilisée');return;}
-            await apiRequest('produits','PUT',{ id:idNum, ...newP });
+            try {
+                await apiRequest('produits','PUT',{ id:idNum, ...newP });
+            } catch (apiError) {
+                console.warn('API update produit failed, saving locally instead.', apiError);
+            }
             newP.id=idNum;
             const idx=products.findIndex(p=>p.id===idNum);
             if(idx!==-1){ products[idx]=newP; saveProducts(products); showToast('✓ Produit modifié','success'); setTimeout(closeModal,700); }
         } else {
             if(products.some(p=>p.reference&&p.reference.toLowerCase()===ref.toLowerCase())){showFieldErr('fieldRef','errRef','Référence déjà existante');return;}
-            const created = await apiRequest('produits','POST',newP);
-            newP.id = created.id ?? Date.now();
+            let newId = Date.now();
+            try {
+                const created = await apiRequest('produits','POST',newP);
+                if(created && created.id) newId = created.id;
+            } catch (apiError) {
+                console.warn('API create produit failed, saving locally instead.', apiError);
+            }
+            newP.id = newId;
             products.push(newP);
             saveProducts(products);
             showToast('✓ Produit ajouté','success');
@@ -988,8 +1462,14 @@ async function submitQuickForm() {
     }
     const newP={reference:ref,nom,description:document.getElementById('quickDesc').value.trim(),image,prix,stock,categorie:cat};
     try {
-        const created = await apiRequest('produits','POST',newP);
-        newP.id = created.id ?? Date.now();
+        let newId = Date.now();
+        try {
+            const created = await apiRequest('produits','POST',newP);
+            if(created && created.id) newId = created.id;
+        } catch (apiError) {
+            console.warn('API create produit failed, saving locally instead.', apiError);
+        }
+        newP.id = newId;
         products.push(newP);
         saveProducts(products);
         ['quickRef','quickNom','quickDesc','quickImage','quickPrix','quickStock'].forEach(id=>document.getElementById(id).value='');
@@ -1121,7 +1601,7 @@ function viewOrderDetails(orderId) {
                 </div>
                 <div class="order-info-item">
                     <label>Total:</label>
-                    <span class="order-total">${parseFloat(order.totalPrice || 0).toFixed(3)} DT</span>
+                    <span class="order-total">${getOrderTotal(order).toFixed(3)} DT</span>
                 </div>
             </div>
             <div class="order-products-section">
@@ -1156,6 +1636,65 @@ function showToast(msg, type='success') {
 }
 
 // ════════════════════════════════════
+//  WEATHER
+// ════════════════════════════════════
+async function loadWeather() {
+    const iconEl = document.getElementById('weatherIcon');
+    const tempEl = document.getElementById('weatherTemp');
+    const descEl = document.getElementById('weatherDesc');
+
+    try {
+        const data = await apiRequest('weather', 'GET');
+        const temp = Math.round(data.temperature);
+        const desc = data.description.charAt(0).toUpperCase() + data.description.slice(1);
+        const icon = getWeatherIcon(data.icon);
+        const adviceEl = document.getElementById('weatherAdvice');
+
+        iconEl.textContent = icon;
+        tempEl.textContent = `${temp}°C`;
+        descEl.textContent = desc;
+
+        const isGood = isDeliveryWeatherGood(data.icon, desc, data.wind_speed, data.humidity);
+        if (isGood) {
+            adviceEl.textContent = '✅ Vous pouvez livrer votre commande aujourd’hui.';
+            adviceEl.style.color = '#166534';
+        } else {
+            adviceEl.textContent = '⚠️ Météo défavorable, soyez prudent avant la livraison.';
+            adviceEl.style.color = '#b91c1c';
+        }
+    } catch (error) {
+        iconEl.textContent = '❌';
+        tempEl.textContent = '--°C';
+        descEl.textContent = 'Erreur météo';
+        document.getElementById('weatherAdvice').textContent = 'Impossible d’analyser la météo.';
+        console.error('Weather error:', error);
+    }
+}
+
+function isDeliveryWeatherGood(iconCode, description, windSpeed, humidity) {
+    const badIcons = ['09d','09n','10d','10n','11d','11n','13d','13n','50d','50n'];
+    const badWords = ['pluie', 'orage', 'neige', 'averse', 'bruine', 'grêle', 'brouillard', 'vent', 'gel', 'tempête'];
+    const lowerDesc = description.toLowerCase();
+
+    if (badIcons.includes(iconCode)) return false;
+    if (badWords.some(word => lowerDesc.includes(word))) return false;
+    if (windSpeed >= 40) return false;
+    if (humidity >= 90) return false;
+    return true;
+}
+
+function getWeatherIcon(iconCode) {
+    const icons = {
+        '01d': '☀️', '01n': '🌙', '02d': '⛅', '02n': '☁️',
+        '03d': '☁️', '03n': '☁️', '04d': '☁️', '04n': '☁️',
+        '09d': '🌧️', '09n': '🌧️', '10d': '🌦️', '10n': '🌧️',
+        '11d': '⛈️', '11n': '⛈️', '13d': '❄️', '13n': '❄️',
+        '50d': '🌫️', '50n': '🌫️'
+    };
+    return icons[iconCode] || '🌤️';
+}
+
+// ════════════════════════════════════
 //  LISTENERS & INIT
 // ════════════════════════════════════
 document.getElementById('aSearch').addEventListener('input', applyProductFilters);
@@ -1164,6 +1703,8 @@ document.getElementById('aFilterStock').addEventListener('change', applyProductF
 document.getElementById('oSearch').addEventListener('input', applyOrderFilters);
 document.getElementById('oFilterStatus').addEventListener('change', applyOrderFilters);
 document.getElementById('oFilterPayment').addEventListener('change', applyOrderFilters);
+document.getElementById('rSearch').addEventListener('input', applyRatingsFilters);
+document.getElementById('rFilterRating').addEventListener('change', applyRatingsFilters);
 
 // Init
 refreshAll();

@@ -182,6 +182,10 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     display:flex; align-items:center; justify-content:center; font-size:52px;
     border-bottom:1px solid var(--gray-200); position:relative; overflow:hidden;
 }
+.product-thumb img {
+    width:100%; height:100%; object-fit:cover;
+    display:block;
+}
 .product-thumb::after {
     content:''; position:absolute; inset:0;
     background:radial-gradient(circle at 70% 30%, rgba(26,86,219,.06), transparent 60%);
@@ -753,10 +757,12 @@ function renderCatalog(filtered, total) {
         if(stock === 0) { stockClass='stock-out'; stockText='Rupture'; }
         else if(stock <= 5) { stockClass='stock-low'; stockText=`⚠️ ${stock} restants`; }
         const emoji = CAT_ICONS[p.categorie] || '📦';
+        const imageUrl = p.image ? String(p.image).trim() : '';
+        const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : emoji;
         const isOut = stock === 0;
         return `
         <div class="product-card">
-            <div class="product-thumb">${emoji}</div>
+            <div class="product-thumb">${thumb}</div>
             <div class="product-body">
                 <div class="product-ref">${escH(p.reference||'—')}</div>
                 <div class="product-name">${escH(p.nom)}</div>
@@ -1194,6 +1200,12 @@ window.addEventListener('load', () => {
     loadFrontUI();
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('filterCat').addEventListener('change', applyFilters);
+});
+
+window.addEventListener('storage', (event) => {
+    if (event.key === 'pharma_products') {
+        loadFrontUI();
+    }
 });
 
 // Add CSS animation for toast

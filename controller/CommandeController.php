@@ -67,6 +67,98 @@ class CommandeController {
         return ['success' => true, 'data' => ['id' => $id]];
     }
 
+    public function getWeather(): array {
+        $city = 'Tunis'; // Default city, can be made configurable
+
+        $url = "https://wttr.in/{$city}?format=j1&lang=fr";
+
+        $context = stream_context_create([
+            'http' => [
+                'timeout' => 10, // Timeout in seconds
+            ]
+        ]);
+
+        $response = file_get_contents($url, false, $context);
+
+        if ($response === false) {
+            return ['success' => false, 'message' => 'Erreur lors de la récupération des données météo.'];
+        }
+
+        $data = json_decode($response, true);
+
+        if (!$data || !isset($data['current_condition'])) {
+            return ['success' => false, 'message' => 'Données météo indisponibles.'];
+        }
+
+        $current = $data['current_condition'][0];
+        $weather = [
+            'city' => $city,
+            'description' => $current['weatherDesc'][0]['value'] ?? 'Non disponible',
+            'temperature' => (float)($current['temp_C'] ?? 0),
+            'humidity' => (int)($current['humidity'] ?? 0),
+            'wind_speed' => (float)($current['windspeedKmph'] ?? 0),
+            'icon' => $this->mapWeatherIcon($current['weatherCode'] ?? '')
+        ];
+
+        return ['success' => true, 'data' => $weather];
+    }
+
+    private function mapWeatherIcon(string $weatherCode): string {
+        // Map wttr.in weather codes to OpenWeatherMap style icons for compatibility
+        $iconMap = [
+            '113' => '01d', // Sunny
+            '116' => '02d', // Partly cloudy
+            '119' => '03d', // Cloudy
+            '122' => '04d', // Overcast
+            '143' => '50d', // Mist
+            '176' => '09d', // Patchy rain
+            '179' => '13d', // Patchy snow
+            '182' => '13d', // Patchy sleet
+            '185' => '09d', // Patchy freezing drizzle
+            '200' => '11d', // Thundery outbreaks
+            '227' => '13d', // Blowing snow
+            '230' => '13d', // Blizzard
+            '248' => '50d', // Fog
+            '260' => '50d', // Freezing fog
+            '263' => '09d', // Patchy light drizzle
+            '266' => '09d', // Light drizzle
+            '281' => '09d', // Freezing drizzle
+            '284' => '09d', // Heavy freezing drizzle
+            '293' => '09d', // Patchy light rain
+            '296' => '09d', // Light rain
+            '299' => '09d', // Moderate rain at times
+            '302' => '10d', // Moderate rain
+            '305' => '10d', // Heavy rain at times
+            '308' => '10d', // Heavy rain
+            '311' => '09d', // Light freezing rain
+            '314' => '10d', // Moderate or heavy freezing rain
+            '317' => '13d', // Light sleet
+            '320' => '13d', // Moderate or heavy sleet
+            '323' => '13d', // Patchy light snow
+            '326' => '13d', // Light snow
+            '329' => '13d', // Patchy moderate snow
+            '332' => '13d', // Moderate snow
+            '335' => '13d', // Patchy heavy snow
+            '338' => '13d', // Heavy snow
+            '350' => '09d', // Ice pellets
+            '353' => '09d', // Light rain shower
+            '356' => '10d', // Moderate or heavy rain shower
+            '359' => '10d', // Torrential rain shower
+            '362' => '13d', // Light sleet showers
+            '365' => '13d', // Moderate or heavy sleet showers
+            '368' => '13d', // Light snow showers
+            '371' => '13d', // Moderate or heavy snow showers
+            '374' => '09d', // Light showers of ice pellets
+            '377' => '13d', // Moderate or heavy showers of ice pellets
+            '386' => '11d', // Patchy light rain with thunder
+            '389' => '11d', // Moderate or heavy rain with thunder
+            '392' => '11d', // Patchy light snow with thunder
+            '395' => '11d', // Moderate or heavy snow with thunder
+        ];
+
+        return $iconMap[$weatherCode] ?? '01d';
+    }
+
     private function resolveProductId(PDO $pdo, int $productId, string $productRef, string $productNom): int {
         if ($productId > 0) {
             $stmt = $pdo->prepare('SELECT id FROM produits WHERE id = ?');
