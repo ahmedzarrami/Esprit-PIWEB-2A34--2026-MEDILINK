@@ -67,6 +67,67 @@ class CommentaireController {
         exit;
     }
 
+    /**
+     * Gérer les réactions (Like/Dislike) sur les commentaires via AJAX
+     */
+    public function react(): void {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Non autorisé']);
+            exit;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $type = $input['type'] ?? '';
+        $idCom = $input['id_commentaire'] ?? null;
+        
+        if (!in_array($type, ['like', 'dislike']) || !$idCom) {
+            echo json_encode(['success' => false, 'message' => 'Données invalides']);
+            exit;
+        }
+        
+        $idUser = $_SESSION['user']['id'];
+        $pdo = Database::getConnection();
+        
+        try {
+            $stmtCheck = $pdo->prepare("SELECT type FROM reaction WHERE id_commentaire = :id_com AND id_utilisateur = :id_user");
+            $stmtCheck->execute([':id_com' => $idCom, ':id_user' => $idUser]);
+            $existing = $stmtCheck->fetch();
+            
+            if ($existing) {
+                if ($existing['type'] === $type) {
+                    $stmtDel = $pdo->prepare("DELETE FROM reaction WHERE id_commentaire = :id_com AND id_utilisateur = :id_user");
+                    $stmtDel->execute([':id_com' => $idCom, ':id_user' => $idUser]);
+                    $action = 'removed';
+                } else {
+                    $stmtUpd = $pdo->prepare("UPDATE reaction SET type = :type WHERE id_commentaire = :id_com AND id_utilisateur = :id_user");
+                    $stmtUpd->execute([':type' => $type, ':id_com' => $idCom, ':id_user' => $idUser]);
+                    $action = 'updated';
+                }
+            } else {
+                $stmtIns = $pdo->prepare("INSERT INTO reaction (type, id_commentaire, id_utilisateur) VALUES (:type, :id_com, :id_user)");
+                $stmtIns->execute([':type' => $type, ':id_com' => $idCom, ':id_user' => $idUser]);
+                $action = 'added';
+            }
+            
+            $stmtCounts = $pdo->prepare("SELECT type, COUNT(*) as count FROM reaction WHERE id_commentaire = :id GROUP BY type");
+            $stmtCounts->execute([':id' => $idCom]);
+            $counts = $stmtCounts->fetchAll(PDO::FETCH_KEY_PAIR);
+            
+            echo json_encode([
+                'success' => true,
+                'action' => $action,
+                'likes' => $counts['like'] ?? 0,
+                'dislikes' => $counts['dislike'] ?? 0
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erreur BDD: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
     // ===== BACK OFFICE =====
 
     /**
@@ -127,6 +188,9 @@ class CommentaireController {
                                     ORDER BY nb DESC LIMIT 1");
         $topUser = $stmtTopUser->fetch();
 
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
         require __DIR__ . '/../View/back_office/commentaire/list.php';
     }

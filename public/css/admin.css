@@ -119,11 +119,16 @@ a { text-decoration: none; }
     align-items: center;
     gap: 0.75rem;
 <<<<<<< HEAD
+<<<<<<< HEAD
     padding: 0.7rem 1.5rem;
+=======
+    padding: 0.7rem 1.25rem;
+>>>>>>> master
     color: var(--admin-text-muted);
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 500;
     transition: var(--admin-transition);
+<<<<<<< HEAD
     position: relative;
     border-left: 3px solid transparent;
 =======
@@ -135,6 +140,10 @@ a { text-decoration: none; }
     border-radius: 100px;
     margin: 0.25rem 1rem;
 >>>>>>> master
+=======
+    border-radius: 100px;
+    margin: 0.25rem 1rem;
+>>>>>>> master
 }
 
 .sidebar-link:hover {
@@ -143,6 +152,7 @@ a { text-decoration: none; }
 }
 
 .sidebar-link.active {
+<<<<<<< HEAD
 <<<<<<< HEAD
     background: var(--admin-sidebar-hover);
     color: var(--admin-accent);
@@ -164,6 +174,11 @@ a { text-decoration: none; }
     color: #fff;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
 >>>>>>> master
+=======
+    background: var(--admin-accent);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+>>>>>>> master
 }
 
 .sidebar-link i {
@@ -175,8 +190,13 @@ a { text-decoration: none; }
 .sidebar-link .badge {
     margin-left: auto;
 <<<<<<< HEAD
+<<<<<<< HEAD
     background: var(--admin-accent);
     color: #fff;
+=======
+    background: #fff;
+    color: var(--admin-accent);
+>>>>>>> master
 =======
     background: #fff;
     color: var(--admin-accent);
@@ -187,6 +207,12 @@ a { text-decoration: none; }
     font-weight: 700;
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+.sidebar-link.active .badge {
+    color: var(--admin-accent);
+}
+>>>>>>> master
 =======
 .sidebar-link.active .badge {
     color: var(--admin-accent);
@@ -328,10 +354,46 @@ a { text-decoration: none; }
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* ===== STATS CARDS ===== */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+=======
+/* ===== TOP HORIZONTAL PILL NAV ===== */
+.admin-horizontal-nav {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+.nav-pill {
+    padding: 0.6rem 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--admin-border);
+    border-radius: 100px;
+    color: var(--admin-text-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--admin-transition);
+}
+.nav-pill:hover {
+    border-color: var(--admin-blue);
+    color: var(--admin-blue);
+}
+.nav-pill.active {
+    background: var(--admin-blue);
+    border-color: var(--admin-blue);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+}
+
+/* ===== STATS CARDS ===== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+>>>>>>> master
 =======
 /* ===== TOP HORIZONTAL PILL NAV ===== */
 .admin-horizontal-nav {
@@ -374,12 +436,19 @@ a { text-decoration: none; }
 .stat-card {
     background: var(--admin-card);
 <<<<<<< HEAD
+<<<<<<< HEAD
     border: 1px solid var(--admin-border);
     border-radius: var(--admin-radius);
     padding: 1.5rem;
     display: flex;
     align-items: center;
     gap: 1rem;
+=======
+    border-radius: 1rem;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+>>>>>>> master
 =======
     border-radius: 1rem;
     padding: 1.5rem;
@@ -396,6 +465,7 @@ a { text-decoration: none; }
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 .stat-icon {
     width: 48px;
     height: 48px;
@@ -405,38 +475,44 @@ a { text-decoration: none; }
     justify-content: center;
     font-size: 1.2rem;
     flex-shrink: 0;
+=======
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    z-index: 0;
+    opacity: 0.5;
+>>>>>>> master
 }
 
-.stat-icon.purple {
-    background: rgba(37, 99, 235, 0.1);
-    color: var(--admin-accent);
-}
+.stat-card.c-blue::after { background: #e0f2fe; }
+.stat-card.c-yellow::after { background: #fef9c3; }
+.stat-card.c-red::after { background: #fee2e2; }
+.stat-card.c-cyan::after { background: #ccfbf1; }
 
-.stat-icon.blue {
-    background: rgba(59, 130, 246, 0.1);
-    color: var(--admin-blue);
-}
-
-.stat-icon.green {
-    background: rgba(34, 197, 94, 0.1);
-    color: var(--admin-green);
-}
-
-.stat-icon.teal {
-    background: rgba(20, 184, 166, 0.1);
-    color: var(--admin-teal);
+.stat-info {
+    position: relative;
+    z-index: 1;
 }
 
 .stat-info h3 {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--admin-text);
-    line-height: 1;
+    color: var(--admin-blue);
+    line-height: 1.2;
+    margin-top: 0.5rem;
 }
 
 .stat-info p {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
     color: var(--admin-text-muted);
+<<<<<<< HEAD
     margin-top: 0.25rem;
 =======
 .stat-card::after {
@@ -474,6 +550,9 @@ a { text-decoration: none; }
     font-weight: 700;
     text-transform: uppercase;
     color: var(--admin-text-muted);
+    letter-spacing: 0.5px;
+>>>>>>> master
+=======
     letter-spacing: 0.5px;
 >>>>>>> master
 }
@@ -586,7 +665,11 @@ a { text-decoration: none; }
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /* ===== ACTION BUTTONS ===== */
+=======
+/* ===== ACTION PILLS ===== */
+>>>>>>> master
 =======
 /* ===== ACTION PILLS ===== */
 >>>>>>> master
@@ -601,6 +684,7 @@ a { text-decoration: none; }
     align-items: center;
     justify-content: center;
 <<<<<<< HEAD
+<<<<<<< HEAD
     width: 34px;
     height: 34px;
     border: 1px solid var(--admin-border);
@@ -608,16 +692,27 @@ a { text-decoration: none; }
     background: var(--admin-card);
     color: var(--admin-text-secondary);
     font-size: 0.85rem;
+=======
+    padding: 0.4rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+>>>>>>> master
     cursor: pointer;
     transition: var(--admin-transition);
+    border: none;
+    text-decoration: none;
 }
 
-.btn-action:hover {
-    border-color: var(--admin-accent);
-    color: var(--admin-accent);
-    background: var(--admin-accent-light);
+.btn-action.btn-voir {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+.btn-action.btn-voir:hover {
+    background: #bae6fd;
 }
 
+<<<<<<< HEAD
 .btn-action.delete:hover {
     border-color: var(--admin-red);
     color: var(--admin-red);
@@ -641,6 +736,8 @@ a { text-decoration: none; }
     background: #bae6fd;
 }
 
+=======
+>>>>>>> master
 .btn-action.btn-modifier {
     background: #fef9c3;
     color: #ca8a04;
@@ -655,6 +752,9 @@ a { text-decoration: none; }
 }
 .btn-action.btn-supprimer:hover {
     background: #fecaca;
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 }
 

@@ -20,16 +20,23 @@ require __DIR__ . '/../../layout/back_header.php';
 <!-- Stats -->
 <div class="stats-grid">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
         <div class="stat-info">
             <h3><?= count($posts) ?></h3>
             <p>Posts au total</p>
+=======
+    <div class="stat-card c-blue">
+        <div class="stat-info">
+            <p>POSTS AU TOTAL</p>
+            <h3><?= $totalPosts ?></h3>
+>>>>>>> master
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-comment"></i></div>
+    <div class="stat-card c-green">
         <div class="stat-info">
+<<<<<<< HEAD
             <h3><?= array_sum(array_column($posts, 'nb_commentaires')) ?></h3>
             <p>Commentaires au total</p>
         </div>
@@ -49,6 +56,14 @@ require __DIR__ . '/../../layout/back_header.php';
     </div>
     <div class="stat-card c-red">
         <div class="stat-info">
+=======
+            <p>COMMENTAIRES AU TOTAL</p>
+            <h3><?= $totalComments ?></h3>
+        </div>
+    </div>
+    <div class="stat-card c-red">
+        <div class="stat-info">
+>>>>>>> master
             <p>LE PLUS COMMENTÉ</p>
             <?php if ($topPost): ?>
                 <h3 style="font-size: 1.5rem;">Post #<?= $topPost['id_post'] ?></h3>
@@ -125,14 +140,20 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td>
                             <div class="action-buttons">
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action" title="Voir">
                                     <i class="fas fa-eye"></i>
+=======
+                                <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action btn-voir" title="Voir">
+                                    Voir
+>>>>>>> master
                                 </a>
-                                <a href="index.php?controller=post&action=edit&id=<?= $p['id_post'] ?>" class="btn-action" title="Modifier">
-                                    <i class="fas fa-edit"></i>
+                                <a href="index.php?controller=post&action=edit&id=<?= $p['id_post'] ?>" class="btn-action btn-modifier" title="Modifier">
+                                    Modifier
                                 </a>
-                                <button class="btn-action delete" title="Supprimer"
+                                <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=post&action=delete&id=<?= $p['id_post'] ?>', 'ce post')">
+<<<<<<< HEAD
                                     <i class="fas fa-trash-alt"></i>
 =======
                                 <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action btn-voir" title="Voir">
@@ -143,6 +164,9 @@ require __DIR__ . '/../../layout/back_header.php';
                                 </a>
                                 <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=post&action=delete&id=<?= $p['id_post'] ?>', 'ce post')">
+                                    Supprimer
+>>>>>>> master
+=======
                                     Supprimer
 >>>>>>> master
                                 </button>

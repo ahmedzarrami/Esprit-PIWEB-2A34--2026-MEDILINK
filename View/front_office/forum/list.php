@@ -4,12 +4,15 @@ require __DIR__ . '/../../layout/front_header.php';
 ?>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- Hero Section -->
 <section class="page-hero">
     <h1><i class="fas fa-comments"></i> Forums de Discussion</h1>
     <p>Échangez avec des professionnels de santé et d'autres patients sur des sujets médicaux importants.</p>
 </section>
 =======
+=======
+>>>>>>> master
 <!-- Full Width Blue Hero Section -->
 <div class="hero-wrapper">
     <div class="hero-container">
@@ -60,6 +63,9 @@ require __DIR__ . '/../../layout/front_header.php';
             <a href="index.php?controller=forum&action=list" class="btn-secondary btn-sm" style="border-radius: 100px;">Réinitialiser</a>
         </div>
     <?php endif; ?>
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 
 <!-- Forums Grid -->

@@ -46,6 +46,9 @@ class ForumController {
         $totalForums = count($forums);
         $totalPosts = array_sum(array_column($forums, 'nb_posts'));
 
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
         require __DIR__ . '/../View/front_office/forum/list.php';
     }
@@ -114,6 +117,31 @@ class ForumController {
         $stmtPosts->execute($params);
         $posts = $stmtPosts->fetchAll();
 
+<<<<<<< HEAD
+>>>>>>> master
+=======
+        // Réactions et Filtres pour les posts du forum
+        $postIds = array_column($posts, 'id_post');
+        $postReactions = [];
+        
+        try {
+            if (!empty($postIds)) {
+                $inQuery = implode(',', array_fill(0, count($postIds), '?'));
+                $stmtReactPost = $pdo->prepare("SELECT id_post, type, COUNT(*) as count FROM reaction WHERE id_post IN ($inQuery) GROUP BY id_post, type");
+                $stmtReactPost->execute($postIds);
+                while ($row = $stmtReactPost->fetch()) {
+                    $postReactions[$row['id_post']][$row['type']] = $row['count'];
+                }
+            }
+        } catch (PDOException $e) {}
+
+        foreach ($posts as &$p) {
+            $p['contenu'] = BadWordsFilter::filter($p['contenu']);
+            $p['likes'] = $postReactions[$p['id_post']]['like'] ?? 0;
+            $p['dislikes'] = $postReactions[$p['id_post']]['dislike'] ?? 0;
+        }
+        unset($p);
+
 >>>>>>> master
         require __DIR__ . '/../View/front_office/forum/show.php';
     }
@@ -173,6 +201,9 @@ class ForumController {
                                      ORDER BY nb DESC LIMIT 1");
         $topForum = $stmtTopForum->fetch();
 
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
         require __DIR__ . '/../View/back_office/forum/list.php';
     }

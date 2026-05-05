@@ -17,20 +17,24 @@ require __DIR__ . '/../../layout/back_header.php';
 <!-- Stats -->
 <div class="stats-grid">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon purple"><i class="fas fa-layer-group"></i></div>
+=======
+    <div class="stat-card c-blue">
+>>>>>>> master
         <div class="stat-info">
-            <h3><?= count($forums) ?></h3>
-            <p>Forums actifs</p>
+            <p>TOTAL FORUMS</p>
+            <h3><?= $totalForums ?></h3>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
+    <div class="stat-card c-yellow">
         <div class="stat-info">
-            <h3><?= array_sum(array_column($forums, 'nb_posts')) ?></h3>
-            <p>Posts au total</p>
+            <p>POSTS AU TOTAL</p>
+            <h3><?= $totalPosts ?></h3>
         </div>
     </div>
+<<<<<<< HEAD
 =======
     <div class="stat-card c-blue">
         <div class="stat-info">
@@ -44,6 +48,8 @@ require __DIR__ . '/../../layout/back_header.php';
             <h3><?= $totalPosts ?></h3>
         </div>
     </div>
+=======
+>>>>>>> master
     <div class="stat-card c-cyan">
         <div class="stat-info">
             <p>LE PLUS ACTIF</p>
@@ -83,6 +89,9 @@ require __DIR__ . '/../../layout/back_header.php';
             <a href="index.php?controller=forum&action=adminList" class="admin-btn admin-btn-secondary">Réinitialiser</a>
         <?php endif; ?>
     </form>
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 </div>
 
@@ -116,14 +125,20 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td>
                             <div class="action-buttons">
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 <a href="index.php?controller=forum&action=show&id=<?= $f['id_forum'] ?>" class="btn-action" title="Voir">
                                     <i class="fas fa-eye"></i>
+=======
+                                <a href="index.php?controller=forum&action=show&id=<?= $f['id_forum'] ?>" class="btn-action btn-voir" title="Voir">
+                                    Voir
+>>>>>>> master
                                 </a>
-                                <a href="index.php?controller=forum&action=edit&id=<?= $f['id_forum'] ?>" class="btn-action" title="Modifier">
-                                    <i class="fas fa-edit"></i>
+                                <a href="index.php?controller=forum&action=edit&id=<?= $f['id_forum'] ?>" class="btn-action btn-modifier" title="Modifier">
+                                    Modifier
                                 </a>
-                                <button class="btn-action delete" title="Supprimer"
+                                <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=forum&action=delete&id=<?= $f['id_forum'] ?>', 'le forum « <?= htmlspecialchars(addslashes($f['titre'])) ?> »')">
+<<<<<<< HEAD
                                     <i class="fas fa-trash-alt"></i>
 =======
                                 <a href="index.php?controller=forum&action=show&id=<?= $f['id_forum'] ?>" class="btn-action btn-voir" title="Voir">
@@ -134,6 +149,9 @@ require __DIR__ . '/../../layout/back_header.php';
                                 </a>
                                 <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=forum&action=delete&id=<?= $f['id_forum'] ?>', 'le forum « <?= htmlspecialchars(addslashes($f['titre'])) ?> »')">
+                                    Supprimer
+>>>>>>> master
+=======
                                     Supprimer
 >>>>>>> master
                                 </button>

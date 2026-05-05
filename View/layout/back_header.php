@@ -16,7 +16,11 @@
 
     <!-- Admin Styles -->
 <<<<<<< HEAD
+<<<<<<< HEAD
     <link rel="stylesheet" href="public/css/admin.css">
+=======
+    <link rel="stylesheet" href="public/css/admin.css?v=<?= time() ?>">
+>>>>>>> master
 =======
     <link rel="stylesheet" href="public/css/admin.css?v=<?= time() ?>">
 >>>>>>> master
@@ -28,11 +32,19 @@
     <div class="sidebar-brand">
         <div class="brand-icon">
 <<<<<<< HEAD
+<<<<<<< HEAD
             <i class="fas fa-heartbeat"></i>
         </div>
         <div>
             <h2>MediLink</h2>
             <small>Panneau d'administration</small>
+=======
+            <i class="fas fa-plus"></i>
+        </div>
+        <div>
+            <h2>MediLink</h2>
+            <small style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600; font-size: 0.65rem;">Back Office Admin</small>
+>>>>>>> master
 =======
             <i class="fas fa-plus"></i>
         </div>
@@ -117,11 +129,17 @@
     <!-- Admin Content -->
     <div class="admin-content">
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> master
         <!-- Horizontal Nav -->
         <div class="admin-horizontal-nav">
             <a href="index.php?controller=forum&action=adminList" class="nav-pill <?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Gestion des Forums</a>
             <a href="index.php?controller=post&action=adminList" class="nav-pill <?= ($controller ?? '') === 'post' ? 'active' : '' ?>">Gestion des Posts</a>
             <a href="index.php?controller=commentaire&action=adminList" class="nav-pill <?= ($controller ?? '') === 'commentaire' ? 'active' : '' ?>">Gestion des Commentaires</a>
         </div>
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master

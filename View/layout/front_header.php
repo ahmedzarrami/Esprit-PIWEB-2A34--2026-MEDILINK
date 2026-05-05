@@ -16,7 +16,11 @@
 
     <!-- Styles -->
 <<<<<<< HEAD
+<<<<<<< HEAD
     <link rel="stylesheet" href="public/css/style.css">
+=======
+    <link rel="stylesheet" href="public/css/style.css?v=<?= time() ?>">
+>>>>>>> master
 =======
     <link rel="stylesheet" href="public/css/style.css?v=<?= time() ?>">
 >>>>>>> master
@@ -30,7 +34,11 @@
         <a href="index.php" class="navbar-brand">
             <div class="brand-icon">
 <<<<<<< HEAD
+<<<<<<< HEAD
                 <i class="fas fa-heartbeat"></i>
+=======
+                <i class="fas fa-plus"></i>
+>>>>>>> master
 =======
                 <i class="fas fa-plus"></i>
 >>>>>>> master
@@ -41,17 +49,24 @@
         <!-- Navigation Links -->
         <ul class="navbar-nav">
 <<<<<<< HEAD
+<<<<<<< HEAD
             <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>"><i class="fas fa-home"></i> Accueil</a></li>
             <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>"><i class="fas fa-comments"></i> Forums</a></li>
+=======
+            <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>">Accueil</a></li>
+            <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Forums</a></li>
+            <li><a href="#">Contact</a></li>
+>>>>>>> master
         </ul>
 
-        <!-- User Info -->
+        <!-- User Info / Actions -->
         <div class="navbar-user">
             <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'administrateur'): ?>
                 <a href="index.php?controller=forum&action=adminList" class="btn-admin-link">
-                    <i class="fas fa-cog"></i> Administration
+                    <i class="fas fa-th-large"></i> Administration
                 </a>
             <?php endif; ?>
+<<<<<<< HEAD
             <div class="user-avatar">
                 <?= strtoupper(substr($_SESSION['user']['prenom'] ?? 'U', 0, 1) . substr($_SESSION['user']['nom'] ?? '', 0, 1)) ?>
             </div>
@@ -72,6 +87,8 @@
                     <i class="fas fa-th-large"></i> Administration
                 </a>
             <?php endif; ?>
+=======
+>>>>>>> master
             
             <?php if (isset($_SESSION['user'])): ?>
                 <a href="index.php?controller=forum&action=list" class="btn-dark">
@@ -80,6 +97,9 @@
             <?php else: ?>
                 <a href="#" class="btn-dark">Connexion</a>
             <?php endif; ?>
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
         </div>
     </div>

@@ -29,7 +29,10 @@ require __DIR__ . '/../../layout/front_header.php';
 </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> master
 <!-- Filtres de recherche -->
 <div style="margin-bottom: 2rem;">
     <form action="index.php" method="GET" class="search-filter-form" style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: var(--shadow-sm); display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-color);">
@@ -60,6 +63,9 @@ require __DIR__ . '/../../layout/front_header.php';
     </form>
 </div>
 
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 <!-- Posts List -->
 <?php if (!empty($posts)): ?>
@@ -89,7 +95,9 @@ require __DIR__ . '/../../layout/front_header.php';
 
                 <div class="post-footer">
                     <div class="post-stats">
-                        <span><i class="fas fa-comment"></i> <?= (int)$p['nb_commentaires'] ?> commentaire<?= $p['nb_commentaires'] > 1 ? 's' : '' ?></span>
+                        <span><i class="fas fa-thumbs-up" style="color: var(--accent-blue);"></i> <?= (int)($p['likes'] ?? 0) ?></span>
+                        <span><i class="fas fa-thumbs-down" style="color: var(--accent-red);"></i> <?= (int)($p['dislikes'] ?? 0) ?></span>
+                        <span style="margin-left: 0.5rem;"><i class="fas fa-comment"></i> <?= (int)$p['nb_commentaires'] ?> commentaire<?= $p['nb_commentaires'] > 1 ? 's' : '' ?></span>
                     </div>
                     <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn btn-secondary btn-sm">
                         Lire la suite <i class="fas fa-arrow-right"></i>

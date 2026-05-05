@@ -14,13 +14,18 @@ require __DIR__ . '/../../layout/back_header.php';
 <!-- Stats -->
 <div class="stats-grid">
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div class="stat-card">
         <div class="stat-icon teal"><i class="fas fa-comments"></i></div>
+=======
+    <div class="stat-card c-blue">
+>>>>>>> master
         <div class="stat-info">
-            <h3><?= count($commentaires) ?></h3>
-            <p>Commentaires au total</p>
+            <p>COMMENTAIRES AU TOTAL</p>
+            <h3><?= $totalComments ?></h3>
         </div>
     </div>
+<<<<<<< HEAD
 =======
     <div class="stat-card c-blue">
         <div class="stat-info">
@@ -28,6 +33,8 @@ require __DIR__ . '/../../layout/back_header.php';
             <h3><?= $totalComments ?></h3>
         </div>
     </div>
+=======
+>>>>>>> master
     <div class="stat-card c-yellow">
         <div class="stat-info">
             <p>TOP CONTRIBUTEUR</p>
@@ -66,6 +73,9 @@ require __DIR__ . '/../../layout/back_header.php';
             <a href="index.php?controller=commentaire&action=adminList" class="admin-btn admin-btn-secondary">Réinitialiser</a>
         <?php endif; ?>
     </form>
+<<<<<<< HEAD
+>>>>>>> master
+=======
 >>>>>>> master
 </div>
 
@@ -110,11 +120,17 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td>
                             <div class="action-buttons">
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 <a href="index.php?controller=post&action=show&id=<?= $c['id_post'] ?>" class="btn-action" title="Voir le post">
                                     <i class="fas fa-eye"></i>
+=======
+                                <a href="index.php?controller=post&action=show&id=<?= $c['id_post'] ?>" class="btn-action btn-voir" title="Voir le post">
+                                    Voir Post
+>>>>>>> master
                                 </a>
-                                <button class="btn-action delete" title="Supprimer"
+                                <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=commentaire&action=delete&id=<?= $c['id_commentaire'] ?>', 'ce commentaire')">
+<<<<<<< HEAD
                                     <i class="fas fa-trash-alt"></i>
 =======
                                 <a href="index.php?controller=post&action=show&id=<?= $c['id_post'] ?>" class="btn-action btn-voir" title="Voir le post">
@@ -122,6 +138,9 @@ require __DIR__ . '/../../layout/back_header.php';
                                 </a>
                                 <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=commentaire&action=delete&id=<?= $c['id_commentaire'] ?>', 'ce commentaire')">
+                                    Supprimer
+>>>>>>> master
+=======
                                     Supprimer
 >>>>>>> master
                                 </button>
