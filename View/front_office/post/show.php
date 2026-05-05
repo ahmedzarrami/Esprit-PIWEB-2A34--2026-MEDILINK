@@ -36,6 +36,61 @@ require __DIR__ . '/../../layout/front_header.php';
     <div class="post-content full">
         <?= nl2br(htmlspecialchars($post['contenu'])) ?>
     </div>
+
+    <!-- Réactions & Describe -->
+    <div class="reaction-buttons">
+        <button class="btn-react btn-like <?= ($post['user_reaction'] === 'like') ? 'active' : '' ?>" 
+                data-type="like" data-id="<?= $post['id_post'] ?>" data-target="post">
+            <i class="fas fa-thumbs-up"></i> <span class="count"><?= $post['likes'] ?? 0 ?></span> J'aime
+        </button>
+        <button class="btn-react btn-dislike <?= ($post['user_reaction'] === 'dislike') ? 'active' : '' ?>" 
+                data-type="dislike" data-id="<?= $post['id_post'] ?>" data-target="post">
+            <i class="fas fa-thumbs-down"></i> <span class="count"><?= $post['dislikes'] ?? 0 ?></span> Je n'aime pas
+        </button>
+        <button class="btn-react btn-describe" onclick="loadAndToggleDescribe(<?= $post['id_post'] ?>)">
+            <i class="fas fa-chart-bar"></i> Analyser
+        </button>
+    </div>
+
+    <!-- Panneau Décrire (Ajax) -->
+    <div id="post-describe" class="describe-panel" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 0.5rem; padding: 1.5rem; margin-top: 1rem;">
+        <div id="describe-loader" style="text-align: center; color: var(--text-muted); padding: 1rem;">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p style="margin-top: 0.5rem;">Analyse du contenu en cours...</p>
+        </div>
+        <div id="describe-content" style="display: none;">
+            <h4 style="margin-bottom: 1rem; color: var(--text-color); font-size: 1.1rem;"><i class="fas fa-chart-pie" style="color: var(--accent-teal);"></i> Analyse Détaillée</h4>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <!-- Mots & Temps -->
+                <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Lecture</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-blue);"><span id="desc-words">0</span> <span style="font-size: 0.9rem; color: var(--text-color);">mots</span></div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-clock"></i> ~<span id="desc-time">0</span> min</div>
+                </div>
+                
+                <!-- Score de Qualité -->
+                <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Score d'Engagement</div>
+                    <div style="display: flex; align-items: baseline; gap: 0.25rem;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-teal);" id="desc-score">0</div>
+                        <div style="font-size: 0.9rem; color: var(--text-muted);">/ 100</div>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; height: 6px; border-radius: 3px; margin-top: 0.5rem; overflow: hidden;">
+                        <div id="desc-score-bar" style="width: 0%; height: 100%; background: var(--accent-teal); transition: width 1s ease;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mots Clés -->
+            <div style="background: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.75rem;">Mots-clés principaux</div>
+                <div id="desc-keywords" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
 </article>
 
 <!-- ===== COMMENTS SECTION ===== -->
@@ -114,6 +169,17 @@ require __DIR__ . '/../../layout/front_header.php';
                     <div class="comment-text">
                         <?= nl2br(htmlspecialchars($c['contenu'])) ?>
                     </div>
+                    
+                    <div class="reaction-buttons" style="margin-top: 0.5rem; padding-top: 0.5rem;">
+                        <button class="btn-react btn-like <?= ($c['user_reaction'] === 'like') ? 'active' : '' ?>" 
+                                data-type="like" data-id="<?= $c['id_commentaire'] ?>" data-target="commentaire">
+                            <i class="fas fa-thumbs-up"></i> <span class="count"><?= $c['likes'] ?? 0 ?></span>
+                        </button>
+                        <button class="btn-react btn-dislike <?= ($c['user_reaction'] === 'dislike') ? 'active' : '' ?>" 
+                                data-type="dislike" data-id="<?= $c['id_commentaire'] ?>" data-target="commentaire">
+                            <i class="fas fa-thumbs-down"></i> <span class="count"><?= $c['dislikes'] ?? 0 ?></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -125,5 +191,135 @@ require __DIR__ . '/../../layout/front_header.php';
         </div>
     <?php endif; ?>
 </section>
+
+<!-- AJAX Script for Reactions & Describe -->
+<script>
+async function loadAndToggleDescribe(idPost) {
+    const panel = document.getElementById('post-describe');
+    const loader = document.getElementById('describe-loader');
+    const content = document.getElementById('describe-content');
+    
+    if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        return;
+    }
+    
+    panel.style.display = 'block';
+    if (content.style.display === 'block') return;
+    
+    loader.style.display = 'block';
+    content.style.display = 'none';
+    
+    try {
+        const response = await fetch('index.php?controller=post&action=describeAjax', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_post: idPost })
+        });
+        
+        const res = await response.json();
+        
+        if (res.success) {
+            const data = res.data;
+            
+            document.getElementById('desc-words').textContent = data.word_count;
+            document.getElementById('desc-time').textContent = data.reading_time;
+            document.getElementById('desc-score').textContent = data.score;
+            setTimeout(() => {
+                document.getElementById('desc-score-bar').style.width = data.score + '%';
+            }, 100);
+            
+            const kwContainer = document.getElementById('desc-keywords');
+            kwContainer.innerHTML = '';
+            if (data.keywords && data.keywords.length > 0) {
+                data.keywords.forEach(kw => {
+                    const badge = document.createElement('span');
+                    badge.style.background = '#e0f2fe';
+                    badge.style.color = '#0284c7';
+                    badge.style.padding = '0.25rem 0.75rem';
+                    badge.style.borderRadius = '100px';
+                    badge.style.fontSize = '0.75rem';
+                    badge.style.fontWeight = '600';
+                    badge.textContent = kw;
+                    kwContainer.appendChild(badge);
+                });
+            } else {
+                kwContainer.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">Aucun mot-clé trouvé.</span>';
+            }
+            
+            loader.style.display = 'none';
+            content.style.display = 'block';
+        } else {
+            loader.innerHTML = '<div style="color: var(--accent-red);"><i class="fas fa-exclamation-triangle"></i> ' + (res.message || 'Erreur d\'analyse.') + '</div>';
+        }
+    } catch (err) {
+        console.error(err);
+        loader.innerHTML = '<div style="color: var(--accent-red);"><i class="fas fa-exclamation-triangle"></i> Erreur réseau.</div>';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const reactButtons = document.querySelectorAll('.btn-react[data-type]');
+    
+    reactButtons.forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const type = this.getAttribute('data-type');
+            const targetId = this.getAttribute('data-id');
+            const targetType = this.getAttribute('data-target'); // 'post' or 'commentaire'
+            
+            const isUserLoggedIn = <?= isset($_SESSION['user']) ? 'true' : 'false' ?>;
+            if (!isUserLoggedIn) {
+                alert('Veuillez vous connecter pour réagir.');
+                return;
+            }
+
+            const url = targetType === 'post' 
+                ? 'index.php?controller=post&action=react' 
+                : 'index.php?controller=commentaire&action=react';
+
+            const payload = {
+                type: type
+            };
+            if (targetType === 'post') payload.id_post = targetId;
+            else payload.id_commentaire = targetId;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update current container buttons
+                    const container = this.closest('.reaction-buttons');
+                    const btnLike = container.querySelector('.btn-like');
+                    const btnDislike = container.querySelector('.btn-dislike');
+                    
+                    // Update counts
+                    btnLike.querySelector('.count').textContent = data.likes;
+                    btnDislike.querySelector('.count').textContent = data.dislikes;
+                    
+                    // Update active state
+                    btnLike.classList.remove('active');
+                    btnDislike.classList.remove('active');
+                    
+                    if (data.action === 'added' || data.action === 'updated') {
+                        if (type === 'like') btnLike.classList.add('active');
+                        else btnDislike.classList.add('active');
+                    }
+                } else {
+                    alert(data.message || 'Une erreur est survenue.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erreur réseau. Impossible d\'enregistrer la réaction.');
+            }
+        });
+    });
+});
+</script>
 
 <?php require __DIR__ . '/../../layout/front_footer.php'; ?>

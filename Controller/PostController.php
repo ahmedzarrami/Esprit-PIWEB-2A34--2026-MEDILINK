@@ -28,6 +28,32 @@ class PostController {
             exit;
         }
 
+        // Filtre de mots injurieux
+        $post['contenu'] = BadWordsFilter::filter($post['contenu']);
+
+        // Réactions (Like/Dislike) pour le post
+        $post['likes'] = 0;
+        $post['dislikes'] = 0;
+        $post['user_reaction'] = null;
+        try {
+            $stmtReactPost = $pdo->prepare("SELECT type, COUNT(*) as count FROM reaction WHERE id_post = :id GROUP BY type");
+            $stmtReactPost->execute([':id' => $id]);
+            $reactPostRaw = $stmtReactPost->fetchAll(PDO::FETCH_KEY_PAIR);
+            $post['likes'] = $reactPostRaw['like'] ?? 0;
+            $post['dislikes'] = $reactPostRaw['dislike'] ?? 0;
+            
+            if (isset($_SESSION['user'])) {
+                $stmtUserReact = $pdo->prepare("SELECT type FROM reaction WHERE id_post = :id AND id_utilisateur = :id_user");
+                $stmtUserReact->execute([':id' => $id, ':id_user' => $_SESSION['user']['id']]);
+                $userReact = $stmtUserReact->fetch();
+                if ($userReact) {
+                    $post['user_reaction'] = $userReact['type'];
+                }
+            }
+        } catch (PDOException $e) {
+            // Ignore si la table n'existe pas encore
+        }
+
         $stmtCom = $pdo->prepare("
             SELECT c.*, u.nom AS auteur_nom, u.prenom AS auteur_prenom, u.role AS auteur_role
             FROM commentaire c
@@ -37,6 +63,41 @@ class PostController {
         ");
         $stmtCom->execute([':id_post' => $id]);
         $commentaires = $stmtCom->fetchAll();
+
+        // Réactions et Filtres pour les commentaires
+        $comIds = array_column($commentaires, 'id_commentaire');
+        $comReactions = [];
+        $userComReactions = [];
+        
+        try {
+            if (!empty($comIds)) {
+                $inQuery = implode(',', array_fill(0, count($comIds), '?'));
+                
+                $stmtReactCom = $pdo->prepare("SELECT id_commentaire, type, COUNT(*) as count FROM reaction WHERE id_commentaire IN ($inQuery) GROUP BY id_commentaire, type");
+                $stmtReactCom->execute($comIds);
+                while ($row = $stmtReactCom->fetch()) {
+                    $comReactions[$row['id_commentaire']][$row['type']] = $row['count'];
+                }
+                
+                if (isset($_SESSION['user'])) {
+                    $params = $comIds;
+                    $params[] = $_SESSION['user']['id'];
+                    $stmtUserReactCom = $pdo->prepare("SELECT id_commentaire, type FROM reaction WHERE id_commentaire IN ($inQuery) AND id_utilisateur = ?");
+                    $stmtUserReactCom->execute($params);
+                    while ($row = $stmtUserReactCom->fetch()) {
+                        $userComReactions[$row['id_commentaire']] = $row['type'];
+                    }
+                }
+            }
+        } catch (PDOException $e) {}
+
+        foreach ($commentaires as &$c) {
+            $c['contenu'] = BadWordsFilter::filter($c['contenu']);
+            $c['likes'] = $comReactions[$c['id_commentaire']]['like'] ?? 0;
+            $c['dislikes'] = $comReactions[$c['id_commentaire']]['dislike'] ?? 0;
+            $c['user_reaction'] = $userComReactions[$c['id_commentaire']] ?? null;
+        }
+        unset($c);
 
         $stmtForum = $pdo->prepare("SELECT * FROM forum WHERE id_forum = :id");
         $stmtForum->execute([':id' => $post['id_forum']]);
@@ -118,6 +179,154 @@ class PostController {
         require __DIR__ . '/../View/front_office/post/create.php';
     }
 
+    /**
+     * Gérer les réactions (Like/Dislike) via AJAX
+     */
+    public function react(): void {
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Non autorisé']);
+            exit;
+        }
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $type = $input['type'] ?? '';
+        $idPost = $input['id_post'] ?? null;
+        
+        if (!in_array($type, ['like', 'dislike']) || !$idPost) {
+            echo json_encode(['success' => false, 'message' => 'Données invalides']);
+            exit;
+        }
+        
+        $idUser = $_SESSION['user']['id'];
+        $pdo = Database::getConnection();
+        
+        try {
+            $stmtCheck = $pdo->prepare("SELECT type FROM reaction WHERE id_post = :id_post AND id_utilisateur = :id_user");
+            $stmtCheck->execute([':id_post' => $idPost, ':id_user' => $idUser]);
+            $existing = $stmtCheck->fetch();
+            
+            if ($existing) {
+                if ($existing['type'] === $type) {
+                    $stmtDel = $pdo->prepare("DELETE FROM reaction WHERE id_post = :id_post AND id_utilisateur = :id_user");
+                    $stmtDel->execute([':id_post' => $idPost, ':id_user' => $idUser]);
+                    $action = 'removed';
+                } else {
+                    $stmtUpd = $pdo->prepare("UPDATE reaction SET type = :type WHERE id_post = :id_post AND id_utilisateur = :id_user");
+                    $stmtUpd->execute([':type' => $type, ':id_post' => $idPost, ':id_user' => $idUser]);
+                    $action = 'updated';
+                }
+            } else {
+                $stmtIns = $pdo->prepare("INSERT INTO reaction (type, id_post, id_utilisateur) VALUES (:type, :id_post, :id_user)");
+                $stmtIns->execute([':type' => $type, ':id_post' => $idPost, ':id_user' => $idUser]);
+                $action = 'added';
+            }
+            
+            $stmtCounts = $pdo->prepare("SELECT type, COUNT(*) as count FROM reaction WHERE id_post = :id GROUP BY type");
+            $stmtCounts->execute([':id' => $idPost]);
+            $counts = $stmtCounts->fetchAll(PDO::FETCH_KEY_PAIR);
+            
+            echo json_encode([
+                'success' => true,
+                'action' => $action,
+                'likes' => $counts['like'] ?? 0,
+                'dislikes' => $counts['dislike'] ?? 0
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erreur BDD: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * Métier avancé : Analyser un post (Décrire) via AJAX
+     */
+    public function describeAjax(): void {
+        header('Content-Type: application/json');
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        $idPost = $input['id_post'] ?? null;
+        
+        if (!$idPost) {
+            echo json_encode(['success' => false, 'message' => 'Post invalide']);
+            exit;
+        }
+        
+        $pdo = Database::getConnection();
+        
+        try {
+            $stmt = $pdo->prepare("SELECT contenu, date_publication FROM post WHERE id_post = :id");
+            $stmt->execute([':id' => $idPost]);
+            $post = $stmt->fetch();
+            
+            if (!$post) {
+                echo json_encode(['success' => false, 'message' => 'Post non trouvé']);
+                exit;
+            }
+            
+            // Clean html tags to analyze text only
+            $text = strip_tags($post['contenu']);
+            
+            // Count words and chars
+            $wordCount = str_word_count($text);
+            $charCount = mb_strlen($text);
+            
+            // Reading time (approx 200 words per min)
+            $readingTime = ceil($wordCount / 200);
+            
+            // Extract keywords (words with more than 4 chars)
+            $words = str_word_count(strtolower($text), 1);
+            $filteredWords = array_filter($words, function($w) {
+                return mb_strlen($w) > 4;
+            });
+            $wordFreq = array_count_values($filteredWords);
+            arsort($wordFreq);
+            $topKeywords = array_slice(array_keys($wordFreq), 0, 5);
+            
+            // Engagement metrics
+            $stmtReact = $pdo->prepare("SELECT type, COUNT(*) as count FROM reaction WHERE id_post = :id GROUP BY type");
+            $stmtReact->execute([':id' => $idPost]);
+            $reactions = $stmtReact->fetchAll(PDO::FETCH_KEY_PAIR);
+            $likes = $reactions['like'] ?? 0;
+            $dislikes = $reactions['dislike'] ?? 0;
+            
+            $stmtCom = $pdo->prepare("SELECT COUNT(*) as total FROM commentaire WHERE id_post = :id");
+            $stmtCom->execute([':id' => $idPost]);
+            $comments = $stmtCom->fetch()['total'];
+            
+            // Calculate Quality / Engagement Score (0 to 100)
+            $score = 50; // Base score
+            if ($wordCount > 50) $score += 10;
+            if ($wordCount > 100) $score += 10;
+            $score += ($likes * 5);
+            $score -= ($dislikes * 5);
+            $score += ($comments * 10);
+            $score = max(0, min(100, $score)); // limit to 0-100
+            
+            echo json_encode([
+                'success' => true,
+                'data' => [
+                    'word_count' => $wordCount,
+                    'char_count' => $charCount,
+                    'reading_time' => $readingTime,
+                    'keywords' => $topKeywords,
+                    'score' => $score,
+                    'engagement' => [
+                        'likes' => $likes,
+                        'dislikes' => $dislikes,
+                        'comments' => $comments
+                    ]
+                ]
+            ]);
+            
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erreur: ' . $e->getMessage()]);
+        }
+        exit;
+    }
+
     // ===== BACK OFFICE =====
 
     /**
@@ -141,8 +350,11 @@ class PostController {
 
         $params = [];
         if ($search !== '') {
-            $query .= " WHERE p.contenu LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search OR f.titre LIKE :search ";
-            $params[':search'] = '%' . $search . '%';
+            $query .= " WHERE p.contenu LIKE :search1 OR u.nom LIKE :search2 OR u.prenom LIKE :search3 OR f.titre LIKE :search4 ";
+            $params[':search1'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
+            $params[':search4'] = '%' . $search . '%';
         }
 
         switch ($sort) {

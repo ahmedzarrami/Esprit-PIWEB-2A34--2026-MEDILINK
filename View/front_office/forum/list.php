@@ -3,11 +3,56 @@ $pageTitle = 'Forums de Discussion';
 require __DIR__ . '/../../layout/front_header.php';
 ?>
 
-<!-- Hero Section -->
-<section class="page-hero">
-    <h1><i class="fas fa-comments"></i> Forums de Discussion</h1>
-    <p>Échangez avec des professionnels de santé et d'autres patients sur des sujets médicaux importants.</p>
-</section>
+<!-- Full Width Blue Hero Section -->
+<div class="hero-wrapper">
+    <div class="hero-container">
+        <div class="hero-badge">
+            <span class="dot"></span> Service disponible 24/7
+        </div>
+        
+        <h1 class="hero-title">Échangez et consultez les<br><span>discussions & conseils santé</span></h1>
+        <p class="hero-subtitle">Recherchez un forum, consultez les sujets, et participez aux échanges avec d'autres patients et professionnels de santé en quelques secondes.</p>
+        
+        <form action="index.php" method="GET" class="hero-search-wrapper">
+            <input type="hidden" name="controller" value="forum">
+            <input type="hidden" name="action" value="list">
+            <input type="text" name="search" placeholder="Rechercher un forum, un sujet..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+            <button type="submit" class="btn-search">Rechercher</button>
+        </form>
+    </div>
+</div>
+
+<!-- Info / Stats Bar -->
+<div class="info-bar">
+    <div class="info-bar-container">
+        <div class="info-item">
+            <h4>Forums</h4>
+            <p>Catalogue complet de sujets</p>
+        </div>
+        <div class="info-item">
+            <h4>Discussions</h4>
+            <p>Création rapide de posts</p>
+        </div>
+        <div class="info-item">
+            <h4><?= $totalForums ?> actifs</h4>
+            <p><?= $totalPosts ?> posts au total</p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+    <div style="margin-bottom: 2rem; border-left: 3px solid #2563eb; padding-left: 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">Forums mis en avant</h2>
+    </div>
+
+    <!-- Filters Sort (Optional inline) -->
+    <?php if (!empty($_GET['search'])): ?>
+        <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+            <p style="color: #64748b;">Résultats pour "<strong><?= htmlspecialchars($_GET['search']) ?></strong>"</p>
+            <a href="index.php?controller=forum&action=list" class="btn-secondary btn-sm" style="border-radius: 100px;">Réinitialiser</a>
+        </div>
+    <?php endif; ?>
 
 <!-- Forums Grid -->
 <?php if (!empty($forums)): ?>
