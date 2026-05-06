@@ -5,9 +5,6 @@
     var inputEl    = document.getElementById('chat-input');
     var sendBtn    = document.getElementById('chat-send');
 
-    /* ════════════════════════════════════════
-       CARTE DES SYMPTÔMES → RECHERCHE
-    ════════════════════════════════════════ */
     var SYMPTOM_MAP = [
         {
             keys:   ['fièvre','fievre','température','temperature','chaud','frisson','chaleur'],
@@ -45,9 +42,6 @@
     var THANKS    = ['merci','super','parfait','excellent'];
     var FAREWELLS = ['au revoir','bye','bonne journée','à bientôt'];
 
-    /* ════════════════════════════════════════
-       UTILS
-    ════════════════════════════════════════ */
     function norm(s) {
         return String(s).toLowerCase()
             .normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -64,16 +58,13 @@
         return s.length > n ? s.slice(0, n) + '…' : s;
     }
 
-    /* ════════════════════════════════════════
-       RECHERCHE SANS DOUBLONS
-    ════════════════════════════════════════ */
     function searchMeds(terms) {
         var seen   = {};
         var result = [];
 
         meds.forEach(function (m) {
             var id = String(m.id);
-            if (seen[id]) return;                    /* évite les doublons */
+            if (seen[id]) return;
             var score = 0;
             terms.forEach(function (t) {
                 if (has(m.nom,         t)) score += 4;
@@ -114,9 +105,6 @@
         return { labels: labels, search: search };
     }
 
-    /* ════════════════════════════════════════
-       GÉNÉRATION DES RÉPONSES
-    ════════════════════════════════════════ */
     function getResponse(input) {
         var ni = norm(input);
 
@@ -147,9 +135,6 @@
         return { text: intro, meds: results };
     }
 
-    /* ════════════════════════════════════════
-       CONSTRUCTION DES CARTES MÉDICAMENTS
-    ════════════════════════════════════════ */
     function stockBadge(stock) {
         stock = parseInt(stock, 10) || 0;
         if (stock > 100) return '<span style="background:#dcfce7;color:#166534;font-size:10px;padding:2px 7px;border-radius:100px;font-weight:600;">En stock</span>';
@@ -183,9 +168,6 @@
         return html;
     }
 
-    /* ════════════════════════════════════════
-       AFFICHAGE DES MESSAGES
-    ════════════════════════════════════════ */
     function addMsg(who, htmlContent, hasCards) {
         var row = document.createElement('div');
         row.className = 'cm-row ' + who;
@@ -217,9 +199,6 @@
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
-    /* ════════════════════════════════════════
-       ENVOI
-    ════════════════════════════════════════ */
     function send(text) {
         text = text.trim();
         if (!text) return;
@@ -243,9 +222,6 @@
         }, 600);
     }
 
-    /* ════════════════════════════════════════
-       ÉVÉNEMENTS
-    ════════════════════════════════════════ */
     sendBtn.addEventListener('click', function () { send(inputEl.value); });
     inputEl.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); send(inputEl.value); }
