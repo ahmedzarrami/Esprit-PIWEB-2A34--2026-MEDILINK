@@ -1,6 +1,7 @@
 <?php
 // Chargement de tous les contrôleurs nécessaires à l'authentification
 require_once __DIR__ . '/Utilisateur.php';
+require_once __DIR__ . '/FaceAuthController.php';
 require_once __DIR__ . '/Patient.php';
 require_once __DIR__ . '/ProfessionnelSante.php';
 require_once __DIR__ . '/Administrateur.php';
@@ -166,23 +167,73 @@ class AuthController
             return ['success' => false, 'errors' => ['password' => 'Le mot de passe est obligatoire.']];
         }
 
-        // Vérification des identifiants en base (email + password_verify)
-        $user = UtilisateurController::seConnecter(trim($email), $motDePasse);
+        // Récupérer l'utilisateur par email (sans vérifier le mot de passe encore)
+        $user = UtilisateurController::getByEmail(trim($email));
 
         if (!$user) {
-            // Message volontairement vague : on ne précise pas si c'est l'email ou le mot de passe
-            // (sécurité : empêche l'énumération des emails existants)
+            // Email inexistant — message volontairement vague (anti-énumération)
             return ['success' => false, 'errors' => ['global' => 'Email ou mot de passe incorrect.']];
         }
 
-        // Connexion réussie : alimentation de la session PHP
-        // Ces 4 variables sont disponibles sur toutes les pages via $_SESSION
-        $_SESSION['user_id']   = $user['id'];    // Clé primaire pour les requêtes SQL
-        $_SESSION['user_role'] = $user['role'];  // Détermine quelle interface afficher
-        $_SESSION['user_nom']  = $user['prenom'] . ' ' . $user['nom']; // Affiché dans la navbar
-        $_SESSION['user_email']= $user['email']; // Affiché dans le profil
+        // --- Vérification du verrou temporel ---
+        if (!empty($user['locked_until'])) {
+            $remaining = (int) ceil((strtotime($user['locked_until']) - time()) / 60);
+            if ($remaining > 0) {
+                return [
+                    'success' => false,
+                    'errors'  => ['global' => "Compte temporairement verrouillé après trop d'échecs. "
+                        . "Réessayez dans {$remaining} minute(s) ou contactez l'administrateur."]
+                ];
+            }
+            // Verrou expiré : réinitialiser automatiquement
+            UtilisateurController::reinitialiserEchecs((int) $user['id']);
+        }
+
+        // --- Vérification du mot de passe ---
+        if (!password_verify($motDePasse, $user['mot_de_passe'])) {
+            // Incrémenter le compteur d'échecs (pose le verrou si seuil atteint)
+            UtilisateurController::incrementerEchecs((int) $user['id']);
+
+            // Recharger pour connaître le nombre de tentatives restantes
+            $updated  = UtilisateurController::getById((int) $user['id']);
+            $echecs   = (int) ($updated['failed_attempts'] ?? 0);
+
+            if (!empty($updated['locked_until']) && strtotime($updated['locked_until']) > time()) {
+                return [
+                    'success' => false,
+                    'errors'  => ['global' => 'Compte verrouillé pendant 30 minutes après 5 échecs consécutifs. Contactez l\'administrateur si nécessaire.']
+                ];
+            }
+
+            $restants = max(0, 5 - $echecs);
+            $msg = 'Email ou mot de passe incorrect.';
+            if ($echecs >= 1) {
+                $msg .= " ({$restants} tentative(s) restante(s) avant verrouillage)";
+            }
+            return ['success' => false, 'errors' => ['global' => $msg]];
+        }
+
+        // --- Connexion réussie ---
+        // Remettre le compteur à zéro
+        UtilisateurController::reinitialiserEchecs((int) $user['id']);
+
+        $_SESSION['user_id']   = $user['id'];
+        $_SESSION['user_role'] = $user['role'];
+        $_SESSION['user_nom']  = $user['prenom'] . ' ' . $user['nom'];
+        $_SESSION['user_email']= $user['email'];
 
         return ['success' => true, 'user' => $user];
+    }
+
+    /**
+     * Authentifie un utilisateur par reconnaissance faciale.
+     * Le descripteur JSON (128 flottants) est fourni par face-api.js côté client.
+     * Retourne un tableau JSON-serializable pour la réponse AJAX.
+     */
+    public function faceLogin(string $descriptorJson): array
+    {
+        $faceCtrl = new FaceAuthController();
+        return $faceCtrl->seConnecterParVisage($descriptorJson);
     }
 
     /**

@@ -202,6 +202,78 @@ class UtilisateurController
     }
 
     /**
+     * Compte les comptes actuellement verrouillés (locked_until dans le futur).
+     */
+    public static function countVerrouilles(): int
+    {
+        $pdo  = Database::getInstance();
+        $stmt = $pdo->query("SELECT COUNT(*) FROM utilisateur WHERE locked_until IS NOT NULL AND locked_until > NOW()");
+        return (int) $stmt->fetchColumn();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Verrouillage de compte (brute-force protection)
+    // ──────────────────────────────────────────────────────────
+
+    private const MAX_ECHECS   = 5;   // tentatives avant verrouillage
+    private const LOCK_MINUTES = 30;  // durée du verrou en minutes
+
+    /**
+     * Incrémente le compteur d'échecs. Si le seuil est atteint, pose le verrou temporel.
+     */
+    public static function incrementerEchecs(int $id): void
+    {
+        $pdo  = Database::getInstance();
+
+        // Incrémenter d'abord
+        $stmt = $pdo->prepare("UPDATE utilisateur SET failed_attempts = failed_attempts + 1 WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+
+        // Vérifier si le seuil est atteint pour poser le verrou
+        $stmt = $pdo->prepare("SELECT failed_attempts FROM utilisateur WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+
+        if ($row && (int)$row['failed_attempts'] >= self::MAX_ECHECS) {
+            $until = date('Y-m-d H:i:s', strtotime('+' . self::LOCK_MINUTES . ' minutes'));
+            $pdo->prepare("UPDATE utilisateur SET locked_until = :until WHERE id = :id")
+                ->execute([':until' => $until, ':id' => $id]);
+        }
+    }
+
+    /**
+     * Remet à zéro le compteur et lève le verrou (connexion réussie).
+     */
+    public static function reinitialiserEchecs(int $id): void
+    {
+        $pdo  = Database::getInstance();
+        $pdo->prepare("UPDATE utilisateur SET failed_attempts = 0, locked_until = NULL WHERE id = :id")
+            ->execute([':id' => $id]);
+    }
+
+    /**
+     * Déverrouille manuellement un compte (action admin).
+     */
+    public static function deverrouiller(int $id): bool
+    {
+        $pdo  = Database::getInstance();
+        $stmt = $pdo->prepare("UPDATE utilisateur SET failed_attempts = 0, locked_until = NULL WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
+    }
+
+    /**
+     * Retourne le descripteur facial d'un utilisateur (JSON string ou null).
+     */
+    public static function getFaceDescriptor(int $id): ?string
+    {
+        $pdo  = Database::getInstance();
+        $stmt = $pdo->prepare("SELECT face_descriptor FROM utilisateur WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        return ($row && !empty($row['face_descriptor'])) ? $row['face_descriptor'] : null;
+    }
+
+    /**
      * Vérifie si un email est déjà utilisé dans la base.
      * $excludeId permet d'exclure un utilisateur du check (utile lors d'une modification :
      * on ne veut pas que l'utilisateur soit bloqué par son propre email actuel).

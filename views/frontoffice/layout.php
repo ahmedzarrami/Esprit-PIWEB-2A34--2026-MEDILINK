@@ -6,6 +6,7 @@
 <title>MediLink — Espace Patient</title>
 <meta name="description" content="MediLink — Plateforme de santé digitale. Prenez rendez-vous, consultez vos ordonnances et accédez aux meilleurs professionnels de santé.">
 <link rel="stylesheet" href="assets/css/front.css">
+<link rel="stylesheet" href="assets/css/face-auth.css">
 </head>
 <body>
 
@@ -59,5 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script src="assets/js/validation.js"></script>
 <script src="assets/js/front.js"></script>
+<!-- face-api.js chargé uniquement sur les pages nécessitant la caméra -->
+<?php if (in_array($page ?? '', ['login', 'profile'])): ?>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="assets/js/face-auth.js"></script>
+<?php endif; ?>
 </body>
 </html>

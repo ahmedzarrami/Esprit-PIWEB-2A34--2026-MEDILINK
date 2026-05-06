@@ -43,6 +43,11 @@
         <div class="stat-value" id="stat-active"><?= $stats['actifs'] ?? 0 ?></div>
         <div class="stat-change down"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>-2</div>
       </div>
+      <div class="stat-card" style="border-left:3px solid #dc2626">
+        <div class="stat-label" style="color:#dc2626">Comptes verrouillés</div>
+        <div class="stat-value" id="stat-locked" style="color:#dc2626"><?= $stats['verrouilles'] ?? 0 ?></div>
+        <div class="stat-change" style="color:#94a3b8;font-size:11px">Verrouillage 30 min</div>
+      </div>
     </div>
 
     <!-- TABLE -->

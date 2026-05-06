@@ -38,6 +38,7 @@ $initials = strtoupper(mb_substr($prenom, 0, 1) . mb_substr($nom, 0, 1));
     <div class="profile-tabs">
       <div class="profile-tab active" onclick="showProfileTab('info',this)">Informations</div>
       <div class="profile-tab" onclick="showProfileTab('security',this)">Sécurité</div>
+      <div class="profile-tab" onclick="showProfileTab('biometric',this)">Biométrie</div>
       <div class="profile-tab" onclick="showProfileTab('rdv',this)">Rendez-vous</div>
     </div>
 
@@ -153,6 +154,67 @@ $initials = strtoupper(mb_substr($prenom, 0, 1) . mb_substr($nom, 0, 1));
         </div>
         <p style="font-size:13px;color:var(--text2);margin-bottom:16px">La suppression de votre compte est irréversible. Toutes vos données seront définitivement effacées.</p>
         <button class="btn btn-danger btn-sm" onclick="toast('Contactez le support pour supprimer votre compte','error')">Supprimer mon compte</button>
+      </div>
+    </div>
+
+    <!-- TAB: BIOMÉTRIE (Reconnaissance Faciale) -->
+    <div id="ptab-biometric" class="hidden">
+      <?php
+        require_once __DIR__ . '/../../controllers/FaceAuthController.php';
+        $hasFace = FaceAuthController::aDescripteur((int)($_SESSION['user_id'] ?? 0));
+      ?>
+      <div class="profile-card">
+        <div class="profile-card-title">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/><circle cx="12" cy="10" r="3" stroke-width="1.5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 16c0-1.7 1.34-3 3-3s3 1.3 3 3"/></svg>
+          Reconnaissance faciale
+        </div>
+
+        <div style="margin-bottom:20px">
+          <?php if ($hasFace): ?>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;margin-bottom:16px">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span style="font-size:14px;color:#15803d;font-weight:500">Reconnaissance faciale activée</span>
+          </div>
+          <?php else: ?>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:16px">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#94a3b8" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span style="font-size:14px;color:#64748b">Reconnaissance faciale non configurée</span>
+          </div>
+          <?php endif; ?>
+
+          <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:20px">
+            Activez la connexion par reconnaissance faciale pour accéder à votre compte sans saisir de mot de passe.
+            Votre descripteur facial est stocké de façon sécurisée et ne quitte jamais nos serveurs.
+          </p>
+        </div>
+
+        <!-- Statut de chargement -->
+        <div id="faceEnrollStatus" class="face-status face-status-info hidden">
+          <span id="faceEnrollStatusText"></span>
+        </div>
+
+        <!-- Vidéo camera -->
+        <div id="faceEnrollCameraWrap" class="face-video-wrap hidden">
+          <video id="faceEnrollVideo" autoplay muted playsinline class="face-video"></video>
+          <canvas id="faceEnrollCanvas" class="face-canvas"></canvas>
+        </div>
+
+        <div class="save-bar" style="flex-wrap:wrap;gap:10px">
+          <button id="faceEnrollStartBtn" type="button" class="btn btn-primary btn-sm" onclick="startFaceEnrollment()">
+            <?= $hasFace ? 'Mettre à jour mon visage' : 'Configurer la reconnaissance faciale' ?>
+          </button>
+          <button id="faceEnrollCaptureBtn" type="button" class="btn btn-primary btn-sm hidden" onclick="captureFaceEnrollment()" disabled>
+            Enregistrer ce visage
+          </button>
+          <button id="faceEnrollCancelBtn" type="button" class="btn btn-outline btn-sm hidden" onclick="cancelFaceEnrollment()">
+            Annuler
+          </button>
+          <?php if ($hasFace): ?>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteFaceDescriptor()" style="margin-left:auto">
+            Supprimer mon visage
+          </button>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
 

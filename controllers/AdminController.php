@@ -44,11 +44,25 @@ class AdminController
     public function getStats(): array
     {
         return [
-            'total'    => UtilisateurController::countByRole(),           // Tous les utilisateurs
-            'patients' => UtilisateurController::countByRole('Patient'),  // Patients uniquement
-            'pros'     => UtilisateurController::countByRole('Professionnel'), // Professionnels
-            'actifs'   => UtilisateurController::countActifs(),           // Comptes actifs (tous rôles)
+            'total'      => UtilisateurController::countByRole(),
+            'patients'   => UtilisateurController::countByRole('Patient'),
+            'pros'       => UtilisateurController::countByRole('Professionnel'),
+            'actifs'     => UtilisateurController::countActifs(),
+            'verrouilles' => UtilisateurController::countVerrouilles(),
         ];
+    }
+
+    /**
+     * Déverrouille manuellement un compte verrouillé.
+     * Réservé à l'administrateur (appelé via AJAX depuis admin.php).
+     */
+    public function unlock(int $id): array
+    {
+        if ($id <= 0) {
+            return ['success' => false, 'error' => 'ID invalide.'];
+        }
+        $ok = UtilisateurController::deverrouiller($id);
+        return ['success' => $ok];
     }
 
     /**

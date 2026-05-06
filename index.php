@@ -8,16 +8,21 @@ session_start();
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/PatientController.php';
 require_once __DIR__ . '/controllers/ProfessionnelController.php';
+require_once __DIR__ . '/controllers/PasswordResetController.php';
+require_once __DIR__ . '/controllers/FaceAuthController.php';
 
 $authCtrl    = new AuthController();
 $patientCtrl = new PatientController();
 $proCtrl     = new ProfessionnelController();
+$resetCtrl   = new PasswordResetController();
+$faceCtrl    = new FaceAuthController();
 
 $page   = $_GET['page']   ?? 'home';
 $action = $_GET['action'] ?? ($_POST['action'] ?? '');
 
-$errors = [];
-$flash  = null;
+$errors  = [];
+$flash   = null;
+$devCode = null;
 
 // ─── Traitement des actions POST ───
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($action)) {
@@ -130,6 +135,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($action)) {
             }
             $page = 'professionnel';
             break;
+
+        // ─── RÉINITIALISATION MOT DE PASSE ───
+
+        case 'forgot_password':
+            // Accepte aussi GET avec ?action=forgot_password&email=... (lien "renvoyer")
+            $emailInput = $_POST['email'] ?? $_GET['email'] ?? '';
+            $result = $resetCtrl->demanderReinitialisation($emailInput);
+            if ($result['success']) {
+                $devCode = $result['dev_code'] ?? null;
+                $flash   = ['message' => $result['message'], 'type' => 'info'];
+                $page    = 'reset_code';
+            } else {
+                $errors = $result['errors'];
+                $page   = 'forgot_password';
+            }
+            break;
+
+        case 'verify_reset_code':
+            $result = $resetCtrl->verifierCodeSession($_POST['code'] ?? '');
+            if ($result['success']) {
+                // Stocker le code pour la prochaine étape (double vérification serveur)
+                $_SESSION['reset_code_used'] = trim($_POST['code'] ?? '');
+                $page = 'reset_password';
+            } else {
+                $errors  = $result['errors'];
+                $devCode = null;
+                $page    = 'reset_code';
+            }
+            break;
+
+        case 'reset_password':
+            $result = $resetCtrl->reinitialiserMotDePasse(
+                $_SESSION['reset_code_used'] ?? '',
+                $_POST['nouveau_mdp']  ?? '',
+                $_POST['confirm_mdp']  ?? ''
+            );
+            if ($result['success']) {
+                unset($_SESSION['reset_code_used']);
+                $flash = ['message' => 'Mot de passe réinitialisé avec succès. Vous pouvez vous connecter.', 'type' => 'success'];
+                $page  = 'login';
+            } else {
+                $errors = $result['errors'];
+                $page   = 'reset_password';
+            }
+            break;
+
+        // ─── RECONNAISSANCE FACIALE (AJAX JSON) ───
+
+        case 'face_login':
+            // Réponse JSON pour les appels AJAX (face-api.js)
+            header('Content-Type: application/json; charset=utf-8');
+            $body = file_get_contents('php://input');
+            $data = json_decode($body, true);
+            $descriptor = $data['descriptor'] ?? null;
+            if (!$descriptor || !is_array($descriptor)) {
+                echo json_encode(['success' => false, 'error' => 'Descripteur manquant.']);
+                exit;
+            }
+            $result = $authCtrl->faceLogin(json_encode($descriptor));
+            echo json_encode($result);
+            exit;
+
+        case 'save_face':
+            // Réponse JSON pour l'enregistrement du visage depuis le profil
+            header('Content-Type: application/json; charset=utf-8');
+            if (empty($_SESSION['user_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Non authentifié.']);
+                exit;
+            }
+            $body = file_get_contents('php://input');
+            $data = json_decode($body, true);
+            $descriptor = $data['descriptor'] ?? null;
+            if (!$descriptor || !is_array($descriptor)) {
+                echo json_encode(['success' => false, 'error' => 'Descripteur manquant.']);
+                exit;
+            }
+            $result = $faceCtrl->enregistrerVisage((int)$_SESSION['user_id'], json_encode($descriptor));
+            echo json_encode($result);
+            exit;
+
+        case 'delete_face':
+            // Suppression du descripteur facial
+            header('Content-Type: application/json; charset=utf-8');
+            if (empty($_SESSION['user_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Non authentifié.']);
+                exit;
+            }
+            $ok = FaceAuthController::supprimerDescripteur((int)$_SESSION['user_id']);
+            echo json_encode(['success' => $ok]);
+            exit;
     }
 }
 
@@ -162,9 +257,18 @@ if ($page === 'professionnel') {
 }
 
 // ─── Routing des vues ───
-$validPages = ['home', 'login', 'register', 'profile', 'professionnel'];
+$validPages = ['home', 'login', 'register', 'profile', 'professionnel',
+               'forgot_password', 'reset_code', 'reset_password'];
 if (!in_array($page, $validPages)) {
     $page = 'home';
+}
+
+// Protéger les pages reset_code et reset_password : nécessitent une session de reset active
+if ($page === 'reset_code' && empty($_SESSION['reset_email'])) {
+    $page = 'forgot_password';
+}
+if ($page === 'reset_password' && (empty($_SESSION['reset_email']) || empty($_SESSION['reset_verified']))) {
+    $page = 'forgot_password';
 }
 
 $viewFile = __DIR__ . '/views/frontoffice/' . $page . '.php';

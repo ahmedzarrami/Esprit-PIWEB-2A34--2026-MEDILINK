@@ -48,6 +48,11 @@ if (!empty($action) && ($_SERVER['REQUEST_METHOD'] === 'POST' || $action === 'li
             echo json_encode($result);
             exit;
 
+        case 'unlock':
+            $id = (int)($_POST['id'] ?? 0);
+            echo json_encode($adminCtrl->unlock($id));
+            exit;
+
         case 'get':
             $id = (int)($_GET['id'] ?? 0);
             $user = $adminCtrl->getUser($id);

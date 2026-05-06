@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MediLink — BackOffice Admin</title>
 <meta name="description" content="MediLink — Panneau d'administration pour la gestion des utilisateurs et de la plateforme.">
-<link rel="stylesheet" href="assets/css/back.css">
+<link rel="stylesheet" href="assets/css/back.css?v=<?= filemtime(__DIR__.'/../../assets/css/back.css') ?>">
 </head>
 <body>
 
@@ -75,7 +75,7 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <script src="assets/js/validation.js"></script>
-<script src="assets/js/back.js"></script>
+<script src="assets/js/back.js?v=<?= filemtime(__DIR__.'/../../assets/js/back.js') ?>"></script>
 
 <?php if (!empty($usersJson)): ?>
 <script>

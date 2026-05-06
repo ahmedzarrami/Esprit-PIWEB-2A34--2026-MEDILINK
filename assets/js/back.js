@@ -37,21 +37,41 @@ function renderTable() {
         return;
     }
 
-    tbody.innerHTML = page.map(u => `
-    <tr>
+    tbody.innerHTML = page.map(u => {
+      const now = Date.now();
+      const lockedUntil = u.locked_until ? new Date(u.locked_until.replace(' ', 'T')).getTime() : 0;
+      const isLocked = lockedUntil > now;
+      const lockBadge = isLocked
+        ? `<span class="badge badge-locked" title="Verrouillé jusqu'au ${u.locked_until}">&#128274; Verrouillé</span>`
+        : '';
+      const unlockBtn = isLocked
+        ? `<button class="btn-icon btn-icon-unlock" title="Débloquer le compte" onclick="unlockUser(${u.id})">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+           </button>`
+        : '';
+      return `
+    <tr${isLocked ? ' style="background:#fef2f2"' : ''}>
       <td><input type="checkbox" class="checkbox" data-id="${u.id}"></td>
       <td>
         <div class="avatar-cell">
           <div class="table-avatar" style="background:${getAvatarColor(u.id)}">${getInitials(u)}</div>
-          <div><div class="user-name">${u.prenom} ${u.nom}</div><div class="user-email">${u.email}</div></div>
+          <div>
+            <div class="user-name">${u.prenom} ${u.nom}</div>
+            <div class="user-email">${u.email}</div>
+            ${isLocked ? `<div style="font-size:10px;color:#dc2626;margin-top:2px">&#9888; ${u.failed_attempts} échec(s) — verrouillé</div>` : ''}
+          </div>
         </div>
       </td>
       <td><span class="role-badge ${u.role==='Patient'?'role-patient':u.role==='Professionnel'?'role-pro':'role-admin'}">${u.role}</span></td>
-      <td><span class="badge ${u.statut_compte==='Actif'?'badge-active':u.statut_compte==='Inactif'?'badge-inactive':u.statut_compte==='Suspendu'?'badge-suspended':'badge-pending'}">${u.statut_compte}</span></td>
+      <td>
+        <span class="badge ${u.statut_compte==='Actif'?'badge-active':u.statut_compte==='Inactif'?'badge-inactive':u.statut_compte==='Suspendu'?'badge-suspended':'badge-pending'}">${u.statut_compte}</span>
+        ${lockBadge}
+      </td>
       <td style="color:var(--text2);font-size:12px">${u.telephone}</td>
       <td style="color:var(--text3);font-size:12px">${formatDate(u.date_creation)}</td>
       <td>
         <div class="actions-cell">
+          ${unlockBtn}
           <button class="btn-icon" title="Voir" onclick="viewUser(${u.id})">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
           </button>
@@ -63,7 +83,8 @@ function renderTable() {
           </button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
     renderPagination();
 }
 
@@ -359,6 +380,25 @@ function openDeleteModal(id) {
     openModal('deleteModal');
 }
 
+// ===== DÉVERROUILLAGE DE COMPTE =====
+function unlockUser(id) {
+    const formData = new FormData();
+    formData.append('action', 'unlock');
+    formData.append('id', id);
+
+    fetch('admin.php', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            toast('Compte déverrouillé avec succès.', 'success');
+            loadUsers();
+        } else {
+            toast(data.error || 'Erreur lors du déverrouillage.', 'error');
+        }
+    })
+    .catch(() => toast('Erreur de connexion au serveur.', 'error'));
+}
+
 function confirmDelete() {
     const formData = new FormData();
     formData.append('action', 'delete');
@@ -426,14 +466,21 @@ function viewUser(id) {
 
 // ===== STATS =====
 function updateStats() {
+    const now = Date.now();
     const total = users.length;
     const patients = users.filter(u => u.role === 'Patient').length;
     const pros = users.filter(u => u.role === 'Professionnel').length;
     const actifs = users.filter(u => u.statut_compte === 'Actif').length;
+    const locked = users.filter(u => {
+        if (!u.locked_until) return false;
+        return new Date(u.locked_until.replace(' ', 'T')).getTime() > now;
+    }).length;
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-patients').textContent = patients;
     document.getElementById('stat-pros').textContent = pros;
     document.getElementById('stat-active').textContent = actifs;
+    const lockedEl = document.getElementById('stat-locked');
+    if (lockedEl) lockedEl.textContent = locked;
 }
 
 function updateStatsFromData(stats) {
@@ -441,6 +488,8 @@ function updateStatsFromData(stats) {
     document.getElementById('stat-patients').textContent = stats.patients;
     document.getElementById('stat-pros').textContent = stats.pros;
     document.getElementById('stat-active').textContent = stats.actifs;
+    const lockedEl = document.getElementById('stat-locked');
+    if (lockedEl && stats.verrouilles !== undefined) lockedEl.textContent = stats.verrouilles;
 }
 
 // ===== AVATAR =====

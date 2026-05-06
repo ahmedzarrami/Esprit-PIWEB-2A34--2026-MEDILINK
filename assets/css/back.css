@@ -108,6 +108,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .badge-suspended::before{background:var(--red)}
 .badge-pending{background:var(--amber-bg);color:var(--amber)}
 .badge-pending::before{background:var(--amber)}
+.badge-locked{background:#fee2e2;color:#dc2626;margin-left:4px}
+.badge-locked::before{background:#dc2626}
+.btn-icon-unlock{border-color:#fca5a5;color:#dc2626;background:#fef2f2}
+.btn-icon-unlock:hover{background:#fee2e2;border-color:#f87171}
 
 .role-badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
 .role-patient{background:rgba(88,166,255,.12);color:var(--blue)}

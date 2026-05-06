@@ -97,3 +97,25 @@ INSERT INTO professionnel_sante (id, specialite, numero_ordre, biographie) VALUE
 
 -- Administrateur
 INSERT INTO administrateur (id) VALUES (9);
+
+-- ================================================
+-- Reconnaissance faciale : descripteur visage
+-- ================================================
+ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS face_descriptor TEXT DEFAULT NULL;
+ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS failed_attempts INT NOT NULL DEFAULT 0;
+ALTER TABLE utilisateur ADD COLUMN IF NOT EXISTS locked_until DATETIME DEFAULT NULL;
+
+-- ================================================
+-- Table : tokens de réinitialisation mot de passe
+-- ================================================
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT NOT NULL,
+    token       VARCHAR(6) NOT NULL,
+    expires_at  DATETIME NOT NULL,
+    used        TINYINT(1) NOT NULL DEFAULT 0,
+    created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_reset_utilisateur
+        FOREIGN KEY (user_id) REFERENCES utilisateur(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
