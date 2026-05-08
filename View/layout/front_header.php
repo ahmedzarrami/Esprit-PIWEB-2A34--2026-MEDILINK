@@ -1,62 +1,48 @@
+<?php
+$currentController = $_GET['controller'] ?? 'forum';
+$currentAction     = $_GET['action'] ?? 'list';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="MediLink — Plateforme médicale intelligente. Forum de discussion santé pour patients et professionnels.">
-    <title>MediLink — <?= htmlspecialchars($pageTitle ?? 'Forum Santé') ?></title>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome Icons -->
+    <title>MediLink – <?= htmlspecialchars($pageTitle ?? 'Forum Santé') ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Styles -->
     <link rel="stylesheet" href="public/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
-<!-- ===== NAVIGATION BAR ===== -->
-<nav class="navbar">
-    <div class="navbar-container">
-        <!-- Brand -->
-        <a href="index.php" class="navbar-brand">
-            <div class="brand-icon">
-                <i class="fas fa-plus"></i>
-            </div>
-            <span>MediLink</span>
+<nav class="navbar-medilink">
+    <a href="index.php" class="nav-logo">
+        <div class="logo-mark">+</div>
+        <div class="logo-text">Medi<span>Link</span></div>
+    </a>
+
+    <div class="nav-links">
+        <a href="public/front/index.php?action=home">Accueil</a>
+        <a href="public/front/index.php?action=medicaments">Médicaments</a>
+        <a href="public/front/index.php?action=ordonnances">Ordonnances</a>
+        <a href="public/front/index.php?action=assistant">🤖 Assistant</a>
+        <a href="index.php?controller=forum&action=list" class="<?= $currentController === 'forum' ? 'active' : '' ?>">Forum</a>
+    </div>
+
+    <div class="nav-actions">
+        <a class="btn-backoffice" href="index.php?controller=forum&action=adminList">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            <span>Administration</span>
         </a>
-
-        <!-- Navigation Links -->
-        <ul class="navbar-nav">
-            <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>">Accueil</a></li>
-            <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Forums</a></li>
-            <li><a href="public/front/index.php?action=medicaments">Médicaments</a></li>
-            <li><a href="public/front/index.php?action=ordonnances">Ordonnances</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
-
-        <!-- User Info / Actions -->
-        <div class="navbar-user">
-            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'administrateur'): ?>
-                <a href="index.php?controller=forum&action=adminList" class="btn-admin-link">
-                    <i class="fas fa-th-large"></i> Administration
-                </a>
-            <?php endif; ?>
-            
-            <?php if (isset($_SESSION['user'])): ?>
-                <a href="index.php?controller=forum&action=list" class="btn-dark">
-                    <i class="fas fa-plus"></i> Nouveau Post
-                </a>
-            <?php else: ?>
-                <a href="#" class="btn-dark">Connexion</a>
-            <?php endif; ?>
-        </div>
+        <a class="btn-admin" href="index.php?controller=post&action=create">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Nouveau post</span>
+        </a>
     </div>
 </nav>
 
-<!-- ===== MAIN CONTENT ===== -->
 <main class="main-content">

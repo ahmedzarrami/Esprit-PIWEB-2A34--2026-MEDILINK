@@ -37,7 +37,7 @@
 }
 
 body.admin-body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Plus Jakarta Sans', Arial, sans-serif;
     background: var(--admin-bg);
     color: var(--admin-text);
     line-height: 1.6;
