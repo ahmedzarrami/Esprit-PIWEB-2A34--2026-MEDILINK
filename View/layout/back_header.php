@@ -62,7 +62,7 @@
             <i class="fas fa-calendar-check"></i> Rendez-vous
         </a>
 
-        <a href="#" class="sidebar-link">
+        <a href="public/back/index.php?action=index" class="sidebar-link">
             <i class="fas fa-pills"></i> Médicaments
         </a>
 

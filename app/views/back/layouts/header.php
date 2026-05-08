@@ -32,6 +32,7 @@ if (!function_exists('e')) {
                 <a href="#" class="nav-item">Messagerie</a>
                 <a href="#" class="nav-item">Profils médecins</a>
                 <a href="index.php?action=index" class="nav-item active-soft">Médicaments</a>
+                <a href="../../index.php?controller=forum&action=adminList" class="nav-item">Forum</a>
             </nav>
         </aside>
 

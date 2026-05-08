@@ -34,6 +34,8 @@
         <ul class="navbar-nav">
             <li><a href="index.php" class="<?= ($controller ?? '') === 'forum' && ($action ?? '') === 'list' ? 'active' : '' ?>">Accueil</a></li>
             <li><a href="index.php?controller=forum&action=list" class="<?= ($controller ?? '') === 'forum' ? 'active' : '' ?>">Forums</a></li>
+            <li><a href="public/front/index.php?action=medicaments">Médicaments</a></li>
+            <li><a href="public/front/index.php?action=ordonnances">Ordonnances</a></li>
             <li><a href="#">Contact</a></li>
         </ul>
 
