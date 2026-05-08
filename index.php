@@ -13,6 +13,7 @@ require_once __DIR__ . '/Model/Utilisateur.php';
 require_once __DIR__ . '/Model/Forum.php';
 require_once __DIR__ . '/Model/Post.php';
 require_once __DIR__ . '/Model/Commentaire.php';
+require_once __DIR__ . '/Model/BadWordsFilter.php';
 
 // Charger les contrôleurs
 require_once __DIR__ . '/Controller/ForumController.php';

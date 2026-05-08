@@ -102,6 +102,43 @@ class ForumController {
         $stmtPosts->execute($params);
         $posts = $stmtPosts->fetchAll();
 
+        // Réactions et Filtres pour les posts du forum
+        $postIds = array_column($posts, 'id_post');
+        $postReactions = [];
+        $userPostReactions = [];
+        
+        try {
+            if (!empty($postIds)) {
+                $inQuery = implode(',', array_fill(0, count($postIds), '?'));
+                
+                // Count all likes/dislikes
+                $stmtReactPost = $pdo->prepare("SELECT id_post, type, COUNT(*) as count FROM reaction WHERE id_post IN ($inQuery) GROUP BY id_post, type");
+                $stmtReactPost->execute($postIds);
+                while ($row = $stmtReactPost->fetch()) {
+                    $postReactions[$row['id_post']][$row['type']] = $row['count'];
+                }
+
+                // Get current user's reaction if logged in
+                if (isset($_SESSION['user'])) {
+                    $params = $postIds;
+                    $params[] = $_SESSION['user']['id'];
+                    $stmtUserReact = $pdo->prepare("SELECT id_post, type FROM reaction WHERE id_post IN ($inQuery) AND id_utilisateur = ?");
+                    $stmtUserReact->execute($params);
+                    while ($row = $stmtUserReact->fetch()) {
+                        $userPostReactions[$row['id_post']] = $row['type'];
+                    }
+                }
+            }
+        } catch (PDOException $e) {}
+
+        foreach ($posts as &$p) {
+            $p['contenu'] = BadWordsFilter::filter($p['contenu']);
+            $p['likes'] = $postReactions[$p['id_post']]['like'] ?? 0;
+            $p['dislikes'] = $postReactions[$p['id_post']]['dislike'] ?? 0;
+            $p['user_reaction'] = $userPostReactions[$p['id_post']] ?? null;
+        }
+        unset($p);
+
         require __DIR__ . '/../View/front_office/forum/show.php';
     }
 

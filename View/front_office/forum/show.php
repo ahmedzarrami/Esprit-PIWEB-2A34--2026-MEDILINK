@@ -85,8 +85,21 @@ require __DIR__ . '/../../layout/front_header.php';
                 </div>
 
                 <div class="post-footer">
-                    <div class="post-stats">
-                        <span><i class="fas fa-comment"></i> <?= (int)$p['nb_commentaires'] ?> commentaire<?= $p['nb_commentaires'] > 1 ? 's' : '' ?></span>
+                    <div class="reaction-buttons" style="margin-top: 0; padding-top: 0; border-top: none; gap: 0.5rem;">
+                        <button class="btn-react btn-like <?= ($p['user_reaction'] === 'like') ? 'active' : '' ?>" 
+                                data-type="like" data-id="<?= $p['id_post'] ?>" data-target="post">
+                            <i class="fas fa-thumbs-up"></i> <span class="count"><?= (int)($p['likes'] ?? 0) ?></span>
+                        </button>
+                        <button class="btn-react btn-dislike <?= ($p['user_reaction'] === 'dislike') ? 'active' : '' ?>" 
+                                data-type="dislike" data-id="<?= $p['id_post'] ?>" data-target="post">
+                            <i class="fas fa-thumbs-down"></i> <span class="count"><?= (int)($p['dislikes'] ?? 0) ?></span>
+                        </button>
+                        <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>#comments-section" 
+                           style="margin-left: 0.5rem; font-size: 0.85rem; color: var(--text-muted); text-decoration: none; display: flex; align-items: center; gap: 0.35rem; transition: var(--transition);"
+                           onmouseover="this.style.color='var(--accent-teal)'"
+                           onmouseout="this.style.color='var(--text-muted)'">
+                            <i class="fas fa-comment"></i> <?= (int)$p['nb_commentaires'] ?> commentaire<?= $p['nb_commentaires'] > 1 ? 's' : '' ?>
+                        </a>
                     </div>
                     <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn btn-secondary btn-sm">
                         Lire la suite <i class="fas fa-arrow-right"></i>
@@ -107,5 +120,74 @@ require __DIR__ . '/../../layout/front_header.php';
         <?php endif; ?>
     </div>
 <?php endif; ?>
+
+<!-- AJAX Script for Reactions -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const reactButtons = document.querySelectorAll('.btn-react[data-type]');
+    
+    reactButtons.forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const type = this.getAttribute('data-type');
+            const targetId = this.getAttribute('data-id');
+            const targetType = this.getAttribute('data-target');
+            
+            const isUserLoggedIn = <?= isset($_SESSION['user']) ? 'true' : 'false' ?>;
+            if (!isUserLoggedIn) {
+                alert('Veuillez vous connecter pour réagir.');
+                return;
+            }
+
+            const url = 'index.php?controller=post&action=react';
+
+            const payload = {
+                type: type,
+                id_post: targetId
+            };
+
+            // Trigger animation
+            this.classList.add('reaction-pop');
+            this.addEventListener('animationend', () => {
+                this.classList.remove('reaction-pop');
+            }, { once: true });
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const container = this.closest('.reaction-buttons');
+                    const btnLike = container.querySelector('.btn-like');
+                    const btnDislike = container.querySelector('.btn-dislike');
+                    
+                    btnLike.querySelector('.count').textContent = data.likes;
+                    btnDislike.querySelector('.count').textContent = data.dislikes;
+                    
+                    btnLike.classList.remove('active');
+                    btnDislike.classList.remove('active');
+                    
+                    if (data.action === 'added' || data.action === 'updated') {
+                        if (type === 'like') btnLike.classList.add('active');
+                        else btnDislike.classList.add('active');
+                    }
+                } else {
+                    alert(data.message || 'Une erreur est survenue.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erreur réseau.');
+            }
+        });
+    });
+});
+</script>
 
 <?php require __DIR__ . '/../../layout/front_footer.php'; ?>
