@@ -69,16 +69,56 @@ class CommentaireController {
      */
     public function adminList(): void {
         $pdo = Database::getConnection();
-        $stmt = $pdo->query("
+        
+        // --- 1. Filtres & Tri (Partie Métier) ---
+        $search = trim($_GET['search'] ?? '');
+        $sort = $_GET['sort'] ?? 'date_desc';
+
+        $query = "
             SELECT c.*, u.nom AS auteur_nom, u.prenom AS auteur_prenom, u.role AS auteur_role,
                    p.contenu AS post_contenu, f.titre AS forum_titre
             FROM commentaire c
             JOIN utilisateur u ON c.id_auteur = u.id
             JOIN post p ON c.id_post = p.id_post
             JOIN forum f ON p.id_forum = f.id_forum
-            ORDER BY c.date_commentaire DESC
-        ");
+        ";
+        
+        $params = [];
+
+        if ($search !== '') {
+            $query .= " WHERE c.contenu LIKE :search1 OR u.nom LIKE :search2 OR u.prenom LIKE :search3 OR p.contenu LIKE :search4 OR f.titre LIKE :search5";
+            $params[':search1'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
+            $params[':search4'] = '%' . $search . '%';
+            $params[':search5'] = '%' . $search . '%';
+        }
+
+        switch ($sort) {
+            case 'date_asc':
+                $query .= " ORDER BY c.date_commentaire ASC";
+                break;
+            case 'date_desc':
+            default:
+                $query .= " ORDER BY c.date_commentaire DESC";
+                break;
+        }
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
         $commentaires = $stmt->fetchAll();
+
+        // --- 2. Statistiques (Partie Métier) ---
+        $stmtStatsTotal = $pdo->query("SELECT COUNT(*) as total FROM commentaire");
+        $totalComments = $stmtStatsTotal->fetch()['total'];
+
+        $stmtTopUser = $pdo->query("SELECT u.id, u.nom, u.prenom, COUNT(c.id_commentaire) as nb
+                                    FROM utilisateur u
+                                    JOIN commentaire c ON u.id = c.id_auteur
+                                    GROUP BY u.id
+                                    ORDER BY nb DESC LIMIT 1");
+        $topUser = $stmtTopUser->fetch();
+
         require __DIR__ . '/../View/back_office/commentaire/list.php';
     }
 

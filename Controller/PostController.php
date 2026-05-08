@@ -141,8 +141,11 @@ class PostController {
 
         $params = [];
         if ($search !== '') {
-            $query .= " WHERE p.contenu LIKE :search OR u.nom LIKE :search OR u.prenom LIKE :search OR f.titre LIKE :search ";
-            $params[':search'] = '%' . $search . '%';
+            $query .= " WHERE p.contenu LIKE :search1 OR u.nom LIKE :search2 OR u.prenom LIKE :search3 OR f.titre LIKE :search4 ";
+            $params[':search1'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
+            $params[':search4'] = '%' . $search . '%';
         }
 
         switch ($sort) {

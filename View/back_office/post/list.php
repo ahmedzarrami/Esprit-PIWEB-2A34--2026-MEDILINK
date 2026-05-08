@@ -14,31 +14,27 @@ require __DIR__ . '/../../layout/back_header.php';
     </a>
 </div>
 
-<!-- Stats (Partie Métier : Statistique) -->
+<!-- Stats -->
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
+    <div class="stat-card c-blue">
         <div class="stat-info">
+            <p>POSTS AU TOTAL</p>
             <h3><?= $totalPosts ?></h3>
-            <p>Posts au total</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fas fa-comment"></i></div>
+    <div class="stat-card c-green">
         <div class="stat-info">
+            <p>COMMENTAIRES AU TOTAL</p>
             <h3><?= $totalComments ?></h3>
-            <p>Commentaires au total</p>
         </div>
     </div>
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fas fa-fire"></i></div>
+    <div class="stat-card c-red">
         <div class="stat-info">
+            <p>LE PLUS COMMENTÉ</p>
             <?php if ($topPost): ?>
-                <h3 style="font-size: 1.2rem;">Post #<?= $topPost['id_post'] ?></h3>
-                <p>Le plus commenté (<?= $topPost['nb'] ?> comm.)</p>
+                <h3 style="font-size: 1.5rem;">Post #<?= $topPost['id_post'] ?></h3>
             <?php else: ?>
-                <h3 style="font-size: 1.2rem;">N/A</h3>
-                <p>Aucun post</p>
+                <h3 style="font-size: 1.5rem;">N/A</h3>
             <?php endif; ?>
         </div>
     </div>
@@ -108,15 +104,15 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td><?= date('d/m/Y H:i', strtotime($p['date_publication'])) ?></td>
                         <td>
                             <div class="action-buttons">
-                                <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action" title="Voir">
-                                    <i class="fas fa-eye"></i>
+                                <a href="index.php?controller=post&action=show&id=<?= $p['id_post'] ?>" class="btn-action btn-voir" title="Voir">
+                                    Voir
                                 </a>
-                                <a href="index.php?controller=post&action=edit&id=<?= $p['id_post'] ?>" class="btn-action" title="Modifier">
-                                    <i class="fas fa-edit"></i>
+                                <a href="index.php?controller=post&action=edit&id=<?= $p['id_post'] ?>" class="btn-action btn-modifier" title="Modifier">
+                                    Modifier
                                 </a>
-                                <button class="btn-action delete" title="Supprimer"
+                                <button class="btn-action btn-supprimer" title="Supprimer"
                                     onclick="confirmDelete('index.php?controller=post&action=delete&id=<?= $p['id_post'] ?>', 'ce post')">
-                                    <i class="fas fa-trash-alt"></i>
+                                    Supprimer
                                 </button>
                             </div>
                         </td>

@@ -28,6 +28,36 @@ require __DIR__ . '/../../layout/front_header.php';
     <?php endif; ?>
 </div>
 
+<!-- Filtres de recherche -->
+<div style="margin-bottom: 2rem;">
+    <form action="index.php" method="GET" class="search-filter-form" style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: var(--shadow-sm); display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; border: 1px solid var(--border-color);">
+        <input type="hidden" name="controller" value="forum">
+        <input type="hidden" name="action" value="show">
+        <input type="hidden" name="id" value="<?= $forum->getIdForum() ?>">
+        
+        <div style="flex: 1; min-width: 250px;">
+            <div style="position: relative;">
+                <i class="fas fa-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+                <input type="text" name="search" placeholder="Rechercher une publication, un auteur..." value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" class="form-control" style="width: 100%; padding-left: 2.5rem; border: 1px solid var(--border-color); border-radius: 0.25rem;">
+            </div>
+        </div>
+        
+        <div>
+            <select name="sort" class="form-control" style="border: 1px solid var(--border-color); border-radius: 0.25rem; padding: 0.6rem 1rem;">
+                <option value="date_desc" <?= ($_GET['sort'] ?? '') === 'date_desc' ? 'selected' : '' ?>>Plus récents en premier</option>
+                <option value="comments_desc" <?= ($_GET['sort'] ?? '') === 'comments_desc' ? 'selected' : '' ?>>Plus commentés</option>
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">
+            Filtrer
+        </button>
+        <?php if (!empty($_GET['search']) || !empty($_GET['sort'])): ?>
+            <a href="index.php?controller=forum&action=show&id=<?= $forum->getIdForum() ?>" class="btn btn-secondary" style="background: #f1f5f9; color: var(--text-color); border: none;">Réinitialiser</a>
+        <?php endif; ?>
+    </form>
+</div>
+
 <!-- Posts List -->
 <?php if (!empty($posts)): ?>
     <div class="posts-list">
