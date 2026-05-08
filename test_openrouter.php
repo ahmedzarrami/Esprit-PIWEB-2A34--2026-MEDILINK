@@ -1,5 +1,5 @@
 <?php
-$apiKey="REMOVED_SECRET";
+$apiKey = $_ENV['OPENROUTER_API_KEY'] ?? getenv('OPENROUTER_API_KEY') ?? '';
 $url="https://openrouter.ai/api/v1/chat/completions";
 $data=["model"=>"openrouter/free","messages"=>[["role"=>"user","content"=>"hello"]]];
 $ch=curl_init($url);
