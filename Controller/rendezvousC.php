@@ -105,7 +105,7 @@ class RendezvousC {
     }
 
     public function listMedecins() {
-        $sql = "SELECT id, nom, specialite FROM medecins ORDER BY nom";
+        $sql = "SELECT id, nom, specialite, ville, adresse FROM medecins ORDER BY nom";
         $db = config::getConnexion();
         try {
             return $db->query($sql)->fetchAll();
@@ -115,7 +115,7 @@ class RendezvousC {
     }
 
     public function getMedecinById($id) {
-        $sql = "SELECT id, nom, specialite, email FROM medecins WHERE id = :id";
+        $sql = "SELECT id, nom, specialite, email, ville, adresse FROM medecins WHERE id = :id";
         $db = config::getConnexion();
         try {
             $query = $db->prepare($sql);

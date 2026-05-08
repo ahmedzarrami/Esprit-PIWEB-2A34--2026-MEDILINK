@@ -288,12 +288,12 @@ body {
 <div class="stats-strip">
     <div class="stats-inner">
         <div class="stat-item">
-            <div class="stat-num">3 médecins</div>
+            <div class="stat-num">6 médecins</div>
             <div class="stat-label">Disponibles</div>
         </div>
         <div class="stat-item">
-            <div class="stat-num">&lt; 2 min</div>
-            <div class="stat-label">Temps de réservation</div>
+            <div class="stat-num">4 patients</div>
+            <div class="stat-label">Inscrits</div>
         </div>
         <div class="stat-item">
             <div class="stat-num">Lun – Sam</div>

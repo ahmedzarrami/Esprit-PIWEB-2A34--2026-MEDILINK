@@ -306,7 +306,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                 <span style="color: var(--gray-400); font-size: 11px;">ID: #<?php echo htmlspecialchars($medecin_id); ?></span>
             </div>
             <a href="loginMedecin.php?logout=1" class="btn-admin" style="background: var(--red); padding: 8px 14px;">
-                🚪 Déconnexion
+                Déconnexion
             </a>
         </div>
     </nav>
@@ -525,7 +525,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                                 <td><?php echo htmlspecialchars($fiche['specialite']); ?></td>
                                 <td>
                                     <a href="?action=edit&edit_id=<?php echo $fiche['idfiche']; ?>">
-                                        <button class="btn btn-small btn-edit">✏️ Modifier</button>
+                                        <button class="btn btn-small btn-edit">Modifier</button>
                                     </a>
                                 </td>
                             </tr>
