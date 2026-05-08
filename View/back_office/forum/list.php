@@ -14,6 +14,22 @@ require __DIR__ . '/../../layout/back_header.php';
     </a>
 </div>
 
+<?php if (!empty($message)): ?>
+    <?php if ($message === 'created'): ?>
+        <div class="admin-alert admin-alert-success" style="margin-top: 1rem;">
+            <i class="fas fa-check-circle"></i> Forum créé avec succès.
+        </div>
+    <?php elseif ($message === 'updated'): ?>
+        <div class="admin-alert admin-alert-success" style="margin-top: 1rem;">
+            <i class="fas fa-check-circle"></i> Forum modifié avec succès.
+        </div>
+    <?php elseif ($message === 'deleted'): ?>
+        <div class="admin-alert admin-alert-success" style="margin-top: 1rem;">
+            <i class="fas fa-check-circle"></i> Forum supprimé avec succès.
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
+
 <!-- Stats -->
 <div class="stats-grid">
     <div class="stat-card c-blue">

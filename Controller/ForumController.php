@@ -187,6 +187,8 @@ class ForumController {
         $stmtStatsPosts = $pdo->query("SELECT COUNT(*) as total FROM post");
         $totalPosts = $stmtStatsPosts->fetch()['total'];
 
+        $message = $_GET['message'] ?? '';
+
         $stmtTopForum = $pdo->query("SELECT f.id_forum, f.titre, COUNT(p.id_post) as nb
                                      FROM forum f
                                      LEFT JOIN post p ON f.id_forum = p.id_forum
@@ -228,7 +230,8 @@ class ForumController {
                 ]);
 
                 if ($result) {
-                    $success = "Forum créé avec succès !";
+                    header('Location: index.php?controller=forum&action=adminList&message=created');
+                    exit;
                 } else {
                     $errors[] = "Erreur lors de la création du forum.";
                 }
@@ -287,7 +290,8 @@ class ForumController {
                 ]);
 
                 if ($result) {
-                    $success = "Forum modifié avec succès !";
+                    header('Location: index.php?controller=forum&action=adminList&message=updated');
+                    exit;
                 } else {
                     $errors[] = "Erreur lors de la modification du forum.";
                 }
@@ -306,7 +310,7 @@ class ForumController {
         $stmt = $pdo->prepare("DELETE FROM forum WHERE id_forum = :id");
         $stmt->execute([':id' => $id]);
         
-        header('Location: index.php?controller=forum&action=adminList');
+        header('Location: index.php?controller=forum&action=adminList&message=deleted');
         exit;
     }
 }
