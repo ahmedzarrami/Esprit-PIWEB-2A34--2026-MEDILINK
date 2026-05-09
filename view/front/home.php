@@ -187,11 +187,165 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .product-ref { font-size:10px; font-weight:500; color:var(--gray-400); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
 .product-name { font-size:14px; font-weight:600; color:var(--gray-900); margin-bottom:4px; line-height:1.35; }
 .product-desc { font-size:12px; color:var(--gray-400); margin-bottom:10px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.product-rating { display:flex; align-items:center; gap:4px; margin-bottom:8px; }
-.star-rating { display:flex; gap:1px; }
-.star { font-size:12px; color:#ddd; }
-.star.filled { color:#fbbf24; }
-.rating-text { font-size:11px; color:var(--gray-500); }
+.product-rating { 
+  display:flex; 
+  align-items:center; 
+  gap:8px; 
+  margin-bottom:10px; 
+  position:relative;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.star-rating { 
+  display:flex; 
+  gap:1px; 
+  position:relative;
+}
+
+.star { 
+  font-size:13px; 
+  color:#cbd5e1; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  transform-origin: center;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.star.filled { 
+  background: linear-gradient(135deg, #059669, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 6px rgba(5, 150, 105, 0.3));
+  animation: medicalPulse 3s ease-in-out infinite;
+}
+
+.star.filled::before {
+  content: '★';
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(135deg, #059669, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  z-index: -1;
+  filter: blur(6px);
+  opacity: 0.4;
+  animation: medicalGlow 3s ease-in-out infinite;
+}
+
+.star.half-star {
+  background: linear-gradient(90deg, #059669 50%, #cbd5e1 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+}
+
+.star.half-star::after {
+  content: '★';
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: linear-gradient(90deg, #059669 50%, #cbd5e1 50%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 3px rgba(5, 150, 105, 0.2));
+}
+
+.rating-text { 
+  font-size:10px; 
+  color:#64748b; 
+  font-weight: 600;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-text::before {
+  content: '💊';
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+@keyframes medicalPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes medicalGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.product-rating:hover .star {
+  transform: scale(1.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-rating:hover .star.filled {
+  filter: drop-shadow(0 0 10px rgba(5, 150, 105, 0.5));
+  transform: scale(1.12);
+}
+
+.product-rating:hover .rating-text {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  color: #065f46;
+  transform: translateY(-1px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-color: #10b981;
+}
+
+/* Professional medical rating badge for high ratings */
+.product-rating[data-rating="4"] .rating-text,
+.product-rating[data-rating="5"] .rating-text {
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  color: #065f46;
+  border: 1px solid #10b981;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+  animation: certifiedPulse 4s ease-in-out infinite;
+}
+
+.product-rating[data-rating="4"] .rating-text::before,
+.product-rating[data-rating="5"] .rating-text::before {
+  content: '⭐';
+  color: #059669;
+  opacity: 1;
+}
+
+@keyframes certifiedPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* Add professional seal for 5-star ratings */
+.product-rating[data-rating="5"]::after {
+  content: '✓';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #059669, #047857);
+  color: white;
+  border-radius: 50%;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
 .product-cat { display:inline-block; font-size:11px; font-weight:500; padding:2px 9px; border-radius:100px; margin-bottom:10px; background:var(--blue-light); color:var(--blue); }
 .product-footer { display:flex; align-items:center; justify-content:space-between; }
 .product-price { font-size:17px; font-weight:700; color:var(--gray-900); }
@@ -341,7 +495,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 <nav class="navbar">
     <a href="home.php" class="nav-logo">
         <div class="nav-logo-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
         </div>
         <span class="nav-logo-text">Medi<span>Link</span></span>
     </a>
@@ -352,6 +506,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
     </div>
 
     <div style="display:flex;align-items:center;gap:10px">
+        <button class="cart-btn" onclick="refreshProducts()" style="background: var(--blue-light); color: var(--blue-dark); border: 1px solid rgba(26,86,219,.25);" title="Actualiser les produits">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Actualiser
+        </button>
         <div class="nav-cart">
             <button class="cart-btn" onclick="openCart()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
@@ -574,13 +732,76 @@ const CAT_ICONS = {
   'Compléments alimentaires':'💊','Bébé & Maman':'🍼',
   'Capillaire':'💆','Solaire':'☀️','Minceur':'⚖️','Orthopédie':'🦴','Autre':'📦'
 };
+const CATEGORY_IMAGES = {
+  'Soins visage': [
+    'https://images.unsplash.com/photo-1596462502278-27d3814a9fd9?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1620916566398-215f721f815c?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1612810280033-3e1b1e0c9bed?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1556228720-195a90dd30a8?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Soins corps': [
+    'https://images.unsplash.com/photo-1556228720-195a90dd30a8?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed7d9d0?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1559597219-e00e898cb492?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Hygiène': [
+    'https://images.unsplash.com/photo-1556228720-195a90dd30a8?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1579413121661-d8d8cb5f599d?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Compléments alimentaires': [
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1598106848310-4a4ba4106a81?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1554465385-e3b0b08c72ea?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Bébé & Maman': [
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1579413121661-d8d8cb5f599d?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Capillaire': [
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1560066161-48c89d2545db?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1596462502278-27d3814a9fd9?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Solaire': [
+    'https://images.unsplash.com/photo-1596462502278-27d3814a9fd9?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1612810280033-3e1b1e0c9bed?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed7d9d0?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Minceur': [
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1598106848310-4a4ba4106a81?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1554465385-e3b0b08c72ea?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1568702846914-96b305d2aaeb?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Orthopédie': [
+    'https://images.unsplash.com/photo-1559757148-5c350a060e0b?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1570172619644-dfd03ed7d9d0?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80'
+  ],
+  'Autre': [
+    'https://images.unsplash.com/photo-1556228720-195a90dd30a8?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1596462502278-27d3814a9fd9?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80'
+  ]
+};
+
 const DEFAULT_PRODUCT_IMAGES = {
-  'PHM-VIS-01':'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80',
-  'PHM-COR-02':'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
-  'PHM-HYG-03':'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
-  'PHM-COMP-04':'https://images.unsplash.com/photo-1580281657521-98da17d80bd3?auto=format&fit=crop&w=600&q=80',
-  'PHM-BEB-05':'https://images.unsplash.com/photo-1580542970540-e80b54a7f363?auto=format&fit=crop&w=600&q=80',
-  'PHM-CAP-06':'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=600&q=80'
+  'PHM-VIS-01':'https://images.unsplash.com/photo-1596462502278-27d3814a9fd9?auto=format&fit=crop&w=600&q=80',
+  'PHM-COR-02':'https://images.unsplash.com/photo-1556228720-195a90dd30a8?auto=format&fit=crop&w=600&q=80',
+  'PHM-HYG-03':'https://images.unsplash.com/photo-1579413121661-d8d8cb5f599d?auto=format&fit=crop&w=600&q=80',
+  'PHM-COMP-04':'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=600&q=80',
+  'PHM-BEB-05':'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80',
+  'PHM-CAP-06':'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80'
 };
 const CART_KEY = 'pharma_cart';
 let _currentOrderProduct = null;
@@ -667,8 +888,46 @@ window.addEventListener('storage', (event) => {
     populateCatSelectAndTags();
     applyFilters();
     updateCartBadge();
+    showToast('📦 Produits mis à jour', 'success');
+  } else if (event.key === 'pharma_products_updated') {
+    // Force refresh when products are updated from admin
+    setTimeout(() => {
+      updateFrontStats();
+      populateCatSelectAndTags();
+      applyFilters();
+      updateCartBadge();
+      showToast('🖼️ Images des produits mises à jour', 'success');
+    }, 100);
   }
 });
+
+// Also listen for visibility changes to refresh when tab becomes active
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    // Tab became active, check for updates
+    setTimeout(() => {
+      updateFrontStats();
+      populateCatSelectAndTags();
+      applyFilters();
+      updateCartBadge();
+    }, 100);
+  }
+});
+
+// Manual refresh function
+function refreshProducts() {
+  // Force refresh from localStorage
+  const products = getProducts();
+  saveProducts(products); // This will trigger storage events
+  
+  // Update all displays
+  updateFrontStats();
+  populateCatSelectAndTags();
+  applyFilters();
+  updateCartBadge();
+  
+  showToast('🔄 Produits actualisés', 'success');
+}
 
 // ── STATS ──
 function updateFrontStats(){
@@ -729,8 +988,23 @@ function renderFrontGrid(products, total){
       const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
       const icon = CAT_ICONS[p.categorie] || '📦';
       const isOut = s === 0;
-      const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
-      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
+      // Get image: custom image first, then category-based image, then default reference image, then icon
+      let imageUrl = '';
+      if (p.image && p.image.trim()) {
+        imageUrl = String(p.image).trim();
+        console.log(`Product ${p.nom} (${p.reference}) using custom image:`, imageUrl);
+      } else if (CATEGORY_IMAGES[p.categorie] && CATEGORY_IMAGES[p.categorie].length > 0) {
+        // Use category-based image with some randomness
+        const categoryImages = CATEGORY_IMAGES[p.categorie];
+        const randomIndex = Math.abs(p.id || p.nom.charCodeAt(0)) % categoryImages.length;
+        imageUrl = categoryImages[randomIndex];
+        console.log(`Product ${p.nom} (${p.reference}) using category image:`, imageUrl);
+      } else if (DEFAULT_PRODUCT_IMAGES[p.reference]) {
+        imageUrl = DEFAULT_PRODUCT_IMAGES[p.reference];
+        console.log(`Product ${p.nom} (${p.reference}) using default image:`, imageUrl);
+      }
+      
+      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'; console.warn('Image failed to load:', '${imageUrl}');">` : icon;
       const ratingData = ratingsMap[p.id] || { average_rating: 0, total_ratings: 0 };
       const stars = renderStars(ratingData.average_rating);
       return `
@@ -740,9 +1014,9 @@ function renderFrontGrid(products, total){
             <div class="product-ref">${escH(p.reference||'N/R')}</div>
             <div class="product-name">${escH(p.nom)}</div>
             <div class="product-desc">${escH(p.description||'Aucune description')}</div>
-            <div class="product-rating">
+            <div class="product-rating" data-rating="${Math.floor(ratingData.average_rating)}">
               <div class="star-rating">${stars}</div>
-              <span class="rating-text">(${ratingData.total_ratings})</span>
+              <span class="rating-text">${ratingData.total_ratings} avis</span>
             </div>
             <div class="product-cat">${escH(p.categorie||'Autre')}</div>
             <div class="product-footer">
@@ -767,8 +1041,24 @@ function renderFrontGrid(products, total){
       const sl = s===0?'Rupture':s<=5?`⚠ ${s}`:`${s} en stock`;
       const icon = CAT_ICONS[p.categorie] || '📦';
       const isOut = s === 0;
-      const imageUrl = p.image ? String(p.image).trim() : (DEFAULT_PRODUCT_IMAGES[p.reference] || '');
-      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'">` : icon;
+      // Get image: custom image first, then category-based image, then default reference image, then icon
+      let imageUrl = '';
+      if (p.image && p.image.trim()) {
+        imageUrl = String(p.image).trim();
+        console.log(`Product ${p.nom} (${p.reference}) using custom image:`, imageUrl);
+      } else if (CATEGORY_IMAGES[p.categorie] && CATEGORY_IMAGES[p.categorie].length > 0) {
+        // Use category-based image with some randomness
+        const categoryImages = CATEGORY_IMAGES[p.categorie];
+        const randomIndex = Math.abs(p.id || p.nom.charCodeAt(0)) % categoryImages.length;
+        imageUrl = categoryImages[randomIndex];
+        console.log(`Product ${p.nom} (${p.reference}) using category image:`, imageUrl);
+      } else if (DEFAULT_PRODUCT_IMAGES[p.reference]) {
+        imageUrl = DEFAULT_PRODUCT_IMAGES[p.reference];
+        console.log(`Product ${p.nom} (${p.reference}) using default image:`, imageUrl);
+      }
+      
+      const thumb = imageUrl ? `<img src="${escH(imageUrl)}" alt="${escH(p.nom)}" onerror="this.parentNode.textContent='📦'; console.warn('Image failed to load:', '${imageUrl}');">` : icon;
+      const defaultStars = renderStars(0);
       return `
         <div class="product-card">
           <div class="product-thumb">${thumb}</div>
@@ -776,6 +1066,10 @@ function renderFrontGrid(products, total){
             <div class="product-ref">${escH(p.reference||'N/R')}</div>
             <div class="product-name">${escH(p.nom)}</div>
             <div class="product-desc">${escH(p.description||'Aucune description')}</div>
+            <div class="product-rating" data-rating="0">
+              <div class="star-rating">${defaultStars}</div>
+              <span class="rating-text">0 avis</span>
+            </div>
             <div class="product-cat">${escH(p.categorie||'Autre')}</div>
             <div class="product-footer">
               <div class="product-price">${parseFloat(p.prix||0).toFixed(3)} <small>DT</small></div>
@@ -826,11 +1120,11 @@ function renderStars(rating) {
   let stars = '';
   for (let i = 1; i <= 5; i++) {
     if (i <= fullStars) {
-      stars += '<span class="star filled">★</span>';
+      stars += `<span class="star filled" style="animation-delay: ${(i-1) * 0.1}s">★</span>`;
     } else if (i === fullStars + 1 && hasHalf) {
-      stars += '<span class="star filled">☆</span>';
+      stars += `<span class="star filled half-star" style="animation-delay: ${(i-1) * 0.1}s">★</span>`;
     } else {
-      stars += '<span class="star">☆</span>';
+      stars += `<span class="star" style="animation-delay: ${(i-1) * 0.1}s">☆</span>`;
     }
   }
   return stars;

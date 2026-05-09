@@ -39,14 +39,14 @@ class ProduitController {
 
         $erreurs = $produit->valider();
         if (!empty($erreurs)) {
-            return ['success' => false, 'errors' => $erreurs];
+            return ['succes' => false, 'erreurs' => $erreurs];
         }
 
         // Insérer en BDD (exemple PDO) :
         // $stmt = $pdo->prepare("INSERT INTO produits (reference, nom, description, prix, stock, categorie) VALUES (?, ?, ?, ?, ?, ?)");
         // $stmt->execute([$produit->reference, $produit->nom, $produit->description, $produit->prix, $produit->stock, $produit->categorie]);
 
-        return ['success' => true, 'message' => 'Produit ajouté avec succès.'];
+        return ['succes' => true, 'message' => 'Produit ajouté avec succès.'];
     }
 
     // ── Modifier un produit ─────────────────
@@ -63,27 +63,27 @@ class ProduitController {
 
         $erreurs = $produit->valider();
         if (!empty($erreurs)) {
-            return ['success' => false, 'errors' => $erreurs];
+            return ['succes' => false, 'erreurs' => $erreurs];
         }
 
         // Mettre à jour en BDD (exemple PDO) :
         // $stmt = $pdo->prepare("UPDATE produits SET reference=?, nom=?, description=?, prix=?, stock=?, categorie=? WHERE id=?");
         // $stmt->execute([$produit->reference, $produit->nom, $produit->description, $produit->prix, $produit->stock, $produit->categorie, $id]);
 
-        return ['success' => true, 'message' => 'Produit modifié avec succès.'];
+        return ['succes' => true, 'message' => 'Produit modifié avec succès.'];
     }
 
     // ── Supprimer un produit ────────────────
     public function supprimer(int $id): array {
         if ($id <= 0) {
-            return ['success' => false, 'errors' => ['ID invalide.']];
+            return ['succes' => false, 'erreurs' => ['ID invalide.']];
         }
 
         // Supprimer en BDD (exemple PDO) :
         // $stmt = $pdo->prepare("DELETE FROM produits WHERE id = ?");
         // $stmt->execute([$id]);
 
-        return ['success' => true, 'message' => 'Produit supprimé avec succès.'];
+        return ['succes' => true, 'message' => 'Produit supprimé avec succès.'];
     }
 
     // ── Récupérer un produit par ID ─────────

@@ -518,7 +518,7 @@ tbody tr:hover td { background:var(--gray-50); }
     <div class="sb-logo">
         <div class="sb-logo-inner">
             <div class="sb-logo-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
             </div>
             <div>
                 <div class="sb-logo-text">Medi<span>Link</span></div>
@@ -552,6 +552,12 @@ tbody tr:hover td { background:var(--gray-50); }
             <span class="sb-nav-badge" id="sbBadgeRatings">0</span>
         </button>
 
+        <div class="sb-section-label">Livraison</div>
+        <a class="sb-nav-item" href="delivery-map.php">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Carte de Livraison
+        </a>
+
         <div class="sb-section-label">Navigation</div>
         <a class="sb-nav-item" href="../front/home.php">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -560,7 +566,7 @@ tbody tr:hover td { background:var(--gray-50); }
     </nav>
 
     <div class="sb-footer">
-        <div class="sb-footer-text">MediLink © 2026</div>
+        <div class="sb-footer-text">MediLink &copy; 2026</div>
     </div>
 </aside>
 
@@ -665,12 +671,13 @@ tbody tr:hover td { background:var(--gray-50); }
                 </div>
                 <div class="form-group"><label class="form-label">Nom du produit *</label><input type="text" id="quickNom" class="form-input" placeholder="Ex : Crème hydratante SPF30"><span class="field-error" id="qerrNom"></span></div>
                 <div class="form-group"><label class="form-label">Description</label><textarea id="quickDesc" class="form-textarea" placeholder="Description, bienfaits, conseils..."></textarea></div>
-                <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="quickImage" class="form-input" placeholder="https://..." /></div>
+                <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="quickImage" class="form-input" placeholder="https://..." /><span class="field-error" id="qerrImage"></span></div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Prix (DT) *</label><input type="number" id="quickPrix" class="form-input" placeholder="0.000" min="0" step="0.001"><span class="field-error" id="qerrPrix"></span></div>
                     <div class="form-group"><label class="form-label">Stock (unités) *</label><input type="number" id="quickStock" class="form-input" placeholder="0" min="0"><span class="field-error" id="qerrStock"></span></div>
                 </div>
                 <button class="btn-submit" onclick="submitQuickForm()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8 15 3"/></svg>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Enregistrer le produit
                 </button>
@@ -843,7 +850,7 @@ tbody tr:hover td { background:var(--gray-50); }
         </div>
         <div class="form-group"><label class="form-label">Nom du produit *</label><input type="text" id="fieldNom" class="form-input" placeholder="Crème hydratante SPF30"><span class="field-error" id="errNom"></span></div>
         <div class="form-group"><label class="form-label">Description</label><textarea id="fieldDesc" class="form-textarea" placeholder="Description, bienfaits..."></textarea></div>
-        <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="fieldImage" class="form-input" placeholder="https://..." /></div>
+        <div class="form-group"><label class="form-label">URL de l'image</label><input type="text" id="fieldImage" class="form-input" placeholder="https://..." /><span class="field-error" id="errImage"></span></div>
         <div class="form-row">
             <div class="form-group"><label class="form-label">Prix (DT) *</label><input type="number" id="fieldPrix" class="form-input" placeholder="0.000" min="0" step="0.001"><span class="field-error" id="errPrix"></span></div>
             <div class="form-group"><label class="form-label">Stock (unités) *</label><input type="number" id="fieldStock" class="form-input" placeholder="0" min="0"><span class="field-error" id="errStock"></span></div>
@@ -926,7 +933,22 @@ const DEMO_PRODUCTS = [
 ];
 
 function getProducts() { const r=localStorage.getItem(STORAGE_KEY); if(!r||r==='[]'){saveProducts(DEMO_PRODUCTS);return[...DEMO_PRODUCTS];}try{return JSON.parse(r);}catch{return[...DEMO_PRODUCTS];} }
-function saveProducts(list) { localStorage.setItem(STORAGE_KEY,JSON.stringify(list)); refreshAll(); }
+function saveProducts(list) { 
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(list)); 
+    refreshAll();
+    
+    // Notify other tabs (front-end) about the update
+    window.dispatchEvent(new StorageEvent('storage', {
+        key: STORAGE_KEY,
+        newValue: JSON.stringify(list),
+        oldValue: localStorage.getItem(STORAGE_KEY),
+        storageArea: localStorage
+    }));
+    
+    // Also send a custom event for immediate sync
+    localStorage.setItem('pharma_products_updated', Date.now().toString());
+    setTimeout(() => localStorage.removeItem('pharma_products_updated'), 100);
+}
 function getOrders() { try{return JSON.parse(localStorage.getItem(ORDERS_KEY)||'[]');}catch{return[];} }
 function saveOrders(list) { localStorage.setItem(ORDERS_KEY,JSON.stringify(list)); refreshOrders(); }
 function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -1377,12 +1399,32 @@ function clearModalErrors() {
     ['fieldRef','fieldNom','fieldCat','fieldImage','fieldPrix','fieldStock'].forEach(id => {
         const el=document.getElementById(id); if(el) el.classList.remove('error');
     });
-    ['errRef','errNom','errCat','errPrix','errStock'].forEach(id => {
+    ['errRef','errNom','errCat','errPrix','errStock','errImage'].forEach(id => {
         const el=document.getElementById(id); if(el){el.classList.remove('show');el.textContent='';}
     });
 }
 function showFieldErr(inputId,errId,msg) { document.getElementById(inputId).classList.add('error'); const e=document.getElementById(errId); e.textContent=msg; e.classList.add('show'); }
 function clearFieldErr(inputId,errId)    { document.getElementById(inputId).classList.remove('error'); document.getElementById(errId).classList.remove('show'); }
+
+function isValidImageUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+        new URL(url);
+        return /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(url) || 
+               url.includes('unsplash.com') || 
+               url.includes('picsum.photos') || 
+               url.includes('images.unsplash.com') ||
+               url.includes('bing.net') ||
+               url.includes('googleusercontent.com') ||
+               url.includes('cloudinary.com') ||
+               url.includes('imgur.com') ||
+               url.includes('istockphoto.com') ||
+               url.includes('shutterstock.com') ||
+               url.includes('gettyimages.com');
+    } catch {
+        return false;
+    }
+}
 
 async function submitForm() {
     document.getElementById('formAlert').className='form-alert';
@@ -1398,11 +1440,13 @@ async function submitForm() {
     if(!cat){showFieldErr('fieldCat','errCat','Catégorie requise');ok=false;}else clearFieldErr('fieldCat','errCat');
     if(isNaN(prix)||prix<0){showFieldErr('fieldPrix','errPrix','Prix invalide (≥0)');ok=false;}else clearFieldErr('fieldPrix','errPrix');
     if(isNaN(stock)||stock<0){showFieldErr('fieldStock','errStock','Stock invalide');ok=false;}else clearFieldErr('fieldStock','errStock');
+    if(image && !isValidImageUrl(image)){showFieldErr('fieldImage','errImage','URL image invalide');ok=false;}else clearFieldErr('fieldImage','errImage');
     if(!ok) return;
     const editIdRaw=document.getElementById('editId').value;
     const products=getProducts();
     const newP={reference:ref,nom,description:document.getElementById('fieldDesc').value.trim(),image,prix,stock,categorie:cat};
 
+    // ... (rest of the code remains the same)
     try {
         if(editIdRaw) {
             const idNum=parseInt(editIdRaw);
@@ -1455,6 +1499,7 @@ async function submitQuickForm() {
     if(!cat){qErr('quickCat','qerrCat','Catégorie requise');}else qOk('quickCat','qerrCat');
     if(isNaN(prix)||prix<0){qErr('quickPrix','qerrPrix','Prix invalide');}else qOk('quickPrix','qerrPrix');
     if(isNaN(stock)||stock<0){qErr('quickStock','qerrStock','Stock invalide');}else qOk('quickStock','qerrStock');
+    if(image && !isValidImageUrl(image)){qErr('quickImage','qerrImage','URL image invalide');}else qOk('quickImage','qerrImage');
     if(!ok) return;
     const products=getProducts();
     if(products.some(p=>p.reference&&p.reference.toLowerCase()===ref.toLowerCase())){
