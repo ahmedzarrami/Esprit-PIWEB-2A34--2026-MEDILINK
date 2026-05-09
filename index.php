@@ -1,42 +1,61 @@
 <?php
-/**
- * MediLink — Front Controller (Routeur)
- * Toutes les requêtes passent par ce fichier
- */
 session_start();
 
-// Charger la configuration BDD
+// ── Dépendances module principal (Forum / Médicaments) ──
 require_once __DIR__ . '/config/database.php';
-
-// Charger les modèles
 require_once __DIR__ . '/Model/Utilisateur.php';
 require_once __DIR__ . '/Model/Forum.php';
 require_once __DIR__ . '/Model/Post.php';
 require_once __DIR__ . '/Model/Commentaire.php';
 require_once __DIR__ . '/Model/BadWordsFilter.php';
-
-// Charger les contrôleurs
 require_once __DIR__ . '/Controller/ForumController.php';
 require_once __DIR__ . '/Controller/PostController.php';
 require_once __DIR__ . '/Controller/CommentaireController.php';
 
-// Simuler une session utilisateur si aucune n'existe (pour démo)
+// ── Dépendances module Gestion RDV ──
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/Controller/rendezvousC.php';
+require_once __DIR__ . '/Controller/fichePatientC.php';
+require_once __DIR__ . '/Controller/evaluationC.php';
+
+// Session utilisateur par défaut (démo)
 if (!isset($_SESSION['user'])) {
     $_SESSION['user'] = [
-        'id' => 1,
-        'nom' => 'Dupont',
+        'id'     => 1,
+        'nom'    => 'Dupont',
         'prenom' => 'Jean',
-        'email' => 'jean.dupont@medilink.com',
-        'role' => 'administrateur'
+        'email'  => 'jean.dupont@medilink.com',
+        'role'   => 'administrateur'
     ];
 }
 
-// Récupérer le contrôleur et l'action depuis l'URL
-$controller = $_GET['controller'] ?? 'forum';
-$action     = $_GET['action'] ?? 'list';
-$id         = $_GET['id'] ?? null;
+$controller = $_GET['controller'] ?? null;
+$action     = $_GET['action']     ?? null;
+$id         = $_GET['id']         ?? null;
 
-// Router vers le bon contrôleur
+// ── Routing page (Gestion RDV) — pas de controller dans l'URL ──
+if ($controller === null) {
+    $page = $action ?? 'home';
+    switch ($page) {
+        case 'patient':
+            require __DIR__ . '/Views/front/homePatient.php';
+            break;
+        case 'medecin':
+        case 'home':
+            require __DIR__ . '/Views/front/home.php';
+            break;
+        case 'admin':
+            require __DIR__ . '/Views/admin/admin.php';
+            break;
+        default:
+            require __DIR__ . '/Views/front/home.php';
+    }
+    exit;
+}
+
+// ── Routing contrôleur (Forum / Médicaments / Ordonnances) ──
+$action = $action ?? 'list';
+
 try {
     switch ($controller) {
         case 'forum':
@@ -52,12 +71,10 @@ try {
             throw new Exception("Contrôleur introuvable : " . htmlspecialchars($controller));
     }
 
-    // Vérifier que la méthode existe
     if (!method_exists($ctrl, $action)) {
         throw new Exception("Action introuvable : " . htmlspecialchars($action));
     }
 
-    // Appeler l'action avec ou sans paramètre ID
     if ($id !== null) {
         $ctrl->$action($id);
     } else {
@@ -65,7 +82,6 @@ try {
     }
 
 } catch (Exception $e) {
-    // Page 404 / erreur
     http_response_code(404);
     ?>
     <!DOCTYPE html>
@@ -103,16 +119,8 @@ try {
                 -webkit-text-fill-color: transparent;
                 line-height: 1;
             }
-            .error-message {
-                margin-top: 1rem;
-                font-size: 1.1rem;
-                color: #94a3b8;
-            }
-            .error-detail {
-                margin-top: 0.5rem;
-                font-size: 0.85rem;
-                color: #64748b;
-            }
+            .error-message { margin-top: 1rem; font-size: 1.1rem; color: #94a3b8; }
+            .error-detail  { margin-top: 0.5rem; font-size: 0.85rem; color: #64748b; }
             .error-link {
                 display: inline-block;
                 margin-top: 2rem;
