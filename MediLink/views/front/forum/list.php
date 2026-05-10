@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Forums de Discussion';
-require __DIR__ . '/../../layout/front_header.php';
+require __DIR__ . '/../layouts/header.php';
 ?>
 
 <!-- Full Width Blue Hero Section -->
@@ -82,4 +82,4 @@ require __DIR__ . '/../../layout/front_header.php';
     </div>
 <?php endif; ?>
 
-<?php require __DIR__ . '/../../layout/front_footer.php'; ?>
+<?php require __DIR__ . '/../layouts/footer.php'; ?>

@@ -1,6 +1,6 @@
 <?php
 $pageTitle = htmlspecialchars($forum->getTitre());
-require __DIR__ . '/../../layout/front_header.php';
+require __DIR__ . '/../layouts/header.php';
 ?>
 
 <!-- Breadcrumb -->
@@ -190,4 +190,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?php require __DIR__ . '/../../layout/front_footer.php'; ?>
+<?php require __DIR__ . '/../layouts/footer.php'; ?>

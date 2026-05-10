@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Créer un Post';
-require __DIR__ . '/../../layout/back_header.php';
+require __DIR__ . '/../layouts/header.php';
 ?>
 
 <!-- Page Header -->
@@ -91,4 +91,4 @@ require __DIR__ . '/../../layout/back_header.php';
     </form>
 </div>
 
-<?php require __DIR__ . '/../../layout/back_footer.php'; ?>
+<?php require __DIR__ . '/../layouts/footer.php'; ?>
