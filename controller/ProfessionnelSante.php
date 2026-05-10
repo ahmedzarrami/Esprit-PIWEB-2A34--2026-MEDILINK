@@ -2,7 +2,7 @@
 // Dépendance vers le contrôleur utilisateur de base
 require_once __DIR__ . '/Utilisateur.php';
 // Dépendance vers le modèle abstrait ProfessionnelSante
-require_once __DIR__ . '/../models/ProfessionnelSante.php';
+require_once __DIR__ . '/../model/ProfessionnelSante.php';
 
 /**
  * ProfessionnelSanteModelController

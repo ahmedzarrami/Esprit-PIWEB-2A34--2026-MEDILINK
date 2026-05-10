@@ -4,7 +4,7 @@ require_once __DIR__ . '/Utilisateur.php';
 /**
  * Classe ProfessionnelSante — Hérite de Utilisateur (Modèle)
  * Contient les attributs et les signatures de méthodes.
- * L'implémentation des méthodes se trouve dans controllers/ProfessionnelSante.php
+ * L'implémentation des méthodes se trouve dans controller/ProfessionnelSante.php
  */
 abstract class ProfessionnelSante extends Utilisateur
 {

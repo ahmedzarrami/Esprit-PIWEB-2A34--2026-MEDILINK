@@ -5,7 +5,7 @@
  */
 session_start();
 
-require_once __DIR__ . '/controllers/AdminController.php';
+require_once __DIR__ . '/controller/AdminController.php';
 
 $adminCtrl = new AdminController();
 
@@ -66,7 +66,7 @@ $allUsers = $adminCtrl->list();
 $stats    = $adminCtrl->getStats();
 $usersJson = json_encode($allUsers);
 
-$viewFile = __DIR__ . '/views/backoffice/users.php';
+$viewFile = __DIR__ . '/view/backoffice/users.php';
 
 // ─── Rendu du layout ───
-include __DIR__ . '/views/backoffice/layout.php';
+include __DIR__ . '/view/backoffice/layout.php';

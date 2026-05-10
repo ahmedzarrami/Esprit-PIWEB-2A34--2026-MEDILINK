@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
-require_once __DIR__ . '/../models/FaceAuth.php';
+require_once __DIR__ . '/../model/FaceAuth.php';
 require_once __DIR__ . '/Utilisateur.php';
 
 /**

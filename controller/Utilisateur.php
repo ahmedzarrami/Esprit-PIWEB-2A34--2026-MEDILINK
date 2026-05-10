@@ -2,7 +2,7 @@
 // Chargement de la configuration de la base de données (singleton PDO)
 require_once __DIR__ . '/../config/Database.php';
 // Chargement du modèle abstrait Utilisateur (définit le contrat des méthodes)
-require_once __DIR__ . '/../models/Utilisateur.php';
+require_once __DIR__ . '/../model/Utilisateur.php';
 
 /**
  * UtilisateurController

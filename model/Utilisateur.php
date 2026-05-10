@@ -3,7 +3,7 @@
 /**
  * Classe abstraite Utilisateur (Modèle)
  * Contient les attributs et les signatures de méthodes.
- * L'implémentation des méthodes se trouve dans controllers/Utilisateur.php
+ * L'implémentation des méthodes se trouve dans controller/Utilisateur.php
  */
 abstract class Utilisateur
 {

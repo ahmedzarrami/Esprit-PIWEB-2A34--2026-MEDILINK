@@ -4,7 +4,7 @@ require_once __DIR__ . '/Utilisateur.php';
 /**
  * Classe Patient — Hérite de Utilisateur (Modèle)
  * Contient les attributs et les signatures de méthodes.
- * L'implémentation des méthodes se trouve dans controllers/Patient.php
+ * L'implémentation des méthodes se trouve dans controller/Patient.php
  */
 abstract class Patient extends Utilisateur
 {

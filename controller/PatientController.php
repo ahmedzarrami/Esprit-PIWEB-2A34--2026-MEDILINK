@@ -2,7 +2,7 @@
 // Dépendances nécessaires pour la gestion du profil patient
 require_once __DIR__ . '/Utilisateur.php';       // Pour emailExiste(), getById(), changerMotDePasse()
 require_once __DIR__ . '/Patient.php';            // Pour getPatientById(), modifierProfil()
-require_once __DIR__ . '/../models/Patient.php';  // Modèle abstrait Patient
+require_once __DIR__ . '/../model/Patient.php';  // Modèle abstrait Patient
 
 /**
  * PatientController

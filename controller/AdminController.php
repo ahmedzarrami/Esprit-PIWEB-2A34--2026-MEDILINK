@@ -5,9 +5,9 @@ require_once __DIR__ . '/Patient.php';
 require_once __DIR__ . '/ProfessionnelSante.php';
 require_once __DIR__ . '/Administrateur.php';
 // Chargement des modèles abstraits correspondants
-require_once __DIR__ . '/../models/Patient.php';
-require_once __DIR__ . '/../models/ProfessionnelSante.php';
-require_once __DIR__ . '/../models/Administrateur.php';
+require_once __DIR__ . '/../model/Patient.php';
+require_once __DIR__ . '/../model/ProfessionnelSante.php';
+require_once __DIR__ . '/../model/Administrateur.php';
 
 /**
  * AdminController

@@ -5,11 +5,11 @@
  */
 session_start();
 
-require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/controllers/PatientController.php';
-require_once __DIR__ . '/controllers/ProfessionnelController.php';
-require_once __DIR__ . '/controllers/PasswordResetController.php';
-require_once __DIR__ . '/controllers/FaceAuthController.php';
+require_once __DIR__ . '/controller/AuthController.php';
+require_once __DIR__ . '/controller/PatientController.php';
+require_once __DIR__ . '/controller/ProfessionnelController.php';
+require_once __DIR__ . '/controller/PasswordResetController.php';
+require_once __DIR__ . '/controller/FaceAuthController.php';
 
 $authCtrl    = new AuthController();
 $patientCtrl = new PatientController();
@@ -271,7 +271,7 @@ if ($page === 'reset_password' && (empty($_SESSION['reset_email']) || empty($_SE
     $page = 'forgot_password';
 }
 
-$viewFile = __DIR__ . '/views/frontoffice/' . $page . '.php';
+$viewFile = __DIR__ . '/view/frontoffice/' . $page . '.php';
 
 // ─── Rendu du layout ───
-include __DIR__ . '/views/frontoffice/layout.php';
+include __DIR__ . '/view/frontoffice/layout.php';

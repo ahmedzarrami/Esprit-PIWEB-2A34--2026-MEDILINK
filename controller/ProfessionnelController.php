@@ -2,7 +2,7 @@
 // Dépendances nécessaires pour la gestion du profil professionnel
 require_once __DIR__ . '/Utilisateur.php';              // Pour emailExiste(), getById(), changerMotDePasse()
 require_once __DIR__ . '/ProfessionnelSante.php';       // Pour getProById(), modifierProfil()
-require_once __DIR__ . '/../models/ProfessionnelSante.php'; // Modèle abstrait ProfessionnelSante
+require_once __DIR__ . '/../model/ProfessionnelSante.php'; // Modèle abstrait ProfessionnelSante
 
 /**
  * ProfessionnelController

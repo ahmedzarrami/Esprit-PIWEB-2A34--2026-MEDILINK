@@ -160,7 +160,7 @@ $initials = strtoupper(mb_substr($prenom, 0, 1) . mb_substr($nom, 0, 1));
     <!-- TAB: BIOMÉTRIE (Reconnaissance Faciale) -->
     <div id="ptab-biometric" class="hidden">
       <?php
-        require_once __DIR__ . '/../../controllers/FaceAuthController.php';
+        require_once __DIR__ . '/../../controller/FaceAuthController.php';
         $hasFace = FaceAuthController::aDescripteur((int)($_SESSION['user_id'] ?? 0));
       ?>
       <div class="profile-card">

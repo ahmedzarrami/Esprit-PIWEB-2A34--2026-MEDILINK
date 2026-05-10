@@ -2,7 +2,7 @@
 // Dépendance vers le contrôleur utilisateur (pour les opérations sur la table "utilisateur")
 require_once __DIR__ . '/Utilisateur.php';
 // Dépendance vers le modèle abstrait Patient (définit les méthodes obligatoires)
-require_once __DIR__ . '/../models/Patient.php';
+require_once __DIR__ . '/../model/Patient.php';
 
 /**
  * PatientModelController

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../config/Database.php';
 require_once __DIR__ . '/../config/Mailer.php';
-require_once __DIR__ . '/../models/PasswordReset.php';
+require_once __DIR__ . '/../model/PasswordReset.php';
 require_once __DIR__ . '/Utilisateur.php';
 
 /**
