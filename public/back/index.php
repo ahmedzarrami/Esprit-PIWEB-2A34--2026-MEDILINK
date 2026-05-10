@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 session_start();
 
-require_once __DIR__ . '/../../app/controllers/back/MedicamentController.php';
+require_once __DIR__ . '/../../controllers/back/MedicamentController.php';
 
 $controller = new MedicamentController();
 $action     = $_GET['action'] ?? 'index';
