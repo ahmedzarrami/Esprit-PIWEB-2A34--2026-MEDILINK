@@ -81,10 +81,10 @@ switch ($module) {
     case 'rdv':
     default:
         switch ($action) {
-            case 'patient': require __DIR__ . '/View/front/homePatient.php'; break;
-            case 'medecin': require __DIR__ . '/View/front/home.php';        break;
-            case 'admin':   require __DIR__ . '/View/admin/admin.php';       break;
-            default:        require __DIR__ . '/View/front/home.php';
+            case 'patient': require __DIR__ . '/views/rdv/front/homePatient.php'; break;
+            case 'medecin': require __DIR__ . '/views/rdv/front/home.php';        break;
+            case 'admin':   require __DIR__ . '/views/rdv/admin/admin.php';       break;
+            default:        require __DIR__ . '/views/rdv/front/home.php';
         }
         break;
 }
