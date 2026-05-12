@@ -6,7 +6,7 @@
 class Database {
     private static ?PDO $instance = null;
     private static string $host = 'localhost';
-    private static string $dbname = 'medilink';
+    private static string $dbname = 'medilinkintegration';
     private static string $username = 'root';
     private static string $password = '';
 

@@ -6,7 +6,7 @@
 class Config {
     // ── Paramètres de connexion ──────────────────
     private static string $host    = 'localhost';
-    private static string $dbname  = 'pharmashop';
+    private static string $dbname  = 'medilinkintegration';
     private static string $user    = 'root';
     private static string $pass    = '';          // Laissez vide si XAMPP/WAMP sans mot de passe
     private static string $charset = 'utf8mb4';
