@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<?php
+require_once __DIR__ . '/../../../../config/session.php';
+require_role('Administrateur');
+?><!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
