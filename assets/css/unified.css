@@ -65,7 +65,60 @@ html body {
   --shadow-card:  0 4px 20px rgba(29, 78, 216, 0.08);
   --shadow-hover: 0 12px 40px rgba(29, 78, 216, 0.14);
   --shadow-glow:  0 0 25px rgba(29, 78, 216, 0.08);
+
+  /* utilisateur/back.css : ce module utilisait un theme sombre GitHub-like.
+     On force toutes ses variables vers le theme clair blanc+bleu MediLink. */
+  --bg:        #f8fafc;
+  --bg2:       #ffffff;
+  --bg3:       #f1f5f9;
+  --bg4:       #e2e8f0;
+  --border:    #e2e8f0;
+  --border2:   #cbd5e1;
+  --text:      #0f172a;
+  --text2:     #475569;
+  --text3:     #94a3b8;
+  --blue:      #1d4ed8;
+  --blue-bg:   #dbeafe;
+  --blue-light:#3b82f6;
+  --green:     #16a34a;
+  --green-bg:  #dcfce7;
+  --red:       #dc2626;
+  --red-bg:    #fee2e2;
+  --amber:     #f59e0b;
+  --amber-bg:  #fef3c7;
+  --purple:    #1d4ed8;        /* unifie */
+  --purple-bg: #dbeafe;
 }
+
+/* Patch supplementaire pour le back-office utilisateurs : la sidebar doit
+   garder un fond bleu (comme les autres modules), pas blanc. */
+body .sidebar{
+  background:linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%) !important;
+  border-right-color:#1e40af !important;
+}
+body .sidebar .sidebar-logo,
+body .sidebar .sidebar-nav,
+body .sidebar .sidebar-footer{ border-color:rgba(255,255,255,.15) !important; }
+body .sidebar .logo-text,
+body .sidebar .nav-section,
+body .sidebar .admin-name,
+body .sidebar .admin-role,
+body .sidebar .nav-item{ color:rgba(255,255,255,.85) !important; }
+body .sidebar .nav-item:hover{ background:rgba(255,255,255,.12) !important; color:#fff !important; }
+body .sidebar .nav-item.active{ background:rgba(255,255,255,.18) !important; color:#fff !important; border-left-color:#fff !important; }
+body .sidebar .admin-card{ background:rgba(255,255,255,.12) !important; }
+body .sidebar .logo-badge{ background:rgba(255,255,255,.2) !important; color:#fff !important; }
+body .topbar{ background:#fff !important; border-color:#e2e8f0 !important; }
+body .topbar .page-title{ color:#0f172a !important; }
+body .content{ background:#f8fafc !important; }
+body .stat-card,
+body .table-card{
+  background:#fff !important;
+  border-color:#e2e8f0 !important;
+  box-shadow:0 1px 3px rgba(15,23,42,.04);
+}
+body .stat-label{ color:#64748b !important; }
+body .stat-value{ color:#0f172a !important; }
 
 /* ---- Forcer le body en blanc/bleu clair ---- */
 html, body {

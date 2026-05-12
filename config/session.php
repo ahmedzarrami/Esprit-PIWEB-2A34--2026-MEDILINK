@@ -226,6 +226,57 @@ function medilink_bridge_patient(PDO $pdo, array $u): int
 }
 
 /**
+ * Recupere la ligne medecins de l'utilisateur courant (Professionnel).
+ * Retourne null si non applicable.
+ */
+function current_medecin(): ?array
+{
+    $u = current_user();
+    if (!$u || $u['role'] !== 'Professionnel' || empty($u['rdv_medecin_id'])) {
+        return null;
+    }
+    try {
+        $pdo = medilink_pdo();
+        $st = $pdo->prepare('SELECT * FROM medecins WHERE id = ?');
+        $st->execute([$u['rdv_medecin_id']]);
+        $row = $st->fetch();
+        return $row ?: null;
+    } catch (Throwable $e) {
+        return null;
+    }
+}
+
+/**
+ * Met a jour les champs localisation/coordonnees de la ligne medecins
+ * de l'utilisateur courant. Utilise par le formulaire profil professionnel.
+ */
+function medilink_update_medecin_address(int $userId, array $data): bool
+{
+    try {
+        $pdo = medilink_pdo();
+        $st  = $pdo->prepare(
+            'UPDATE medecins
+                SET nom = ?, specialite = ?, email = ?, telephone = ?,
+                    adresse = ?, ville = ?, latitude = ?, longitude = ?
+              WHERE utilisateur_id = ?'
+        );
+        return $st->execute([
+            $data['nom'] ?? '',
+            $data['specialite'] ?? 'Generaliste',
+            $data['email'] ?? '',
+            $data['telephone'] ?? null,
+            $data['adresse'] ?? null,
+            $data['ville']   ?? null,
+            $data['latitude']  !== '' && $data['latitude']  !== null ? (float)$data['latitude']  : null,
+            $data['longitude'] !== '' && $data['longitude'] !== null ? (float)$data['longitude'] : null,
+            $userId,
+        ]);
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+/**
  * Trouve ou cree une ligne medecins liee a utilisateur_id.
  */
 function medilink_bridge_medecin(PDO $pdo, array $u): int

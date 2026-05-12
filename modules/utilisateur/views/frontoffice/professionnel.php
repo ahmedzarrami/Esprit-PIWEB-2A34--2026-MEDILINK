@@ -9,11 +9,42 @@ $ordre    = htmlspecialchars($user['numero_ordre'] ?? '');
 $bio      = htmlspecialchars($user['biographie'] ?? '');
 $initials = strtoupper(mb_substr($prenom, 0, 1) . mb_substr($nom, 0, 1));
 
+// Donnees medecin (table 'medecins') : adresse, ville, lat, lng
+$medecin     = function_exists('current_medecin') ? current_medecin() : null;
+$adresse_med = htmlspecialchars($medecin['adresse']   ?? '');
+$ville_med   = htmlspecialchars($medecin['ville']     ?? '');
+$lat_med     = htmlspecialchars((string)($medecin['latitude']  ?? ''));
+$lng_med     = htmlspecialchars((string)($medecin['longitude'] ?? ''));
+
 $specialites = [
     'Médecine générale','Cardiologie','Dermatologie','Gynécologie','Neurologie',
     'Ophtalmologie','Orthopédie','Pédiatrie','Psychiatrie','Radiologie',
     'Rhumatologie','Urologie','Endocrinologie','Gastro-entérologie','Pneumologie',
     'ORL','Chirurgie générale','Anesthésiologie','Oncologie','Néphrologie',
+];
+
+// Villes tunisiennes principales avec coordonnees
+$villes_tn = [
+    'Tunis'    => [36.8190, 10.1660],
+    'Sfax'     => [34.7406, 10.7603],
+    'Sousse'   => [35.8288, 10.6380],
+    'Bizerte'  => [37.2744, 9.8739],
+    'Monastir' => [35.7643, 10.8113],
+    'Nabeul'   => [36.4561, 10.7376],
+    'Ariana'   => [36.8665, 10.1647],
+    'Gabes'    => [33.8881, 10.0982],
+    'Kairouan' => [35.6712, 10.1019],
+    'Gafsa'    => [34.4250, 8.7842],
+    'Mahdia'   => [35.5047, 11.0622],
+    'La Marsa' => [36.8786, 10.3247],
+    'Hammamet' => [36.4000, 10.6167],
+    'Tozeur'   => [33.9197, 8.1335],
+    'Beja'     => [36.7256, 9.1817],
+    'Jendouba' => [36.5011, 8.7800],
+    'Kasserine'=> [35.1675, 8.8364],
+    'Tataouine'=> [32.9297, 10.4517],
+    'Medenine' => [33.3547, 10.5053],
+    'Zaghouan' => [36.4028, 10.1428],
 ];
 ?>
 
@@ -163,6 +194,71 @@ $specialites = [
             </div>
           </div>
         </div>
+        <!-- ====== Adresse & localisation (cabinet) ====== -->
+        <div class="form-section-title" style="margin:18px 0 10px;font-size:13px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.5px;">
+          Localisation du cabinet
+          <span style="font-size:11px;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0;margin-left:6px;">(affiché aux patients sur la carte)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Adresse complète</label>
+          <input class="form-input" id="pp-adresse" name="adresse" type="text"
+                 value="<?= $adresse_med ?>"
+                 placeholder="12 Avenue Habib Bourguiba"
+                 form="proProfileForm">
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Ville</label>
+            <select class="form-input" id="pp-ville" name="ville" form="proProfileForm"
+                    onchange="ppAutoFillCoords()">
+              <option value="">-- Choisir une ville --</option>
+              <?php foreach ($villes_tn as $vname => $coords): ?>
+                <option value="<?= htmlspecialchars($vname) ?>"
+                        data-lat="<?= $coords[0] ?>" data-lng="<?= $coords[1] ?>"
+                        <?= $ville_med === $vname ? 'selected' : '' ?>>
+                  <?= htmlspecialchars($vname) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coordonnées GPS</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input class="form-input" id="pp-lat" name="latitude"  type="text"
+                     value="<?= $lat_med ?>" placeholder="36.8190" form="proProfileForm">
+              <input class="form-input" id="pp-lng" name="longitude" type="text"
+                     value="<?= $lng_med ?>" placeholder="10.1660" form="proProfileForm">
+              <button type="button" onclick="ppUseMyLocation()"
+                      style="white-space:nowrap;padding:9px 14px;border-radius:8px;background:#1d4ed8;color:#fff;border:none;font-weight:600;cursor:pointer;">
+                📍 Ma position
+              </button>
+            </div>
+            <div class="form-hint" style="font-size:11px;color:#64748b;margin-top:4px;">
+              Choisir une ville remplit automatiquement les coordonnées, ou cliquer "Ma position" pour utiliser le GPS du navigateur.
+            </div>
+          </div>
+        </div>
+        <script>
+          function ppAutoFillCoords() {
+            var sel = document.getElementById('pp-ville');
+            var opt = sel.options[sel.selectedIndex];
+            if (!opt) return;
+            var lat = opt.getAttribute('data-lat');
+            var lng = opt.getAttribute('data-lng');
+            if (lat && lng) {
+              document.getElementById('pp-lat').value = lat;
+              document.getElementById('pp-lng').value = lng;
+            }
+          }
+          function ppUseMyLocation() {
+            if (!navigator.geolocation) { alert('Geolocation non supporte.'); return; }
+            navigator.geolocation.getCurrentPosition(function(p){
+              document.getElementById('pp-lat').value = p.coords.latitude.toFixed(6);
+              document.getElementById('pp-lng').value = p.coords.longitude.toFixed(6);
+            }, function(){ alert('Impossible de recuperer la position.'); });
+          }
+        </script>
+
         <div class="form-group">
           <label class="form-label">Biographie / Présentation</label>
           <textarea class="form-input" id="pp-bio" name="biographie" rows="4"

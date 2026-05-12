@@ -1,6 +1,17 @@
 <?php
 require_once __DIR__ . '/../../../../../config/session.php';
 require_role('Administrateur');
+
+// Charger les fiches patient pour la section "Fiches"
+$basePath = dirname(__DIR__) . '/..';
+require_once $basePath . '/config.php';
+require_once $basePath . '/Controller/fichePatientC.php';
+try {
+    $fichePatientC = new FichePatientC();
+    $admin_fiches  = $fichePatientC->listFichePatient();
+} catch (Throwable $e) {
+    $admin_fiches = [];
+}
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -363,6 +374,11 @@ tbody td:first-child{color:var(--gray-900);font-weight:500}
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Statistiques
     </button>
+    <button class="nav-item" onclick="showSection('fiches')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Fiches Patients
+      <span class="nav-badge"><?= count($admin_fiches) ?></span>
+    </button>
     <div class="nav-section-label" style="margin-top:12px">Application</div>
     <a class="nav-item" href="rapportFichesPatient.php">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -612,6 +628,77 @@ tbody td:first-child{color:var(--gray-900);font-weight:500}
       </div>
     </div>
 
+  </section>
+
+  <!-- ════════════════════════════════
+       SECTION : FICHES PATIENTS
+  ════════════════════════════════ -->
+  <section class="page-section" id="sec-fiches">
+    <div class="section-hd" style="margin-bottom:18px">
+      <h2>Fiches Patients (<?= count($admin_fiches) ?>)</h2>
+      <a href="rapportFichesPatient.php" class="btn-refresh" style="text-decoration:none">
+        📄 Voir le rapport detaille
+      </a>
+    </div>
+
+    <?php if (empty($admin_fiches)): ?>
+      <div style="background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:48px;text-align:center;color:var(--gray-400);">
+        <div style="font-size:48px;margin-bottom:14px;">📋</div>
+        <div style="font-size:15px;color:var(--gray-600);font-weight:600;margin-bottom:6px;">Aucune fiche patient enregistrée</div>
+        <div style="font-size:13px;">Les fiches créées par les médecins via leur espace apparaitront ici.</div>
+      </div>
+    <?php else: ?>
+      <div style="background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:var(--gray-50);color:var(--gray-600);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.5px;">
+              <th style="padding:14px 16px;text-align:left;">#</th>
+              <th style="padding:14px 16px;text-align:left;">Patient</th>
+              <th style="padding:14px 16px;text-align:left;">Medecin</th>
+              <th style="padding:14px 16px;text-align:left;">RDV</th>
+              <th style="padding:14px 16px;text-align:left;">Groupe</th>
+              <th style="padding:14px 16px;text-align:left;">Allergies</th>
+              <th style="padding:14px 16px;text-align:left;">Cree le</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($admin_fiches as $f): ?>
+              <tr style="border-top:1px solid var(--gray-100);">
+                <td style="padding:14px 16px;font-weight:700;color:var(--blue);">#<?= (int)$f['idfiche'] ?></td>
+                <td style="padding:14px 16px;">
+                  <?php
+                    $np = trim(($f['patient_prenom'] ?? '') . ' ' . ($f['patient_nom'] ?? ''));
+                    echo $np ? htmlspecialchars($np) : '<span style="color:var(--gray-400);">N/A</span>';
+                  ?>
+                </td>
+                <td style="padding:14px 16px;">
+                  <?= htmlspecialchars($f['medecin_nom'] ?? '') ?>
+                  <div style="font-size:11px;color:var(--gray-400);"><?= htmlspecialchars($f['specialite'] ?? '') ?></div>
+                </td>
+                <td style="padding:14px 16px;color:var(--gray-600);font-size:12px;">
+                  <?= htmlspecialchars($f['date_rdv'] ?? '') ?><br>
+                  <?= htmlspecialchars(substr((string)($f['heure_rdv'] ?? ''), 0, 5)) ?>
+                </td>
+                <td style="padding:14px 16px;">
+                  <?php $g = $f['groupsanguin'] ?? ''; ?>
+                  <?php if ($g): ?>
+                    <span style="background:var(--red-l);color:var(--red);padding:3px 10px;border-radius:999px;font-weight:700;font-size:11px;"><?= htmlspecialchars($g) ?></span>
+                  <?php else: ?>
+                    <span style="color:var(--gray-400);">—</span>
+                  <?php endif; ?>
+                </td>
+                <td style="padding:14px 16px;color:var(--gray-600);font-size:12px;">
+                  <?= htmlspecialchars(($f['allergies'] ?? '') ?: '—') ?>
+                </td>
+                <td style="padding:14px 16px;color:var(--gray-400);font-size:11px;">
+                  <?= htmlspecialchars($f['date_creation'] ?? '') ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
   </section>
 
 </div><!-- end .main -->

@@ -102,6 +102,21 @@ class ProfessionnelController
             // Mise à jour des deux tables : "utilisateur" et "professionnel_sante"
             ProfessionnelSanteModelController::modifierProfil($pro);
 
+            // Synchronisation avec la table "medecins" (utilisee par le module RDV
+            // et la carte cote patient). Adresse, ville, lat, lng.
+            if (function_exists('medilink_update_medecin_address')) {
+                medilink_update_medecin_address($userId, [
+                    'nom'        => 'Dr. ' . $prenom . ' ' . $nom,
+                    'specialite' => $spec,
+                    'email'      => $email,
+                    'telephone'  => $tel,
+                    'adresse'    => trim($data['adresse']   ?? ''),
+                    'ville'      => trim($data['ville']     ?? ''),
+                    'latitude'   => trim($data['latitude']  ?? ''),
+                    'longitude' => trim($data['longitude'] ?? ''),
+                ]);
+            }
+
             // Mise à jour de la session pour affichage immédiat dans la navbar
             $_SESSION['user_nom']   = $prenom . ' ' . $nom;
             $_SESSION['user_email'] = $email;
