@@ -37,11 +37,13 @@ switch ($action) {
         require "View/front/home.php";
         break;
     case 'patient':
+        // Espace patient : page de gestion des RDV du patient
         require "View/front/homePatient.php";
         break;
     case 'medecin':
-        require "View/front/home.php"; // Vue medecin reutilise la home pour l'instant
-        break;
+        // Espace medecin : page de gestion des fiches patients
+        header('Location: /files40/modules/rdv/MediLink/View/front/gestionFichePatient.php');
+        exit;
     case 'admin':
         require "View/admin/admin.php";
         break;

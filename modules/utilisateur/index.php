@@ -272,6 +272,24 @@ if (!in_array($page, $validPages)) {
     $page = 'home';
 }
 
+// Si l'utilisateur est deja connecte et qu'il atterrit sur login/register/home,
+// on l'envoie soit a la cible memorisee, soit a l'accueil approprie.
+if (is_logged_in() && in_array($page, ['login', 'register', 'home'], true)) {
+    $back = $_SESSION['login_redirect'] ?? null;
+    unset($_SESSION['login_redirect']);
+    if ($back) {
+        header('Location: ' . $back);
+        exit;
+    }
+    $role = current_role();
+    if ($role === 'Administrateur') {
+        header('Location: /files40/admin/index.php');
+    } else {
+        header('Location: /files40/index.php');
+    }
+    exit;
+}
+
 // Protéger les pages reset_code et reset_password : nécessitent une session de reset active
 if ($page === 'reset_code' && empty($_SESSION['reset_email'])) {
     $page = 'forgot_password';
