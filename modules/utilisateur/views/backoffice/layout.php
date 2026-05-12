@@ -7,6 +7,7 @@
 <meta name="description" content="MediLink — Panneau d'administration pour la gestion des utilisateurs et de la plateforme.">
 <link rel="stylesheet" href="assets/css/back.css?v=<?= filemtime(__DIR__.'/../../assets/css/back.css') ?>">
 <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
 

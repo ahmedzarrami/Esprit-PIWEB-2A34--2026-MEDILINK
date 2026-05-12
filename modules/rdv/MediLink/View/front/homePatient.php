@@ -569,6 +569,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 @media(max-width:500px){.chat-win{width:calc(100vw - 20px);right:10px;bottom:95px;height:72vh;}.chat-fab{bottom:22px;right:16px;width:54px;height:54px;}}
 </style>
 <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
 
@@ -1550,7 +1551,7 @@ async function sendMsg() {
     document.getElementById('chatBody').scrollTop = 99999;
 
     try {
-        const res  = await fetch('/ProjetWeb/chatbot.php', {
+        const res  = await fetch('/files40/modules/rdv/MediLink/chatbot.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ system: sysPrompt(), messages: hist })

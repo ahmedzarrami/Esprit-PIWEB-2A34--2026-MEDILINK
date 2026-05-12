@@ -489,6 +489,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .footer-admin a:hover { background:var(--gray-100); color:var(--gray-600); }
 </style>
 <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
 

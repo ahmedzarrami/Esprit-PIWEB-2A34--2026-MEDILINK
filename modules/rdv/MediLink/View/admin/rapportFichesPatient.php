@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../../../../../config/session.php';
+require_role('Administrateur');
+
 $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
 require_once $basePath . '/Controller/fichePatientC.php';
@@ -306,6 +309,7 @@ $fichePatientC = new FichePatientC();
         }
     </style>
 <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
     <!-- ── NAVBAR ── -->

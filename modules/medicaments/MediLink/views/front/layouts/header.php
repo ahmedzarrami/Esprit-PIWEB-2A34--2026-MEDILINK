@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
 

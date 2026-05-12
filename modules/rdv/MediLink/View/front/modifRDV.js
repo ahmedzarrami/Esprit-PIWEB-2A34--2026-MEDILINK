@@ -6,7 +6,7 @@
 async function editRDV(id) {
     try {
         // Récupérer les données du RDV
-        const response = await fetch(`/ProjetWeb/api.php?action=get&id=${id}`);
+        const response = await fetch(`/files40/modules/rdv/MediLink/api.php?action=get&id=${id}`);
         const result = await response.json();
 
         if (!result.success || !result.data) {
@@ -47,7 +47,7 @@ async function editRDV(id) {
         }
 
         // ── Vérifier doublon (exclure le RDV actuel) ──
-        const rdvList = await fetch('/ProjetWeb/api.php?action=list');
+        const rdvList = await fetch('/files40/modules/rdv/MediLink/api.php?action=list');
         const listResult = await rdvList.json();
         
         if (listResult.success && listResult.data) {
@@ -65,7 +65,7 @@ async function editRDV(id) {
         }
 
         // ✅ Mise à jour via API
-        const updateResponse = await fetch('/ProjetWeb/api.php?action=update', {
+        const updateResponse = await fetch('/files40/modules/rdv/MediLink/api.php?action=update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

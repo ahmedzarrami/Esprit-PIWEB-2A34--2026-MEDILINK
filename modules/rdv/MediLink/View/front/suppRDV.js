@@ -6,7 +6,7 @@ async function deleteRDV(id) {
     if (!confirm("Voulez-vous vraiment supprimer ce rendez-vous ?")) return;
 
     try {
-        const response = await fetch('/ProjetWeb/api.php?action=delete', {
+        const response = await fetch('/files40/modules/rdv/MediLink/api.php?action=delete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

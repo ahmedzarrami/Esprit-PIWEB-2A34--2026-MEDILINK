@@ -190,6 +190,7 @@ legend-marker {
 }
 </style>
 <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
 

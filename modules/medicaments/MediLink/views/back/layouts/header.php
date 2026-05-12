@@ -17,6 +17,7 @@ if (!function_exists('e')) {
     <title><?= e($pageTitle ?? 'MediLink') ?></title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body>
     <div class="backoffice-shell">

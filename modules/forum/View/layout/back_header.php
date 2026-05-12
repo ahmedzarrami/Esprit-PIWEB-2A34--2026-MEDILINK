@@ -17,6 +17,7 @@
     <!-- Admin Styles -->
     <link rel="stylesheet" href="public/css/admin.css?v=<?= time() ?>">
     <link rel="stylesheet" href="/files40/assets/css/unified.css">
+<script src="/files40/assets/js/medilink_topbar.js" defer></script>
 </head>
 <body class="admin-body">
 
