@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../controllers/front/HomeController.php';
 require_once __DIR__ . '/../../controllers/front/MedicamentController.php';
 require_once __DIR__ . '/../../controllers/front/OrdonnanceController.php';
 require_once __DIR__ . '/../../controllers/front/AssistantController.php';
+require_once __DIR__ . '/../../controllers/front/ParapharmacieController.php';
 
 $action = $_GET['action'] ?? 'home';
 
@@ -56,6 +57,14 @@ switch ($action) {
 
     case 'assistant':
         (new FrontAssistantController())->index();
+        break;
+
+    case 'parapharmacie':
+        (new FrontParapharmacieController())->index();
+        break;
+
+    case 'show_produit':
+        (new FrontParapharmacieController())->show();
         break;
 
     default:

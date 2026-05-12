@@ -12,7 +12,7 @@ class FrontMedicamentController extends FrontController
 
     public function __construct()
     {
-        $this->db = (new Database())->getConnection();
+        $this->db = Database::getConnection();
     }
 
     public function index(): void
@@ -29,8 +29,8 @@ class FrontMedicamentController extends FrontController
             'prix_desc' => 'prix DESC',
         ];
         $orderBy = $sortMap[$sort] ?? 'nom ASC';
-        $where   = $search !== '' ? 'WHERE nom LIKE :search OR description LIKE :search OR forme LIKE :search OR fabricant LIKE :search' : '';
-        $params  = $search !== '' ? [':search' => '%' . $search . '%'] : [];
+        $where   = $search !== '' ? 'WHERE nom LIKE :s1 OR description LIKE :s2 OR forme LIKE :s3 OR fabricant LIKE :s4' : '';
+        $params  = $search !== '' ? [':s1' => '%'.$search.'%', ':s2' => '%'.$search.'%', ':s3' => '%'.$search.'%', ':s4' => '%'.$search.'%'] : [];
 
         $stmtCount = $this->db->prepare("SELECT COUNT(*) FROM medicaments $where");
         $stmtCount->execute($params);

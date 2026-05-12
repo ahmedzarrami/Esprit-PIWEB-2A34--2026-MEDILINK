@@ -8,7 +8,14 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
 
-
+$aiConfig = require __DIR__ . '/config/ai_config.php';
+$groqKey  = $aiConfig['groq_api_key'] ?? '';
+if (!$groqKey) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Clé API Groq non configurée. Ajoutez GROQ_API_KEY dans config/ai_config.php']);
+    exit;
+}
+define('GROQ_API_KEY', $groqKey);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

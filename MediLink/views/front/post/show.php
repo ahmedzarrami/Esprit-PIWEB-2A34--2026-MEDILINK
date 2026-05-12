@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Post — Discussion';
-require __DIR__ . '/../layouts/header.php';
+require __DIR__ . '/../layouts/forum_header.php';
 ?>
 
 <!-- Breadcrumb -->
@@ -222,6 +222,18 @@ require __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
+<!-- Données discussion pour l'assistant -->
+<?php
+$discussionCtx  = "Post de " . $post['auteur_prenom'] . " " . $post['auteur_nom'] . " :\n" . $post['contenu'];
+foreach ($commentaires as $c) {
+    $discussionCtx .= "\n\n---\nCommentaire de " . $c['auteur_prenom'] . " " . $c['auteur_nom'] . " :\n" . $c['contenu'];
+}
+?>
+<script>
+var DISCUSSION_CONTEXT = <?= json_encode($discussionCtx, JSON_UNESCAPED_UNICODE) ?>;
+var chatHistory = [];
+</script>
+
 <!-- AJAX Script for Reactions & Describe -->
 <script>
 async function loadAndToggleDescribe(idPost) {
@@ -402,26 +414,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function askAssistant(prompt = null) {
         const typingId = showTyping();
-        
+
+        let userMessage, system;
+
+        if (prompt) {
+            system = "Tu es l'assistant médical intelligent de MediLink, un forum de santé tunisien. "
+                   + "Réponds toujours en français, de façon claire, bienveillante et professionnelle. "
+                   + "Pour toute question sérieuse, rappelle de consulter un médecin.";
+            userMessage = prompt;
+        } else {
+            system = "Tu es un expert médical analysant une discussion de forum de santé. "
+                   + "Fais un résumé synthétique des échanges, identifie les préoccupations majeures "
+                   + "et fournis des insights pertinents. Sois concis et rassurant. Réponds en français.";
+            userMessage = "Voici la discussion à résumer :\n\n" + DISCUSSION_CONTEXT;
+        }
+
+        chatHistory.push({ role: "user", content: userMessage });
+
         try {
-            const response = await fetch('index.php?controller=post&action=analyzeAssistantAjax', {
+            const response = await fetch('/medilink_medicament/MediLink/chatbot.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    id_post: <?= $post['id_post'] ?>,
-                    prompt: prompt 
+                body: JSON.stringify({
+                    messages: chatHistory.slice(-10),
+                    system: system
                 })
             });
+
             const res = await response.json();
             document.getElementById(typingId)?.remove();
 
-            if (res.success) {
-                appendMessage(res.data.response, 'ai');
+            if (res.content && res.content[0]?.text) {
+                const aiText = res.content[0].text;
+                chatHistory.push({ role: "assistant", content: aiText });
+                appendMessage(aiText, 'ai');
+            } else if (res.error) {
+                chatHistory.pop();
+                appendMessage("⚠️ " + res.error, 'ai');
             } else {
-                appendMessage("Désolé, une erreur est survenue lors de la communication avec l'assistant.", 'ai');
+                chatHistory.pop();
+                appendMessage("Désolé, une erreur est survenue. Réessayez dans un instant.", 'ai');
             }
         } catch (err) {
             console.error(err);
+            chatHistory.pop();
             document.getElementById(typingId)?.remove();
             appendMessage("Erreur réseau. Vérifiez votre connexion.", 'ai');
         }
@@ -442,10 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     runAnalysisBtn?.addEventListener('click', () => {
-        appendMessage("Peux-tu me résumer la discussion en cours ?", 'user');
-        askAssistant(null); // No prompt = analysis mode
+        appendMessage("Résume la discussion en cours.", 'user');
+        askAssistant(null);
     });
 });
 </script>
 
-<?php require __DIR__ . '/../layouts/footer.php'; ?>
+<?php require __DIR__ . '/../layouts/forum_footer.php'; ?>

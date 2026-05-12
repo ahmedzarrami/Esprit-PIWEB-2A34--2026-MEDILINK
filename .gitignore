@@ -1,4 +1,6 @@
 .claude/
 *.log
-
 *.vsix
+
+# Fichiers de configuration sensibles (clés API)
+MediLink/config/ai_config.php

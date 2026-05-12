@@ -24,7 +24,7 @@ class PostController {
         $post = $stmtPost->fetch();
 
         if (!$post) {
-            header('Location: index.php?controller=forum&action=list');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list');
             exit;
         }
 
@@ -120,7 +120,7 @@ class PostController {
     public function create(): void {
         $idForum = $_GET['id_forum'] ?? null;
         if (!$idForum) {
-            header('Location: index.php?controller=forum&action=list');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list');
             exit;
         }
 
@@ -130,7 +130,7 @@ class PostController {
         $dataForum = $stmtForum->fetch();
 
         if (!$dataForum) {
-            header('Location: index.php?controller=forum&action=list');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list');
             exit;
         }
         
@@ -168,7 +168,7 @@ class PostController {
                 ]);
                 
                 if ($result) {
-                    header('Location: index.php?controller=forum&action=show&id=' . $idForum);
+                    header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=show&id=' . $idForum);
                     exit;
                 } else {
                     $errors[] = "Erreur lors de la publication du post.";
@@ -615,7 +615,7 @@ class PostController {
                 ]);
                 
                 if ($result) {
-                    header('Location: index.php?controller=post&action=adminList');
+                    header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=adminList');
                     exit;
                 } else {
                     $errors[] = "Erreur lors de la création du post.";
@@ -642,7 +642,7 @@ class PostController {
         $post = $stmt->fetch();
 
         if (!$post) {
-            header('Location: index.php?controller=post&action=adminList');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=adminList');
             exit;
         }
 
@@ -690,7 +690,7 @@ class PostController {
         $stmt = $pdo->prepare("DELETE FROM post WHERE id_post = :id");
         $stmt->execute([':id' => $id]);
         
-        header('Location: index.php?controller=post&action=adminList');
+        header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=adminList');
         exit;
     }
 }

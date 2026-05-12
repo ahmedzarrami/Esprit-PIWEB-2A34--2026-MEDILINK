@@ -15,11 +15,11 @@ $medecin_nom = $_SESSION['medecin_nom'] ?? 'Médecin';
 
 $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/fichePatientC.php';
-require_once $basePath . '/Controller/evaluationC.php';
-require_once $basePath . '/Model/evaluation.php';
-require_once $basePath . '/Controller/rendezvousC.php';
-require_once $basePath . '/Model/fichePatient.php';
+require_once $basePath . '/controllers/fichePatientC.php';
+require_once $basePath . '/controllers/evaluationC.php';
+require_once $basePath . '/models/evaluation.php';
+require_once $basePath . '/controllers/rendezvousC.php';
+require_once $basePath . '/models/fichePatient.php';
 
 $fichePatientC = new FichePatientC();
 $evaluationC   = new EvaluationC();

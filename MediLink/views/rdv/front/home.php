@@ -1,3 +1,20 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) session_start();
+// Redirection automatique si déjà connecté
+if (!empty($_SESSION['user_id'])) {
+    $_rdvRole = strtolower($_SESSION['user_role'] ?? '');
+    if ($_rdvRole === 'administrateur') {
+        header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=admin');
+        exit;
+    } elseif ($_rdvRole === 'professionnel') {
+        header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=medecin');
+        exit;
+    } else {
+        header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=patient');
+        exit;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -224,12 +241,23 @@ body {
 
 <!-- ── NAVBAR ── -->
 <nav class="navbar-medilink">
-    <a href="index.php" class="nav-logo">
+    <a href="/medilink_medicament/MediLink/index.php" class="nav-logo">
         <span>MediLink</span>
     </a>
-    <div class="nav-badge">
-        <span class="nav-badge-dot"></span>
-        Service disponible · Lun–Sam 8h–18h
+    <div style="display:flex;align-items:center;gap:16px;">
+        <a href="/medilink_medicament/MediLink/index.php" style="font-size:12px;color:#94a3b8;text-decoration:none;">⬅ Accueil</a>
+        <a href="/medilink_medicament/MediLink/public/front/index.php?action=medicaments" style="font-size:12px;color:#94a3b8;text-decoration:none;">💊 Médicaments</a>
+        <a href="/medilink_medicament/MediLink/public/front/index.php?action=parapharmacie" style="font-size:12px;color:#94a3b8;text-decoration:none;">🧴 Parapharmacie</a>
+        <a href="/medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list" style="font-size:12px;color:#94a3b8;text-decoration:none;">💬 Forum</a>
+        <?php if (!empty($_SESSION['user_id'])): ?>
+        <a href="/medilink_medicament/MediLink/index.php?action=logout" style="font-size:12px;color:#dc2626;text-decoration:none;font-weight:600">Déconnexion</a>
+        <?php else: ?>
+        <a href="/medilink_medicament/MediLink/index.php?page=login" style="font-size:12px;color:#1a56db;text-decoration:none;font-weight:600">🔐 Connexion</a>
+        <?php endif; ?>
+        <div class="nav-badge">
+            <span class="nav-badge-dot"></span>
+            Service disponible · Lun–Sam 8h–18h
+        </div>
     </div>
 </nav>
 
@@ -248,7 +276,7 @@ body {
         <div class="portals">
 
             <!-- Patient -->
-            <a href="View/front/homePatient.php" class="portal-card portal-patient">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient" class="portal-card portal-patient">
                 <div class="portal-icon-wrap">🧑‍⚕️</div>
                 <div class="portal-title">Espace Patient</div>
                 <div class="portal-desc">Réservez vos rendez-vous, consultez votre historique et gérez vos consultations.</div>
@@ -259,7 +287,7 @@ body {
             </a>
 
             <!-- Médecin -->
-            <a href="View/front/loginMedecin.php" class="portal-card portal-medecin">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=medecin" class="portal-card portal-medecin">
                 <div class="portal-icon-wrap">⚕️</div>
                 <div class="portal-title">Espace Médecin</div>
                 <div class="portal-desc">Consultez vos patients, gérez vos plannings et accédez aux fiches médicales.</div>
@@ -270,7 +298,7 @@ body {
             </a>
 
             <!-- Admin -->
-            <a href="View/admin/admin.php" class="portal-card portal-admin">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin" class="portal-card portal-admin">
                 <div class="portal-icon-wrap">⚙️</div>
                 <div class="portal-title">Administration</div>
                 <div class="portal-desc">Gérez les utilisateurs, les médecins et la configuration de la plateforme.</div>
@@ -305,7 +333,7 @@ body {
 <!-- ── FOOTER ── -->
 <div class="footer">
     MediLink &copy; <?php echo date('Y'); ?> &nbsp;·&nbsp;
-    <a href="View/admin/admin.php">Administration</a>
+    <a href="/medilink_medicament/MediLink/index.php">Retour à l'accueil</a>
 </div>
 
 </body>

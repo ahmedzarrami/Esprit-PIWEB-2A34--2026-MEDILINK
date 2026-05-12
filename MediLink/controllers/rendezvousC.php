@@ -89,9 +89,12 @@ class RendezvousC {
     }
 
     public function getRendezvousByMedecinId($medecin_id) {
-        $sql = "SELECT r.*, m.nom as medecin_nom, m.specialite 
+        $sql = "SELECT r.*, m.nom as medecin_nom, m.specialite,
+                       p.nom as patient_nom, p.prenom as patient_prenom,
+                       p.telephone as patient_tel, p.email as patient_email
                 FROM rendezvous r
                 JOIN medecins m ON r.medecin_id = m.id
+                LEFT JOIN patients p ON r.patient_id = p.id
                 WHERE r.medecin_id = :medecin_id
                 ORDER BY r.date_rdv DESC, r.heure_rdv ASC";
         $db = config::getConnexion();

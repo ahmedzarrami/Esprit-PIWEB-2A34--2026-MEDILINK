@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Modération des Commentaires';
-require __DIR__ . '/../layouts/header.php';
+require __DIR__ . '/../layouts/forum_admin_header.php';
 ?>
 
 <!-- Page Header -->
@@ -120,4 +120,4 @@ require __DIR__ . '/../layouts/header.php';
     <?php endif; ?>
 </div>
 
-<?php require __DIR__ . '/../layouts/footer.php'; ?>
+<?php require __DIR__ . '/../layouts/forum_admin_footer.php'; ?>

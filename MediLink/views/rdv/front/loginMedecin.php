@@ -1,26 +1,74 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // ── Déconnexion ──
 if (isset($_GET['logout'])) {
     session_destroy();
-    header('Location: loginMedecin.php?deconnecte=1');
+    header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=medecin&deconnecte=1');
     exit;
 }
 
-$basePath = dirname(__DIR__) . '/..';
+$basePath = dirname(dirname(dirname(__DIR__)));
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/rendezvousC.php';
+require_once $basePath . '/controllers/rendezvousC.php';
 
 $rendezvousController = new RendezvousC();
 $error_message        = '';
 $success_message      = '';
 $deconnecte           = isset($_GET['deconnecte']);
 
-// ── Déjà connecté → rediriger ──
-if (isset($_SESSION['medecin_id']) && !empty($_SESSION['medecin_id'])) {
+// ── Bridge auth unifiée → session RDV médecin ──
+if (empty($_SESSION['medecin_id']) && !empty($_SESSION['user_id']) && strtolower($_SESSION['user_role'] ?? '') === 'professionnel') {
+    $pdo = config::getConnexion();
+
+    // 1. Chercher dans medecins par email
+    $stmt = $pdo->prepare("SELECT id, nom, specialite FROM medecins WHERE email = :email LIMIT 1");
+    $stmt->execute([':email' => $_SESSION['user_email'] ?? '']);
+    $rdvM = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // 2. Pas trouvé → créer depuis utilisateur + professionnel_sante
+    if (!$rdvM) {
+        $stmtU = $pdo->prepare("
+            SELECT u.prenom, u.nom, u.email, u.telephone, ps.specialite
+            FROM utilisateur u
+            LEFT JOIN professionnel_sante ps ON ps.id = u.id
+            WHERE u.id = :id LIMIT 1
+        ");
+        $stmtU->execute([':id' => (int)$_SESSION['user_id']]);
+        $uInfo = $stmtU->fetch(PDO::FETCH_ASSOC);
+
+        if ($uInfo) {
+            $nomComplet = 'Dr. ' . trim($uInfo['prenom']) . ' ' . trim($uInfo['nom']);
+            $spec = !empty($uInfo['specialite']) ? $uInfo['specialite'] : 'Médecine générale';
+            $stmtIns = $pdo->prepare("
+                INSERT IGNORE INTO medecins (nom, specialite, email, telephone)
+                VALUES (:nom, :spec, :email, :tel)
+            ");
+            $stmtIns->execute([
+                ':nom'   => $nomComplet,
+                ':spec'  => $spec,
+                ':email' => $uInfo['email'],
+                ':tel'   => $uInfo['telephone'] ?? '',
+            ]);
+            $stmt2 = $pdo->prepare("SELECT id, nom, specialite FROM medecins WHERE email = :email LIMIT 1");
+            $stmt2->execute([':email' => $uInfo['email']]);
+            $rdvM = $stmt2->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+
+    if ($rdvM) {
+        $_SESSION['medecin_id']         = $rdvM['id'];
+        $_SESSION['medecin_nom']        = $rdvM['nom'];
+        $_SESSION['medecin_specialite'] = $rdvM['specialite'];
+    }
+}
+
+// ── Déjà connecté → rediriger directement ──
+if (!empty($_SESSION['medecin_id'])) {
     if ($rendezvousController->medecinExists($_SESSION['medecin_id'])) {
-        header('Location: gestionFichePatient.php');
+        header('Location: /medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php');
         exit;
     } else {
         session_destroy();
@@ -43,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['medecin_nom']        = $medecin['nom'];
             $_SESSION['medecin_specialite'] = $medecin['specialite'];
             $success_message = '✅ Authentification réussie ! Redirection...';
-            header('Refresh: 1; url=gestionFichePatient.php');
+            header('Refresh: 1; url=/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php');
         } else {
             $error_message = '❌ ID médecin non trouvé. Accès refusé.';
         }
@@ -266,7 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Lien retour -->
 <div class="back-link">
-    <a href="../../index.php">← Retour à l'accueil</a>
+    <a href="/medilink_medicament/MediLink/index.php">← Retour à l'accueil</a>
 </div>
 
 </body>

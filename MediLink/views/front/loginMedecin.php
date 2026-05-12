@@ -10,7 +10,7 @@ if (isset($_GET['logout'])) {
 
 $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/rendezvousC.php';
+require_once $basePath . '/controllers/rendezvousC.php';
 
 $rendezvousController = new RendezvousC();
 $error_message        = '';
@@ -266,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Lien retour -->
 <div class="back-link">
-    <a href="../../index.php">← Retour à l'accueil</a>
+    <a href="/medilink_medicament/MediLink/index.php">← Retour à l'accueil</a>
 </div>
 
 </body>

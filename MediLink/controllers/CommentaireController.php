@@ -12,7 +12,7 @@ class CommentaireController {
      */
     public function add(): void {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: index.php?controller=forum&action=list');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list');
             exit;
         }
 
@@ -40,7 +40,7 @@ class CommentaireController {
             // Stocker les erreurs en session pour les afficher après redirection
             $_SESSION['comment_errors'] = $errors;
             $_SESSION['comment_contenu'] = $contenu;
-            header('Location: index.php?controller=post&action=show&id=' . $idPost);
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=show&id=' . $idPost);
             exit;
         }
 
@@ -58,7 +58,7 @@ class CommentaireController {
             $_SESSION['comment_errors'] = ["Erreur lors de l'ajout du commentaire."];
         }
 
-        header('Location: index.php?controller=post&action=show&id=' . $idPost);
+        header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=show&id=' . $idPost);
         exit;
     }
 
@@ -202,9 +202,9 @@ class CommentaireController {
         // Rediriger vers la bonne page selon le contexte
         $from = $_GET['from'] ?? 'admin';
         if ($from === 'post' && $commentaire) {
-            header('Location: index.php?controller=post&action=show&id=' . $commentaire['id_post']);
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=post&action=show&id=' . $commentaire['id_post']);
         } else {
-            header('Location: index.php?controller=commentaire&action=adminList');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=commentaire&action=adminList');
         }
         exit;
     }

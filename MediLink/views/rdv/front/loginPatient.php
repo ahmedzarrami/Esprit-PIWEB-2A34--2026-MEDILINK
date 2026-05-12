@@ -1,16 +1,18 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // ── Déconnexion ──
 if (isset($_GET['logout'])) {
     session_destroy();
-    header('Location: loginPatient.php?deconnecte=1');
+    header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=patient&logout=1');
     exit;
 }
 
 // ── Déjà connecté → rediriger ──
 if (isset($_SESSION['patient_id']) && !empty($_SESSION['patient_id'])) {
-    header('Location: homePatient.php');
+    header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=patient');
     exit;
 }
 
@@ -19,8 +21,8 @@ $success = isset($_GET['deconnecte']);
 
 // ── Traitement connexion ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_once dirname(dirname(__DIR__)) . '/config.php';
-    require_once dirname(dirname(__DIR__)) . '/Controller/rendezvousC.php';
+    require_once dirname(dirname(dirname(__DIR__))) . '/config.php';
+    require_once dirname(dirname(dirname(__DIR__))) . '/controllers/rendezvousC.php';
 
     $patient_id = trim($_POST['patient_id'] ?? '');
 
@@ -37,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['patient_nom']    = $patient['nom'];
                 $_SESSION['patient_prenom'] = $patient['prenom'];
                 $_SESSION['patient_email']  = $patient['email'];
-                header('Location: homePatient.php');
+                header('Location: /medilink_medicament/MediLink/index.php?module=rdv&action=patient');
                 exit;
             } else {
                 $error = 'Numéro de patient invalide. Veuillez vérifier et réessayer.';
@@ -276,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <div class="back-link">
-    <a href="../../index.php">← Retour à l'accueil</a>
+    <a href="/medilink_medicament/MediLink/index.php">← Retour à l'accueil</a>
 </div>
 
 </body>

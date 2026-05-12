@@ -13,7 +13,7 @@ class FrontOrdonnanceController extends FrontController
 
     public function __construct()
     {
-        $this->db = (new Database())->getConnection();
+        $this->db = Database::getConnection();
     }
 
     public function index(): void
@@ -22,8 +22,8 @@ class FrontOrdonnanceController extends FrontController
         $page    = max(1, (int) ($_GET['page']   ?? 1));
         $perPage = 10;
 
-        $where  = $search !== '' ? 'WHERE numero LIKE :search OR patient_nom LIKE :search' : '';
-        $params = $search !== '' ? [':search' => '%' . $search . '%'] : [];
+        $where  = $search !== '' ? 'WHERE numero LIKE :s1 OR patient_nom LIKE :s2' : '';
+        $params = $search !== '' ? [':s1' => '%'.$search.'%', ':s2' => '%'.$search.'%'] : [];
 
         $stmtCount = $this->db->prepare("SELECT COUNT(*) FROM ordonnances $where");
         $stmtCount->execute($params);
@@ -80,15 +80,15 @@ class FrontOrdonnanceController extends FrontController
         $errors = [];
         if ($patientNom === '')     $errors[] = 'Le nom du patient est requis.';
         if ($dateOrdonnance === '') $errors[] = 'La date de l\'ordonnance est requise.';
-        if (empty($lignes))         $errors[] = 'Veuillez ajouter au moins un médicament.';
+        if (empty($lignes))         $errors[] = 'Veuillez ajouter au moins un mÃ©dicament.';
 
         foreach ($lignes as $i => $ligne) {
             $n = $i + 1;
-            if (empty($ligne['medicament_id']))         $errors[] = "Ligne $n : sélectionnez un médicament.";
+            if (empty($ligne['medicament_id']))         $errors[] = "Ligne $n : sÃ©lectionnez un mÃ©dicament.";
             if (empty(trim($ligne['posologie'] ?? ''))) $errors[] = "Ligne $n : la posologie est requise.";
         }
 
-        /* Validation métier (doublons, quantités) */
+        /* Validation mÃ©tier (doublons, quantitÃ©s) */
         $metierErrors = $this->validateMetier($lignes, $patientAge !== '' ? (int) $patientAge : null);
         $errors       = array_merge($errors, $metierErrors);
 
@@ -137,7 +137,7 @@ class FrontOrdonnanceController extends FrontController
             ]);
         }
 
-        /* Vérification d'incompatibilités (avertissements non bloquants) */
+        /* VÃ©rification d'incompatibilitÃ©s (avertissements non bloquants) */
         $warnings = $this->checkIncompatibilities($lignes);
         if (!empty($warnings)) {
             if (session_status() === PHP_SESSION_NONE) session_start();
@@ -156,7 +156,7 @@ class FrontOrdonnanceController extends FrontController
 
         if ($row === false) {
             http_response_code(404);
-            $this->render('medicament/not-found', ['errorMessage' => 'L\'ordonnance demandée est introuvable.']);
+            $this->render('medicament/not-found', ['errorMessage' => 'L\'ordonnance demandÃ©e est introuvable.']);
             return;
         }
 
@@ -229,15 +229,15 @@ class FrontOrdonnanceController extends FrontController
         $errors = [];
         if ($patientNom === '')     $errors[] = 'Le nom du patient est requis.';
         if ($dateOrdonnance === '') $errors[] = 'La date de l\'ordonnance est requise.';
-        if (empty($lignes))         $errors[] = 'Veuillez ajouter au moins un médicament.';
+        if (empty($lignes))         $errors[] = 'Veuillez ajouter au moins un mÃ©dicament.';
 
         foreach ($lignes as $i => $ligne) {
             $n = $i + 1;
-            if (empty($ligne['medicament_id']))         $errors[] = "Ligne $n : sélectionnez un médicament.";
+            if (empty($ligne['medicament_id']))         $errors[] = "Ligne $n : sÃ©lectionnez un mÃ©dicament.";
             if (empty(trim($ligne['posologie'] ?? ''))) $errors[] = "Ligne $n : la posologie est requise.";
         }
 
-        /* Validation métier (doublons, quantités) */
+        /* Validation mÃ©tier (doublons, quantitÃ©s) */
         $metierErrors = $this->validateMetier($lignes, $patientAge !== '' ? (int) $patientAge : null);
         $errors       = array_merge($errors, $metierErrors);
 
@@ -285,7 +285,7 @@ class FrontOrdonnanceController extends FrontController
             ]);
         }
 
-        /* Vérification d'incompatibilités (avertissements non bloquants) */
+        /* VÃ©rification d'incompatibilitÃ©s (avertissements non bloquants) */
         $warnings = $this->checkIncompatibilities($lignes);
         if (!empty($warnings)) {
             if (session_status() === PHP_SESSION_NONE) session_start();
@@ -311,7 +311,7 @@ class FrontOrdonnanceController extends FrontController
     }
 
     /**
-     * Validation métier bloquante : doublons de médicaments.
+     * Validation mÃ©tier bloquante : doublons de mÃ©dicaments.
      */
     private function validateMetier(array $lignes, ?int $patientAge): array
     {
@@ -323,8 +323,8 @@ class FrontOrdonnanceController extends FrontController
             if ($medId <= 0) continue;
 
             if (isset($seenIds[$medId])) {
-                $errors[] = 'Doublon détecté : le médicament de la ligne ' . ($i + 1)
-                    . ' est identique à la ligne ' . $seenIds[$medId]
+                $errors[] = 'Doublon dÃ©tectÃ© : le mÃ©dicament de la ligne ' . ($i + 1)
+                    . ' est identique Ã  la ligne ' . $seenIds[$medId]
                     . '. Supprimez le doublon ou fusionnez les lignes.';
             } else {
                 $seenIds[$medId] = $i + 1;
@@ -335,8 +335,8 @@ class FrontOrdonnanceController extends FrontController
     }
 
     /**
-     * Contrôle d'incompatibilités non bloquant (avertissements session).
-     * Vérifie des paires connues par correspondance partielle sur le nom du médicament.
+     * ContrÃ´le d'incompatibilitÃ©s non bloquant (avertissements session).
+     * VÃ©rifie des paires connues par correspondance partielle sur le nom du mÃ©dicament.
      */
     private function checkIncompatibilities(array $lignes): array
     {
@@ -356,13 +356,13 @@ class FrontOrdonnanceController extends FrontController
             $names[(int) $row['id']] = strtolower($row['nom']);
         }
 
-        /* Paires incompatibles connues (vérification par sous-chaîne) */
+        /* Paires incompatibles connues (vÃ©rification par sous-chaÃ®ne) */
         $pairs = [
-            ['doliprane',    'ibuprofène',   'Association Doliprane + Ibuprofène : risque de surdosage en antalgiques'],
-            ['doliprane',    'ibuprofene',   'Association Doliprane + Ibuprofène : risque de surdosage en antalgiques'],
-            ['paracetamol',  'ibuprofène',   'Association paracétamol + ibuprofène : consulter le prescripteur'],
-            ['amoxicilline', 'augmentin',    'Amoxicilline + Augmentin contiennent tous deux de l\'amoxicilline — doublon de principe actif'],
-            ['amoxicilline', 'clamoxyl',     'Amoxicilline + Clamoxyl sont équivalents — prescription en doublon de principe actif'],
+            ['doliprane',    'ibuprofÃ¨ne',   'Association Doliprane + IbuprofÃ¨ne : risque de surdosage en antalgiques'],
+            ['doliprane',    'ibuprofene',   'Association Doliprane + IbuprofÃ¨ne : risque de surdosage en antalgiques'],
+            ['paracetamol',  'ibuprofÃ¨ne',   'Association paracÃ©tamol + ibuprofÃ¨ne : consulter le prescripteur'],
+            ['amoxicilline', 'augmentin',    'Amoxicilline + Augmentin contiennent tous deux de l\'amoxicilline â€” doublon de principe actif'],
+            ['amoxicilline', 'clamoxyl',     'Amoxicilline + Clamoxyl sont Ã©quivalents â€” prescription en doublon de principe actif'],
         ];
 
         $warnings = [];
@@ -376,7 +376,7 @@ class FrontOrdonnanceController extends FrontController
                 if (strpos($name, $b) !== false) $hasB = true;
             }
             if ($hasA && $hasB) {
-                $warnings[] = '⚠ ' . $msg . '.';
+                $warnings[] = 'âš  ' . $msg . '.';
             }
         }
 
@@ -442,3 +442,4 @@ class FrontOrdonnanceController extends FrontController
         ];
     }
 }
+

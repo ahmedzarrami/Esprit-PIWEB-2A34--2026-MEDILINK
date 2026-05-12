@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+
+# Redirect root to front public index
+RewriteRule ^$ MediLink/public/front/index.php [L,R=302]
+RewriteRule ^front/?$ MediLink/public/front/index.php [L,R=302]
+RewriteRule ^back/?$ MediLink/public/back/index.php [L,R=302]

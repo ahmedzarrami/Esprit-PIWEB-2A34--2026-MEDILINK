@@ -248,7 +248,7 @@ body {
         <div class="portals">
 
             <!-- Patient -->
-            <a href="Views/front/homePatient.php" class="portal-card portal-patient">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient" class="portal-card portal-patient">
                 <div class="portal-icon-wrap">🧑‍⚕️</div>
                 <div class="portal-title">Espace Patient</div>
                 <div class="portal-desc">Réservez vos rendez-vous, consultez votre historique et gérez vos consultations.</div>
@@ -259,7 +259,7 @@ body {
             </a>
 
             <!-- Médecin -->
-            <a href="Views/front/loginMedecin.php" class="portal-card portal-medecin">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=medecin" class="portal-card portal-medecin">
                 <div class="portal-icon-wrap">⚕️</div>
                 <div class="portal-title">Espace Médecin</div>
                 <div class="portal-desc">Consultez vos patients, gérez vos plannings et accédez aux fiches médicales.</div>
@@ -270,7 +270,7 @@ body {
             </a>
 
             <!-- Admin -->
-            <a href="Views/admin/admin.php" class="portal-card portal-admin">
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin" class="portal-card portal-admin">
                 <div class="portal-icon-wrap">⚙️</div>
                 <div class="portal-title">Administration</div>
                 <div class="portal-desc">Gérez les utilisateurs, les médecins et la configuration de la plateforme.</div>
@@ -305,7 +305,7 @@ body {
 <!-- ── FOOTER ── -->
 <div class="footer">
     MediLink &copy; <?php echo date('Y'); ?> &nbsp;·&nbsp;
-    <a href="Views/admin/admin.php">Administration</a>
+    <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin">Administration</a>
 </div>
 
 </body>

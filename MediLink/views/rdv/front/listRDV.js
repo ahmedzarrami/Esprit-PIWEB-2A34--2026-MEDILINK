@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function renderRDVs() {
         try {
-            const response = await fetch('/ProjetWeb/api.php?action=list');
+            const response = await fetch('api.php?action=list');
             const result = await response.json();
             
             let rdvs = [];

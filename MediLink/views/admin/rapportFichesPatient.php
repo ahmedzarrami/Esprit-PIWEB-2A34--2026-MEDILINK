@@ -1,7 +1,7 @@
 <?php
 $basePath = dirname(__DIR__) . '/..';
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/fichePatientC.php';
+require_once $basePath . '/controllers/fichePatientC.php';
 
 $fichePatientC = new FichePatientC();
 ?>
@@ -309,14 +309,14 @@ $fichePatientC = new FichePatientC();
 <body>
     <!-- ── NAVBAR ── -->
     <nav class="navbar-medilink">
-        <a href="admin.php" class="nav-logo">
+        <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin" class="nav-logo">
             <span>MediLink</span>
         </a>
         <div class="nav-links">
-            <a href="admin.php">Accueil</a>
-            <a href="rapportFichesPatient.php" class="active">Rapport Fiches</a>
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin">Accueil</a>
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=admin" class="active">Rapport Fiches</a>
         </div>
-        <a href="../../index.php" class="btn-home">
+        <a href="/medilink_medicament/MediLink/index.php" class="btn-home">
              Retour accueil
         </a>
     </nav>

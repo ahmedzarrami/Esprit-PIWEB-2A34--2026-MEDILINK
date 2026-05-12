@@ -1,176 +1,124 @@
 <?php
-/**
- * Classe abstraite Utilisateur
- * Représente un utilisateur générique du système MediLink
- * Héritage : Patient, ProfessionnelSante, Administrateur
- */
-abstract class Utilisateur {
-    // Propriétés privées (encapsulation OOP)
-    private ?int $id;
-    private string $nom;
-    private string $prenom;
-    private string $email;
-    private string $motDePasse;
-    private ?string $telephone;
-    private string $statutCompte;
-    private string $role;
 
-    /**
-     * Constructeur
-     */
+/**
+ * Classe abstraite Utilisateur (Modèle)
+ * Contient les attributs et les signatures de méthodes.
+ * L'implémentation des méthodes se trouve dans controllers/Utilisateur.php
+ */
+abstract class Utilisateur
+{
+    // ── Propriétés privées ──
+    private ?int    $id           = null;
+    private string  $nom          = '';
+    private string  $prenom       = '';
+    private string  $email        = '';
+    private string  $motDePasse   = '';
+    private string  $telephone    = '';
+    private string  $statutCompte = 'Actif';
+    private string  $role         = '';
+    private ?string $dateCreation = null;
+
+    // ── Constructeur ──
     public function __construct(
-        ?int $id = null,
         string $nom = '',
         string $prenom = '',
         string $email = '',
         string $motDePasse = '',
-        ?string $telephone = null,
-        string $statutCompte = 'actif',
-        string $role = 'patient'
+        string $telephone = '',
+        string $statutCompte = 'Actif',
+        string $role = ''
     ) {
-        $this->id = $id;
-        $this->nom = $nom;
-        $this->prenom = $prenom;
-        $this->email = $email;
-        $this->motDePasse = $motDePasse;
-        $this->telephone = $telephone;
+        $this->nom          = $nom;
+        $this->prenom       = $prenom;
+        $this->email        = $email;
+        $this->motDePasse   = $motDePasse;
+        $this->telephone    = $telephone;
         $this->statutCompte = $statutCompte;
-        $this->role = $role;
+        $this->role         = $role;
     }
 
-    // ===== GETTERS =====
-    public function getId(): ?int { return $this->id; }
-    public function getNom(): string { return $this->nom; }
-    public function getPrenom(): string { return $this->prenom; }
-    public function getEmail(): string { return $this->email; }
-    public function getMotDePasse(): string { return $this->motDePasse; }
-    public function getTelephone(): ?string { return $this->telephone; }
-    public function getStatutCompte(): string { return $this->statutCompte; }
-    public function getRole(): string { return $this->role; }
-    public function getNomComplet(): string { return $this->prenom . ' ' . $this->nom; }
+    // ══════════════════════════════════════════
+    // GETTERS
+    // ══════════════════════════════════════════
+    public function getId(): ?int            { return $this->id; }
+    public function getNom(): string         { return $this->nom; }
+    public function getPrenom(): string      { return $this->prenom; }
+    public function getEmail(): string       { return $this->email; }
+    public function getMotDePasse(): string  { return $this->motDePasse; }
+    public function getTelephone(): string   { return $this->telephone; }
+    public function getStatutCompte(): string{ return $this->statutCompte; }
+    public function getRole(): string        { return $this->role; }
+    public function getDateCreation(): ?string { return $this->dateCreation; }
 
-    // ===== SETTERS =====
-    public function setId(int $id): void { $this->id = $id; }
-    public function setNom(string $nom): void { $this->nom = $nom; }
-    public function setPrenom(string $prenom): void { $this->prenom = $prenom; }
-    public function setEmail(string $email): void { $this->email = $email; }
-    public function setMotDePasse(string $motDePasse): void { $this->motDePasse = $motDePasse; }
-    public function setTelephone(?string $telephone): void { $this->telephone = $telephone; }
-    public function setStatutCompte(string $statutCompte): void { $this->statutCompte = $statutCompte; }
-    public function setRole(string $role): void { $this->role = $role; }
+    // ══════════════════════════════════════════
+    // SETTERS
+    // ══════════════════════════════════════════
+    public function setId(?int $id): void            { $this->id = $id; }
+    public function setNom(string $nom): void         { $this->nom = $nom; }
+    public function setPrenom(string $prenom): void   { $this->prenom = $prenom; }
+    public function setEmail(string $email): void     { $this->email = $email; }
+    public function setMotDePasse(string $mdp): void  { $this->motDePasse = $mdp; }
+    public function setTelephone(string $tel): void   { $this->telephone = $tel; }
+    public function setStatutCompte(string $s): void  { $this->statutCompte = $s; }
+    public function setRole(string $role): void       { $this->role = $role; }
+    public function setDateCreation(?string $d): void { $this->dateCreation = $d; }
 
-    // ===== MÉTHODES ABSTRAITES =====
-    /**
-     * Inscription de l'utilisateur
-     */
-    abstract public function sInscrire(): bool;
-
-    /**
-     * Connexion de l'utilisateur
-     */
-    abstract public function seConnecter(string $email, string $motDePasse): bool;
+    
 
     /**
-     * Modification du profil
+     * Inscription — Insère dans la table utilisateur
+     * Retourne l'ID inséré
      */
-    public function modifierProfil(): bool {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("UPDATE utilisateur SET nom = :nom, prenom = :prenom, email = :email, telephone = :telephone WHERE id = :id");
-        return $stmt->execute([
-            ':nom'       => $this->nom,
-            ':prenom'    => $this->prenom,
-            ':email'     => $this->email,
-            ':telephone' => $this->telephone,
-            ':id'        => $this->id
-        ]);
-    }
+    abstract public function sInscrire(): int;
 
     /**
-     * Récupérer un utilisateur par son ID
+     * Connexion — Vérifie email et mot de passe
+     * Retourne les données utilisateur ou false
      */
-    public static function getById(int $id): ?array {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM utilisateur WHERE id = :id");
-        $stmt->execute([':id' => $id]);
-        $result = $stmt->fetch();
-        return $result ?: null;
-    }
+    abstract public static function seConnecter(string $email, string $motDePasse);
 
     /**
-     * Récupérer tous les utilisateurs
+     * Modifier le profil (table utilisateur)
      */
-    public static function getAll(): array {
-        $pdo = Database::getConnection();
-        $stmt = $pdo->query("SELECT * FROM utilisateur ORDER BY nom, prenom");
-        return $stmt->fetchAll();
-    }
-}
+    abstract public function modifierProfil(): bool;
 
-/**
- * Classe Patient — hérite de Utilisateur
- */
-class Patient extends Utilisateur {
-    private ?string $dateNaissance;
-    private ?string $sexe;
-    private ?string $adresse;
+    /**
+     * Modifier le mot de passe
+     */
+    abstract public function changerMotDePasse(string $nouveauMdp): bool;
 
-    public function __construct(
-        ?int $id = null, string $nom = '', string $prenom = '', string $email = '',
-        string $motDePasse = '', ?string $telephone = null, string $statutCompte = 'actif',
-        ?string $dateNaissance = null, ?string $sexe = null, ?string $adresse = null
-    ) {
-        parent::__construct($id, $nom, $prenom, $email, $motDePasse, $telephone, $statutCompte, 'patient');
-        $this->dateNaissance = $dateNaissance;
-        $this->sexe = $sexe;
-        $this->adresse = $adresse;
-    }
+    /**
+     * Récupérer un utilisateur par ID
+     */
+    abstract public static function getById(int $id): ?array;
 
-    public function getDateNaissance(): ?string { return $this->dateNaissance; }
-    public function getSexe(): ?string { return $this->sexe; }
-    public function getAdresse(): ?string { return $this->adresse; }
+    /**
+     * Récupérer un utilisateur par email
+     */
+    abstract public static function getByEmail(string $email): ?array;
 
-    public function sInscrire(): bool { return true; }
-    public function seConnecter(string $email, string $motDePasse): bool { return true; }
-}
+    /**
+     * Lister tous les utilisateurs
+     */
+    abstract public static function getAll(): array;
 
-/**
- * Classe ProfessionnelSante — hérite de Utilisateur
- */
-class ProfessionnelSante extends Utilisateur {
-    private ?string $specialite;
-    private ?string $numeroOrdre;
-    private ?string $biographie;
+    /**
+     * Supprimer un utilisateur par ID
+     */
+    abstract public static function supprimer(int $id): bool;
 
-    public function __construct(
-        ?int $id = null, string $nom = '', string $prenom = '', string $email = '',
-        string $motDePasse = '', ?string $telephone = null, string $statutCompte = 'actif',
-        ?string $specialite = null, ?string $numeroOrdre = null, ?string $biographie = null
-    ) {
-        parent::__construct($id, $nom, $prenom, $email, $motDePasse, $telephone, $statutCompte, 'professionnel');
-        $this->specialite = $specialite;
-        $this->numeroOrdre = $numeroOrdre;
-        $this->biographie = $biographie;
-    }
+    /**
+     * Compter le nombre d'utilisateurs par rôle
+     */
+    abstract public static function countByRole(string $role = ''): int;
 
-    public function getSpecialite(): ?string { return $this->specialite; }
-    public function getNumeroOrdre(): ?string { return $this->numeroOrdre; }
-    public function getBiographie(): ?string { return $this->biographie; }
+    /**
+     * Compter les comptes actifs
+     */
+    abstract public static function countActifs(): int;
 
-    public function sInscrire(): bool { return true; }
-    public function seConnecter(string $email, string $motDePasse): bool { return true; }
-}
-
-/**
- * Classe Administrateur — hérite de Utilisateur
- */
-class Administrateur extends Utilisateur {
-    public function __construct(
-        ?int $id = null, string $nom = '', string $prenom = '', string $email = '',
-        string $motDePasse = '', ?string $telephone = null, string $statutCompte = 'actif'
-    ) {
-        parent::__construct($id, $nom, $prenom, $email, $motDePasse, $telephone, $statutCompte, 'administrateur');
-    }
-
-    public function sInscrire(): bool { return true; }
-    public function seConnecter(string $email, string $motDePasse): bool { return true; }
+    /**
+     * Vérifier si un email existe déjà
+     */
+    abstract public static function emailExiste(string $email, ?int $excludeId = null): bool;
 }

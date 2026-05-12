@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'Nouveau Post';
-require __DIR__ . '/../layouts/header.php';
+require __DIR__ . '/../layouts/forum_header.php';
 ?>
 
 <!-- Breadcrumb -->
@@ -72,4 +72,4 @@ require __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php require __DIR__ . '/../layouts/footer.php'; ?>
+<?php require __DIR__ . '/../layouts/forum_footer.php'; ?>

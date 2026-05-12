@@ -15,47 +15,21 @@ if (!function_exists('e')) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle ?? 'MediLink') ?></title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/medilink_medicament/MediLink/public/back/css/style.css">
 </head>
 <body>
     <div class="backoffice-shell">
-        <aside class="sidebar">
-            <div class="brand-block">
-                <div class="brand-logo">Medi<span>Link</span></div>
-                <p class="brand-text">Back Office Secrétaire</p>
-            </div>
+        <?php include dirname(__DIR__) . '/layouts/sidebar.php'; ?>
 
-            <nav class="sidebar-nav">
-                <a href="index.php?action=index" class="nav-item <?= (($_GET['action'] ?? 'index') === 'index') ? 'active' : '' ?>">Tableau de bord</a>
-                <a href="#" class="nav-item">Agenda</a>
-                <a href="#" class="nav-item">Patients</a>
-                <a href="#" class="nav-item">Messagerie</a>
-                <a href="#" class="nav-item">Profils médecins</a>
-                <a href="index.php?action=index" class="nav-item active-soft">Médicaments</a>
-            </nav>
-        </aside>
-
-        <div class="content-area">
-            <header class="topbar">
-                <div>
-                    <h1><?= e($pageTitle ?? 'MediLink') ?></h1>
+        <div class="content-area" style="margin-left: 280px; min-height: 100vh;">
+            <div class="topbar" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); padding: 16px 40px; display: flex; flex-direction:column; align-items:flex-start; gap: 16px; position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                    <div>
+                        <div style="font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px;"><?= e($pageTitle ?? 'Gestion des Médicaments') ?></div>
+                        <div style="font-size: 13px; color: #64748b; margin-top: 2px; font-weight: 500;">Gérez l'inventaire et les produits</div>
+                    </div>
                 </div>
-                <a href="../front/index.php" class="btn-frontoffice" title="Aller au Front Office">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    Front Office
-                </a>
-                <div class="topbar-badge">Secrétaire</div>
-            </header>
-
-            <section class="module-strip">
-                <div class="module-card">Gestion des RDV</div>
-                <div class="module-card">Suivi des Patients</div>
-                <div class="module-card">Messagerie Sécurisée</div>
-                <div class="module-card">Gestion des Profils</div>
-                <div class="module-card selected">Gestion des Médicaments</div>
-            </section>
+            </div>
 
             <?php if (is_array($flash)): ?>
                 <div class="flash flash-<?= e((string) ($flash['type'] ?? 'success')) ?>">

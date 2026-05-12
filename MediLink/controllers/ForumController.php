@@ -57,7 +57,7 @@ class ForumController {
         $data = $stmt->fetch();
 
         if (!$data) {
-            header('Location: index.php?controller=forum&action=list');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list');
             exit;
         }
 
@@ -230,7 +230,7 @@ class ForumController {
                 ]);
 
                 if ($result) {
-                    header('Location: index.php?controller=forum&action=adminList&message=created');
+                    header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=adminList&message=created');
                     exit;
                 } else {
                     $errors[] = "Erreur lors de la création du forum.";
@@ -252,7 +252,7 @@ class ForumController {
         $data = $stmt->fetch();
 
         if (!$data) {
-            header('Location: index.php?controller=forum&action=adminList');
+            header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=adminList');
             exit;
         }
 
@@ -290,7 +290,7 @@ class ForumController {
                 ]);
 
                 if ($result) {
-                    header('Location: index.php?controller=forum&action=adminList&message=updated');
+                    header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=adminList&message=updated');
                     exit;
                 } else {
                     $errors[] = "Erreur lors de la modification du forum.";
@@ -310,7 +310,7 @@ class ForumController {
         $stmt = $pdo->prepare("DELETE FROM forum WHERE id_forum = :id");
         $stmt->execute([':id' => $id]);
         
-        header('Location: index.php?controller=forum&action=adminList&message=deleted');
+        header('Location: /medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=adminList&message=deleted');
         exit;
     }
 }

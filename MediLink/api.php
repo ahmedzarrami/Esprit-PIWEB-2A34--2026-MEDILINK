@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/Controller/rendezvousC.php';
+require_once __DIR__ . '/controllers/rendezvousC.php';
 
 $action = $_GET['action'] ?? '';
 $controller = new RendezvousC();

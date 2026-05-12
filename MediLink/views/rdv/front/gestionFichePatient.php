@@ -1,11 +1,13 @@
 <?php
 // Démarrer la session
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Vérifier si l'utilisateur est authentifié
 if (!isset($_SESSION['medecin_id']) || empty($_SESSION['medecin_id'])) {
     // Redirectionner vers la page de login
-    header('Location: loginMedecin.php');
+    header('Location: /medilink_medicament/MediLink/views/rdv/front/loginMedecin.php');
     exit;
 }
 
@@ -13,13 +15,13 @@ if (!isset($_SESSION['medecin_id']) || empty($_SESSION['medecin_id'])) {
 $medecin_id = $_SESSION['medecin_id'];
 $medecin_nom = $_SESSION['medecin_nom'] ?? 'Médecin';
 
-$basePath = dirname(__DIR__) . '/..';
+$basePath = dirname(dirname(dirname(__DIR__)));
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/fichePatientC.php';
-require_once $basePath . '/Controller/evaluationC.php';
-require_once $basePath . '/Model/evaluation.php';
-require_once $basePath . '/Controller/rendezvousC.php';
-require_once $basePath . '/Model/fichePatient.php';
+require_once $basePath . '/controllers/fichePatientC.php';
+require_once $basePath . '/controllers/evaluationC.php';
+require_once $basePath . '/models/evaluation.php';
+require_once $basePath . '/controllers/rendezvousC.php';
+require_once $basePath . '/models/fichePatient.php';
 
 $fichePatientC = new FichePatientC();
 $evaluationC   = new EvaluationC();
@@ -45,7 +47,7 @@ if ($action === 'edit' && $edit_id) {
     // Vérifier que cette fiche appartient bien à ce médecin
     if ($edit_fiche && $edit_fiche['medecin_nom'] !== $_SESSION['medecin_nom']) {
         // L'utilisateur essaie d'accéder a une fiche qui n'est pas sienne
-        header('Location: gestionFichePatient.php');
+        header('Location: /medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php');
         exit;
     }
 }
@@ -63,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rdv = $rendezvousC->getRendezvousById($rendezvous_id);
     if (!$rdv || $rdv['medecin_id'] != $medecin_id) {
         // Tentative de manipulation : le rendez-vous n'existe pas ou n'appartient pas au médecin
-        header('Location: gestionFichePatient.php');
+        header('Location: /medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php');
         exit;
     }
 
@@ -73,13 +75,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fichePatientC->updateFichePatient($fiche);
         $message = "✅ Fiche patient modifiée avec succès";
         $action = 'list';
-        header('Location: gestionFichePatient.php?success=1');
+        header('Location: /medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php?success=1');
         exit;
     } else {
         // Ajout
         $fiche = new FichePatient(null, $rendezvous_id, $groupsanguin, $allergies, $antecedents, $notesGenerales);
         $new_id = $fichePatientC->addFichePatient($fiche);
-        header('Location: gestionFichePatient.php?success=1');
+        header('Location: /medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php?success=1');
         exit;
     }
 }
@@ -291,21 +293,21 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
 <body>
     <!-- ── NAVBAR ── -->
     <nav class="navbar-medilink">
-        <a href="home.php" class="nav-logo">
+        <a href="/medilink_medicament/MediLink/views/rdv/front/home.php" class="nav-logo">
             <span>MediLink</span>
         </a>
         <div class="nav-links">
-            <a href="home.php">Accueil</a>
-            <a href="gestionFichePatient.php" class="active">Fiches Patients</a>
-            <a href="gestionFichePatient.php?action=evals">⭐ Mes évaluations</a>
-            <a href="../admin/rapportFichesPatient.php">📊 Rapport</a>
+            <a href="/medilink_medicament/MediLink/views/rdv/front/home.php">Accueil</a>
+            <a href="/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php" class="active">Fiches Patients</a>
+            <a href="/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php?action=evals">⭐ Mes évaluations</a>
+            <a href="/medilink_medicament/MediLink/views/rdv/admin/rapportFichesPatient.php">📊 Rapport</a>
         </div>
         <div style="display: flex; align-items: center; gap: 16px;">
             <div style="display: flex; flex-direction: column; font-size: 12px; text-align: right;">
                 <strong style="color: var(--blue);">Dr. <?php echo htmlspecialchars($medecin_nom); ?></strong>
                 <span style="color: var(--gray-400); font-size: 11px;">ID: #<?php echo htmlspecialchars($medecin_id); ?></span>
             </div>
-            <a href="loginMedecin.php?logout=1" class="btn-admin" style="background: var(--red); padding: 8px 14px;">
+            <a href="/medilink_medicament/MediLink/views/rdv/front/loginMedecin.php?logout=1" class="btn-admin" style="background: var(--red); padding: 8px 14px;">
                 Déconnexion
             </a>
         </div>
@@ -322,7 +324,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
 
         <!-- ── TABS ── -->
         <div class="tabs">
-            <button class="tab-btn <?php echo ($action === 'list' || !isset($_GET['action'])) ? 'active' : ''; ?>" onclick="location.href='gestionFichePatient.php'">
+            <button class="tab-btn <?php echo ($action === 'list' || !isset($_GET['action'])) ? 'active' : ''; ?>" onclick="location.href='/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php'">
                 📋 Liste des fiches
             </button>
             <button class="tab-btn <?php echo $action === 'add' ? 'active' : ''; ?>" onclick="location.href='?action=add'">
@@ -390,7 +392,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                         <button type="submit" class="btn btn-primary">
                             <?php echo $edit_fiche ? '💾 Modifier' : '✅ Créer'; ?>
                         </button>
-                        <button type="button" class="btn btn-secondary" onclick="location.href='gestionFichePatient.php'">
+                        <button type="button" class="btn btn-secondary" onclick="location.href='/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php'">
                             ❌ Annuler
                         </button>
                     </div>
@@ -401,7 +403,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
             <!-- ── LIST VIEW ── -->
 
             <!-- Barre de recherche & tri -->
-            <form method="GET" action="gestionFichePatient.php">
+            <form method="GET" action="/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php">
                 <div class="search-bar">
                     <div class="search-group">
                         <label>👤 Nom du patient</label>
@@ -422,7 +424,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                         </select>
                     </div>
                     <button type="submit" class="btn-search">Appliquer</button>
-                    <a href="gestionFichePatient.php" class="btn-reset-search">✕ Réinitialiser</a>
+                    <a href="/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php" class="btn-reset-search">✕ Réinitialiser</a>
                 </div>
             </form>
 
@@ -446,7 +448,7 @@ h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-90
                                     'tri'            => $next_tri,
                                 ]);
                                 ?>
-                                <a href="gestionFichePatient.php?<?php echo $params; ?>"
+                                <a href="/medilink_medicament/MediLink/views/rdv/front/gestionFichePatient.php?<?php echo $params; ?>"
                                    class="sort-link <?php echo 'active'; ?>"
                                    title="Inverser le tri">
                                     📅 Date RDV <?php echo $icon_tri; ?>

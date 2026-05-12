@@ -1,6 +1,8 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 session_destroy();
-header('Location: loginPatient.php?logout=1');
+header('Location: /medilink_medicament/MediLink/views/rdv/front/loginPatient.php?logout=1');
 exit;
 ?>

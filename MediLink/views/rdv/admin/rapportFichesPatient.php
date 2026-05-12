@@ -1,7 +1,7 @@
 <?php
-$basePath = dirname(__DIR__) . '/..';
+$basePath = dirname(dirname(dirname(__DIR__)));
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/fichePatientC.php';
+require_once $basePath . '/controllers/fichePatientC.php';
 
 $fichePatientC = new FichePatientC();
 ?>
@@ -18,54 +18,57 @@ $fichePatientC = new FichePatientC();
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --blue:        #1a56db;
-            --blue-dark:   #1a46c4;
-            --blue-light:  #eff4ff;
-            --blue-mid:    #6694f8;
-            --green:       #0da271;
+            --blue:        #2563eb;
+            --blue-dark:   #1d4ed8;
+            --blue-light:  #eff6ff;
+            --blue-mid:    #60a5fa;
+            --green:       #10b981;
             --green-light: #ecfdf5;
-            --navy:        #0f1b2d;
-            --navy2:       #1e2f45;
-            --red:         #dc2626;
-            --red-light:   #fee2e2;
-            --orange-light:#fef3c7;
+            --navy:        #0f172a;
+            --navy2:       #1e293b;
+            --red:         #ef4444;
+            --red-light:   #fef2f2;
+            --orange-light:#fffbeb;
             --gray-50:     #f8fafc;
             --gray-100:    #f1f5f9;
             --gray-200:    #e2e8f0;
             --gray-400:    #94a3b8;
             --gray-600:    #475569;
             --gray-900:    #0f172a;
-            --radius:      12px;
-            --radius-lg:   18px;
-            --radius-xl:   24px;
+            --radius:      16px;
+            --radius-lg:   24px;
+            --radius-xl:   32px;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50); color: var(--gray-900); font-size: 14px; line-height: 1.6; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50); color: var(--gray-900); font-size: 14px; line-height: 1.6; overflow-x: hidden; }
 
         /* ── NAVBAR ── */
         .navbar-medilink {
-            background: #fff;
-            border-bottom: 1px solid var(--gray-200);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             padding: 0 40px;
-            height: 68px;
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.03);
         }
-        .nav-logo { display: flex; align-items: center; text-decoration: none; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-        .nav-logo span { background: linear-gradient(90deg, #1a56db 0%, #0da271 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .nav-logo { display: flex; align-items: center; text-decoration: none; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .nav-logo span { background: linear-gradient(135deg, var(--blue), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 
-        .nav-links { display: flex; gap: 4px; }
+        .nav-links { display: flex; gap: 8px; }
         .nav-links a {
-            padding: 6px 16px;
-            border-radius: 8px;
+            padding: 8px 20px;
+            border-radius: 12px;
             color: var(--gray-600);
             text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            transition: .15s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all .3s ease;
         }
         .nav-links a:hover, .nav-links a.active {
             background: var(--blue-light);
@@ -75,155 +78,173 @@ $fichePatientC = new FichePatientC();
         .btn-home {
             display: flex;
             align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            background: var(--navy);
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--navy), #1e293b);
             color: #fff;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
             text-decoration: none;
-            transition: .15s;
+            transition: all .3s ease;
+            box-shadow: 0 4px 15px rgba(15,23,42,0.2);
         }
-        .btn-home:hover { background: var(--navy2); }
+        .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(15,23,42,0.3); }
 
         /* ── HERO ── */
         .hero {
-            background: linear-gradient(135deg, #1a46c4 0%, #2563eb 55%, #3b7ff7 100%);
-            padding: 72px 40px 88px;
+            background: linear-gradient(135deg, var(--navy) 0%, #1e293b 100%);
+            padding: 100px 40px 120px;
             position: relative;
             overflow: hidden;
         }
-        .hero::before { content:''; position:absolute; top:-80px; right:-80px; width:350px; height:350px; background:rgba(255,255,255,.06); border-radius:50%; }
-        .hero::after { content:''; position:absolute; bottom:-100px; left:42%; width:220px; height:220px; background:rgba(255,255,255,.04); border-radius:50%; }
-        .hero-inner { max-width:920px; margin:0 auto; position:relative; z-index:1; }
-        .hero h1 { font-size:40px; font-weight:600; color:#fff; line-height:1.2; margin-bottom:14px; }
-        .hero p { color:rgba(255,255,255,.75); font-size:15px; max-width:460px; line-height:1.75; }
+        .hero::before { content:''; position:absolute; top:-50%; right:-10%; width:60%; height:200%; background:radial-gradient(circle,rgba(37,99,235,0.3) 0%,rgba(15,23,42,0) 60%); transform:rotate(-15deg); pointer-events:none; }
+        .hero::after { content:''; position:absolute; bottom:-20%; left:-10%; width:50%; height:150%; background:radial-gradient(circle,rgba(16,185,129,0.2) 0%,rgba(15,23,42,0) 60%); transform:rotate(15deg); pointer-events:none; }
+        .hero-inner { max-width:960px; margin:0 auto; position:relative; z-index:1; }
+        .hero h1 { font-size:48px; font-weight:800; color:#fff; line-height:1.15; margin-bottom:16px; letter-spacing:-1px; }
+        .hero p { color:rgba(255,255,255,.75); font-size:18px; max-width:500px; line-height:1.6; font-weight:400; }
 
         /* ── MAIN ── */
-        .main-content { max-width:920px; margin:0 auto; padding:44px 40px 60px; }
+        .main-content { max-width:960px; margin:-40px auto 80px; padding:0 40px; position:relative; z-index:10; }
 
         .section-heading {
-            font-size: 15px; font-weight: 600; color: var(--gray-900);
-            margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            font-size: 18px; font-weight: 800; color: var(--gray-900);
+            margin-bottom: 24px; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;
         }
         .section-heading::before {
-            content: ''; display: inline-block; width: 3px; height: 16px;
-            background: var(--blue); border-radius: 2px;
+            content: ''; display: inline-block; width: 4px; height: 20px;
+            background: linear-gradient(180deg, var(--blue), #8b5cf6); border-radius: 4px;
         }
 
         /* ── STATS GRID ── */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
         }
         .stat-card {
-            background: #fff;
-            border: 1px solid var(--gray-200);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.9);
             border-radius: var(--radius-lg);
-            padding: 20px;
-            border-left: 4px solid var(--blue);
+            padding: 28px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
         }
+        .stat-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(180deg, var(--blue), #8b5cf6); }
         .stat-label {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--gray-600);
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         .stat-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--blue);
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -1px;
         }
 
         /* ── BUTTON ── */
         .btn-print {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 11px 20px;
-            background: var(--blue);
+            gap: 10px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--blue), #8b5cf6);
             color: #fff;
             border: none;
-            border-radius: var(--radius);
-            font-size: 13px;
-            font-weight: 500;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: .15s;
-            margin-bottom: 22px;
+            transition: all .3s ease;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 25px rgba(37,99,235,0.3);
         }
-        .btn-print:hover { background: var(--blue-dark); }
+        .btn-print:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(37,99,235,0.4); }
 
         /* ── REPORT CARD ── */
         .report-card {
-            background: #fff;
-            border: 1px solid var(--gray-200);
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.9);
             border-radius: var(--radius-xl);
             overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
         }
         .report-header {
-            background: var(--blue);
+            background: linear-gradient(135deg, var(--blue), #8b5cf6);
             color: #fff;
-            padding: 20px 28px;
+            padding: 24px 32px;
         }
         .report-header h2 {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
         .report-content {
-            padding: 28px;
+            padding: 32px;
         }
 
         /* ── FICHE ITEM ── */
         .fiche-item {
-            border-bottom: 1px solid var(--gray-200);
-            padding: 20px 0;
+            border-bottom: 1px dashed var(--gray-200);
+            padding: 24px 0;
+            transition: all .3s ease;
         }
         .fiche-item:last-child {
             border-bottom: none;
         }
         .fiche-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--blue);
-            margin-bottom: 14px;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
         }
         .fiche-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
-            margin-bottom: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
         }
         .info-box {
             background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            padding: 12px;
-            border-radius: var(--radius);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 16px;
+            border-radius: 12px;
         }
         .info-label {
-            font-size: 11px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
             color: var(--gray-600);
             text-transform: uppercase;
             letter-spacing: .05em;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
         .info-value {
             color: var(--gray-900);
-            font-size: 13px;
+            font-size: 15px;
+            font-weight: 600;
         }
 
         /* ── INFO BLOCKS ── */
         .info-block {
-            margin-top: 14px;
-            padding: 12px;
-            border-radius: var(--radius);
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 12px;
             border-left: 4px solid;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
         .info-block.allergies {
             background: var(--orange-light);
-            border-left-color: #fbbf24;
+            border-left-color: #f59e0b;
             color: #92400e;
         }
         .info-block.antecedents {
@@ -232,58 +253,64 @@ $fichePatientC = new FichePatientC();
             color: var(--blue-dark);
         }
         .info-block.notes {
-            background: var(--gray-100);
-            border-left-color: var(--gray-600);
+            background: var(--gray-50);
+            border-left-color: var(--gray-400);
             color: var(--gray-900);
         }
         .info-block strong {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 14px;
         }
         .info-block p {
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         /* ── EMPTY STATE ── */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 80px 20px;
+            background: rgba(255,255,255,0.5);
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--gray-300);
         }
         .empty-icon {
             font-size: 48px;
             margin-bottom: 16px;
+            color: var(--gray-300);
         }
         .empty-text {
-            color: var(--gray-400);
-            font-size: 14px;
+            color: var(--gray-500);
+            font-size: 16px;
+            font-weight: 600;
         }
 
         /* ── BOUTON PDF ── */
         .btn-pdf {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 18px;
-            background: var(--red);
-            color: #fff;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--red-light);
+            color: var(--red);
             border: none;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
             cursor: pointer;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: .15s;
+            transition: all .3s ease;
         }
-        .btn-pdf:hover { background: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,.3); }
+        .btn-pdf:hover { background: var(--red); color:#fff; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(239,68,68,0.2); }
         .btn-pdf:disabled { opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
         .fiche-actions {
             display: flex;
             justify-content: flex-end;
-            padding: 10px 0 18px;
+            padding: 16px 0 24px;
             margin-top: 0;
-            border-bottom: 2px solid var(--gray-200);
+            border-bottom: 2px solid rgba(0,0,0,0.05);
         }
         .fiche-actions:last-child {
             border-bottom: none;
@@ -293,44 +320,54 @@ $fichePatientC = new FichePatientC();
         @media print {
             body { background: white; }
             .navbar-medilink, .btn-print, .btn-pdf, .fiche-actions { display: none; }
+            .stat-card, .report-card { box-shadow:none; border:1px solid #ccc; backdrop-filter:none; }
         }
 
         /* ── RESPONSIVE ── */
-        @media (max-width:700px) {
-            .navbar-medilink { padding: 0 16px; }
-            .main-content { padding: 28px 16px 48px; }
-            .hero { padding: 48px 20px 60px; }
-            .hero h1 { font-size: 28px; }
+        @media (max-width:768px) {
+            .navbar-medilink { padding: 0 20px; }
+            .main-content { padding: 20px; }
+            .hero { padding: 60px 20px 80px; }
+            .hero h1 { font-size: 36px; }
             .stats-grid { grid-template-columns: 1fr; }
             .fiche-grid { grid-template-columns: 1fr; }
+            .main { margin-left: 0; }
         }
+        
+        .main {
+            margin-left: 280px;
+            min-height: 100vh;
+        }
+        .topbar {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 16px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .topbar-title { font-size: 18px; font-weight: 800; color: var(--gray-900); letter-spacing: -0.3px; }
+        .topbar-subtitle { font-size: 13px; color: var(--gray-500); margin-top: 2px; font-weight: 500; }
     </style>
 </head>
 <body>
-    <!-- ── NAVBAR ── -->
-    <nav class="navbar-medilink">
-        <a href="admin.php" class="nav-logo">
-            <span>MediLink</span>
-        </a>
-        <div class="nav-links">
-            <a href="admin.php">Accueil</a>
-            <a href="rapportFichesPatient.php" class="active">Rapport Fiches</a>
-        </div>
-        <a href="../../index.php" class="btn-home">
-             Retour accueil
-        </a>
-    </nav>
+    
+    <?php include dirname(dirname(dirname(__DIR__))) . '/views/back/layouts/sidebar.php'; ?>
 
-    <!-- ── HERO ── -->
-    <div class="hero">
-        <div class="hero-inner">
-            <h1>Rapport des Fiches Patients</h1>
-            <p>Vue d'ensemble complète des dossiers médicaux et des diagnostics enregistrés.</p>
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <div class="topbar-title">Rapport des Fiches Patients</div>
+                <div class="topbar-subtitle">Vue d'ensemble complète des dossiers médicaux</div>
+            </div>
         </div>
-    </div>
 
-    <!-- ── MAIN CONTENT ── -->
-    <div class="main-content">
+        <div class="main-content" style="max-width: 1200px; margin: 40px auto; padding: 0 40px;">
         <?php
         try {
             $fiches = $fichePatientC->listFichePatient();
@@ -519,5 +556,6 @@ $fichePatientC = new FichePatientC();
         }
     }
     </script>
+    </div> <!-- /main -->
 </body>
 </html>

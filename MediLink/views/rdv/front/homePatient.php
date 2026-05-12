@@ -1,18 +1,74 @@
 <?php
-session_start();
-
-// ── Vérifier que le patient est connecté ──
-if (!isset($_SESSION['patient_id']) || empty($_SESSION['patient_id'])) {
-    header('Location: loginPatient.php');
-    exit;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$basePath = dirname(__DIR__) . '/..';
+$basePath = dirname(dirname(dirname(__DIR__)));
 require_once $basePath . '/config.php';
-require_once $basePath . '/Controller/rendezvousC.php';
-require_once $basePath . '/Model/rendezvous.php';
-require_once $basePath . '/Controller/evaluationC.php';
-require_once $basePath . '/Model/evaluation.php';
+
+// ── Bridge auth unifiée → session RDV patient ──
+if (empty($_SESSION['patient_id']) && !empty($_SESSION['user_id']) && strtolower($_SESSION['user_role'] ?? '') === 'patient') {
+    $pdo = config::getConnexion();
+
+    // 1. Chercher dans la table patients (RDV) par email
+    $stmt = $pdo->prepare("SELECT id, nom, prenom FROM patients WHERE email = :email LIMIT 1");
+    $stmt->execute([':email' => $_SESSION['user_email'] ?? '']);
+    $rdvP = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // 2. Pas trouvé → récupérer depuis utilisateur + patient et créer
+    if (!$rdvP) {
+        $stmtU = $pdo->prepare("
+            SELECT u.prenom, u.nom, u.email, u.telephone,
+                   p.date_naissance, p.sexe, p.adresse
+            FROM utilisateur u
+            LEFT JOIN patient p ON p.id = u.id
+            WHERE u.id = :id LIMIT 1
+        ");
+        $stmtU->execute([':id' => (int)$_SESSION['user_id']]);
+        $uInfo = $stmtU->fetch(PDO::FETCH_ASSOC);
+
+        if ($uInfo) {
+            $dob  = !empty($uInfo['date_naissance']) ? $uInfo['date_naissance'] : date('Y-m-d', strtotime('-25 years'));
+            $sexe = in_array($uInfo['sexe'] ?? '', ['M', 'F']) ? $uInfo['sexe'] : 'M';
+            $tel  = !empty($uInfo['telephone']) ? $uInfo['telephone'] : '00000000';
+
+            $stmtIns = $pdo->prepare("
+                INSERT IGNORE INTO patients (nom, prenom, email, motdepasse, telephone, datedenaissance, sexe, adresse)
+                VALUES (:nom, :prenom, :email, :mdp, :tel, :dob, :sexe, :adresse)
+            ");
+            $stmtIns->execute([
+                ':nom'    => $uInfo['nom'],
+                ':prenom' => $uInfo['prenom'],
+                ':email'  => $uInfo['email'],
+                ':mdp'    => password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT),
+                ':tel'    => $tel,
+                ':dob'    => $dob,
+                ':sexe'   => $sexe,
+                ':adresse'=> $uInfo['adresse'] ?? null,
+            ]);
+
+            $stmt2 = $pdo->prepare("SELECT id, nom, prenom FROM patients WHERE email = :email LIMIT 1");
+            $stmt2->execute([':email' => $uInfo['email']]);
+            $rdvP = $stmt2->fetch(PDO::FETCH_ASSOC);
+        }
+    }
+
+    if ($rdvP) {
+        $_SESSION['patient_id']     = $rdvP['id'];
+        $_SESSION['patient_nom']    = $rdvP['nom'];
+        $_SESSION['patient_prenom'] = $rdvP['prenom'];
+    }
+}
+
+// ── Vérifier que le patient est connecté ──
+if (empty($_SESSION['patient_id'])) {
+    header('Location: /medilink_medicament/MediLink/index.php?page=login');
+    exit;
+}
+require_once $basePath . '/controllers/rendezvousC.php';
+require_once $basePath . '/models/rendezvous.php';
+require_once $basePath . '/controllers/evaluationC.php';
+require_once $basePath . '/models/evaluation.php';
 
 $rendezvousC    = new RendezvousC();
 $evaluationC    = new EvaluationC();
@@ -572,7 +628,12 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
 
 <!-- NAVBAR -->
 <nav class="navbar-medilink">
-    <a href="homePatient.php" class="nav-logo"><span>MediLink</span></a>
+    <a href="/medilink_medicament/MediLink/index.php" class="nav-logo"><span>MediLink</span></a>
+    <div style="display:flex;align-items:center;gap:12px;font-size:12px;">
+        <a href="/medilink_medicament/MediLink/index.php" style="color:#94a3b8;text-decoration:none;">⬅ Accueil</a>
+        <a href="/medilink_medicament/MediLink/index.php?module=medicament" style="color:#94a3b8;text-decoration:none;">💊 Médicaments</a>
+        <a href="/medilink_medicament/MediLink/index.php?module=forum&controller=forum&action=list" style="color:#94a3b8;text-decoration:none;">💬 Forum</a>
+    </div>
     <div class="nav-user">
         <div class="user-info">
             <div class="user-avatar"><?php echo strtoupper(substr($patient_prenom,0,1).substr($patient_nom,0,1)); ?></div>
@@ -581,7 +642,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                 <div class="user-role">Patient</div>
             </div>
         </div>
-        <a href="logoutPatient.php" class="btn-logout">Déconnexion</a>
+        <a href="/medilink_medicament/MediLink/views/rdv/front/logoutPatient.php" class="btn-logout">Déconnexion</a>
     </div>
 </nav>
 
@@ -639,7 +700,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     </div>
 
     <div class="rech-card">
-        <form method="GET" action="homePatient.php">
+        <form method="GET" action="/medilink_medicament/MediLink/index.php?module=rdv&action=patient">
             <div class="rech-filters">
                 <div class="rech-form-group">
                     <label class="rech-label">Spécialité</label>
@@ -669,9 +730,9 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
             </div>
         </form>
         <div class="rech-tags">
-            <a href="homePatient.php" class="rech-tag <?php echo !$filtre_spec?'active':''; ?>">Tous</a>
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient" class="rech-tag <?php echo !$filtre_spec?'active':''; ?>">Tous</a>
             <?php foreach ($specialites as $s): ?>
-                <a href="homePatient.php?spec=<?php echo urlencode($s); ?>"
+                <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&spec=<?php echo urlencode($s); ?>"
                    class="rech-tag <?php echo $filtre_spec===$s?'active':''; ?>">
                     <?php echo htmlspecialchars($s); ?>
                 </a>
@@ -718,7 +779,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                         <div class="rech-doc-meta">
                             <div class="rech-meta-item"><strong><?php echo $m['exp']; ?></strong>Exp.</div>
                         </div>
-                        <a href="homePatient.php?medecin_id=<?php echo $m['id']; ?>&date=<?php echo urlencode($selected_date); ?>#formRDV"
+                        <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&medecin_id=<?php echo $m['id']; ?>&date=<?php echo urlencode($selected_date); ?>#formRDV"
                            class="btn-rech-rdv <?php echo $isSel_m?'selected':''; ?>">
                             <?php echo $isSel_m ? '✓ Sélectionné' : 'Sélectionner'; ?>
                         </a>
@@ -750,7 +811,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
         <?php echo $edit_rdv ? '✏️ Modifier le rendez-vous' : 'Réserver un nouveau rendez-vous'; ?>
     </div>
     <div class="form-card">
-        <form method="POST" action="homePatient.php#formRDV">
+        <form method="POST" action="/medilink_medicament/MediLink/index.php?module=rdv&action=patient#formRDV">
             <input type="hidden" name="action" value="<?php echo $edit_rdv?'update':'add'; ?>">
             <?php if ($edit_rdv): ?>
                 <input type="hidden" name="rdv_id" value="<?php echo $edit_rdv['id']; ?>">
@@ -761,7 +822,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                 <div class="form-group">
                     <label>Médecin *</label>
                     <select name="medecin_id" id="selMedecin"
-                        onchange="location.href='homePatient.php?medecin_id='+this.value+'&date='+document.getElementById('selDate').value+'<?php echo $edit_rdv?'&edit='.$edit_rdv['id']:''; ?>#formRDV'">
+                        onchange="location.href='/medilink_medicament/MediLink/index.php?module=rdv&action=patient&medecin_id='+this.value+'&date='+document.getElementById('selDate').value+'<?php echo $edit_rdv?'&edit='.$edit_rdv['id']:''; ?>#formRDV'">
                         <option value="">-- Sélectionner un médecin --</option>
                         <?php foreach ($medecins as $doc): ?>
                             <option value="<?php echo $doc['id']; ?>" <?php echo $selected_medecin_id==$doc['id']?'selected':''; ?>>
@@ -817,7 +878,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                 <?php echo $edit_rdv?'Modifier le rendez-vous':'✓ Confirmer le rendez-vous'; ?>
             </button>
             <?php if ($edit_rdv): ?>
-                <a href="homePatient.php" class="btn-cancel">❌ Annuler la modification</a>
+                <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient" class="btn-cancel">❌ Annuler la modification</a>
             <?php endif; ?>
         </form>
     </div>
@@ -826,7 +887,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
     <div class="section-heading" id="mesRDV">📋 Mes rendez-vous</div>
 
     <!-- Barre de recherche & tri -->
-    <form method="GET" action="homePatient.php#mesRDV">
+    <form method="GET" action="/medilink_medicament/MediLink/index.php?module=rdv&action=patient#mesRDV">
         <div class="rdv-search-bar">
             <div class="rdv-sg">
                 <label>👨‍⚕️ Nom du médecin</label>
@@ -847,7 +908,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                 </select>
             </div>
             <button type="submit" class="btn-rdv-search">Rechercher</button>
-            <a href="homePatient.php#mesRDV" class="btn-rdv-reset">✕ Réinitialiser</a>
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient#mesRDV" class="btn-rdv-reset">✕ Réinitialiser</a>
         </div>
     </form>
 
@@ -889,7 +950,7 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
             'rdv_tri'     => $next,
         ]);
         ?>
-        <a href="homePatient.php?<?php echo $q; ?>#mesRDV"
+        <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&<?php echo $q; ?>#mesRDV"
            class="rdv-sort-link active">
             Trier <?php echo $rdv_tri === 'asc' ? '↓ Plus récent' : '↑ Plus ancien'; ?>
         </a>
@@ -934,9 +995,9 @@ body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--gray-50); co
                         <?php elseif ($est_passe && $deja_evalue): ?>
                             <span class="btn-evaluated">✅ Évalué</span>
                         <?php else: ?>
-                            <a href="homePatient.php?edit=<?php echo $rdv['id']; ?>#formRDV"
+                            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&edit=<?php echo $rdv['id']; ?>#formRDV"
                                class="btn-action btn-edit">Modifier</a>
-                            <form method="POST" action="homePatient.php" style="display:inline"
+                            <form method="POST" action="/medilink_medicament/MediLink/index.php?module=rdv&action=patient" style="display:inline"
                                   onsubmit="return confirm('Supprimer ce rendez-vous ?')">
                                 <input type="hidden" name="action"  value="delete">
                                 <input type="hidden" name="rdv_id" value="<?php echo $rdv['id']; ?>">
@@ -1035,7 +1096,7 @@ function buildPopup(m, dist) {
             ${m.adresse ? `<div style="font-size:11px;color:#94a3b8;margin-bottom:8px;font-style:italic">🏥 ${m.adresse}</div>` : ""}
             <div style="font-size:12px;margin-bottom:8px">${noteText}</div>
             ${distHtml}
-            <a href="homePatient.php?medecin_id=${m.id}#formRDV"
+            <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&medecin_id=${m.id}#formRDV"
                style="display:block;text-align:center;background:#ecfdf5;color:#0da271;
                       border:1px solid rgba(13,162,113,.3);
                       padding:6px 12px;border-radius:7px;font-size:12px;
@@ -1240,7 +1301,7 @@ document.addEventListener("DOMContentLoaded", initMap);
         </div>
         <div class="modal-note-label" id="noteLabel">Choisissez une note</div>
 
-        <form method="POST" action="homePatient.php#mesRDV" id="evalForm">
+        <form method="POST" action="/medilink_medicament/MediLink/index.php?module=rdv&action=patient#mesRDV" id="evalForm">
             <input type="hidden" name="action"  value="evaluer">
             <input type="hidden" name="rdv_id"  id="modal-rdv-id">
             <input type="hidden" name="note"    id="modal-note" value="0">
@@ -1280,7 +1341,7 @@ function changerDate(dateVal, medecinId, editId) {
     }
 
     // Date valide → rediriger pour charger les créneaux
-    let url = 'homePatient.php?medecin_id=' + medecinId + '&date=' + dateVal;
+    let url = '/medilink_medicament/MediLink/index.php?module=rdv&action=patient&medecin_id=' + medecinId + '&date=' + dateVal;
     if (editId) url += '&edit=' + editId;
     url += '#formRDV';
     location.href = url;
@@ -1503,7 +1564,7 @@ function addMsg(role, text) {
                 <div class="doc-card-chat-name">👨‍⚕️ ${nom}</div>
                 <div class="doc-card-chat-spec">${spec} · 📍 ${ville}</div>
                 <div class="doc-card-chat-stars">${noteText}</div>
-                <a href="homePatient.php?medecin_id=${id}#formRDV" class="btn-rdv-chat">
+                <a href="/medilink_medicament/MediLink/index.php?module=rdv&action=patient&medecin_id=${id}#formRDV" class="btn-rdv-chat">
                     📅 Prendre rendez-vous
                 </a>
             </div>`;
@@ -1548,7 +1609,7 @@ async function sendMsg() {
     document.getElementById('chatBody').scrollTop = 99999;
 
     try {
-        const res  = await fetch('/ProjetWeb/chatbot.php', {
+        const res  = await fetch('chatbot.php', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({ system: sysPrompt(), messages: hist })

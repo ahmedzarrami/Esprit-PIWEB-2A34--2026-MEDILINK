@@ -20,7 +20,7 @@ $success = isset($_GET['deconnecte']);
 // ── Traitement connexion ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once dirname(dirname(__DIR__)) . '/config.php';
-    require_once dirname(dirname(__DIR__)) . '/Controller/rendezvousC.php';
+    require_once dirname(dirname(__DIR__)) . '/controllers/rendezvousC.php';
 
     $patient_id = trim($_POST['patient_id'] ?? '');
 
@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <div class="back-link">
-    <a href="../../index.php">← Retour à l'accueil</a>
+    <a href="/medilink_medicament/MediLink/index.php">← Retour à l'accueil</a>
 </div>
 
 </body>

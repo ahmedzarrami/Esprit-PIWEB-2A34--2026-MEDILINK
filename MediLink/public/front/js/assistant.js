@@ -41,7 +41,7 @@
         }
     ];
 
-    var GREETINGS = ['bonjour','salut','bonsoir','hello','coucou'];
+    var GREETINGS = ['bonjour','salut','bonsoir','hello','coucou','hi','hey','salam','ahlan','marhaba'];
     var THANKS    = ['merci','super','parfait','excellent'];
     var FAREWELLS = ['au revoir','bye','bonne journée','à bientôt'];
 
@@ -160,10 +160,11 @@
     function buildCards(results) {
         var html = '<div class="ai-cards">';
         results.forEach(function (m) {
+            var initials = esc(m.nom).replace(/[^A-Za-zÀ-ÿ]/g,' ').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase() || 'Rx';
             html +=
                 '<a class="ai-card" href="index.php?action=show_medicament&id=' + m.id + '">' +
                     '<div class="ai-card-top">' +
-                        '<div class="ai-card-icon">💊</div>' +
+                        '<div class="ai-card-icon" style="background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:10px;width:38px;height:38px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;letter-spacing:.5px;flex-shrink:0">' + initials + '</div>' +
                         '<div class="ai-card-info">' +
                             '<div class="ai-card-nom">' + esc(m.nom) + '</div>' +
                             '<div class="ai-card-meta">' +
@@ -174,7 +175,7 @@
                     '</div>' +
                     '<p class="ai-card-desc">' + esc(cut(m.description, 80)) + '</p>' +
                     '<div class="ai-card-footer">' +
-                        '<span class="ai-card-prix">' + parseFloat(m.prix).toFixed(2) + ' DT</span>' +
+                        '<span class="ai-card-prix">' + parseFloat(m.prix).toFixed(3) + ' DT</span>' +
                         stockBadge(m.stock) +
                     '</div>' +
                 '</a>';
@@ -193,7 +194,8 @@
 
         var avatar = document.createElement('div');
         avatar.className = 'cm-avatar';
-        avatar.textContent = who === 'bot' ? '💊' : '🧑';
+        avatar.style.cssText = 'display:flex;align-items:center;justify-content:center';
+        avatar.textContent = who === 'bot' ? 'Rx' : 'U';
 
         var bubble = document.createElement('div');
         bubble.className = 'cm-bubble';
@@ -211,7 +213,7 @@
         row.className = 'cm-row bot';
         row.id = 'cm-typing';
         row.innerHTML =
-            '<div class="cm-avatar">💊</div>' +
+            '<div class="cm-avatar" style="display:flex;align-items:center;justify-content:center">Rx</div>' +
             '<div class="cm-bubble cm-typing"><span></span><span></span><span></span></div>';
         messagesEl.appendChild(row);
         messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -250,8 +252,8 @@
     inputEl.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); send(inputEl.value); }
     });
-    document.querySelectorAll('.chat-chip').forEach(function (chip) {
-        chip.addEventListener('click', function () { send(chip.dataset.msg || chip.textContent); });
+    document.querySelectorAll('.chat-chip, .asst-topic').forEach(function (chip) {
+        chip.addEventListener('click', function () { send(chip.dataset.msg || chip.textContent.trim()); });
     });
 
 })();

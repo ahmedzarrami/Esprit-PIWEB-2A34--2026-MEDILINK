@@ -22,11 +22,11 @@ class MedicamentController extends BackController
 
     public function __construct()
     {
-        $this->db         = (new Database())->getConnection();
+        $this->db         = Database::getConnection();
         $this->medicament = new Medicament();
     }
 
-    /* ── Actions ─────────────────────────────────── */
+    /* â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     public function index(): void
     {
@@ -57,7 +57,7 @@ class MedicamentController extends BackController
                 'formes'     => $this->countDistinctFormes(),
                 'fabricants' => $this->countDistinctFabricants(),
             ],
-            'pageTitle'     => 'Gestion des médicaments',
+            'pageTitle'     => 'Gestion des mÃ©dicaments',
         ]);
     }
 
@@ -66,12 +66,12 @@ class MedicamentController extends BackController
         $id         = $this->getIdFromQuery();
         $medicament = $this->getById($id);
         if ($medicament === null) {
-            $this->abort('Médicament introuvable.');
+            $this->abort('MÃ©dicament introuvable.');
         }
 
         $this->render('medicament/show', [
             'medicament' => $medicament,
-            'pageTitle'  => 'Détail du médicament',
+            'pageTitle'  => 'DÃ©tail du mÃ©dicament',
         ]);
     }
 
@@ -91,12 +91,12 @@ class MedicamentController extends BackController
                 try {
                     $this->hydrate($this->medicament, $data);
                     if ($this->insert($this->buildPayload($this->medicament))) {
-                        $this->setFlash('success', 'Le médicament a été ajouté avec succès.');
+                        $this->setFlash('success', 'Le mÃ©dicament a Ã©tÃ© ajoutÃ© avec succÃ¨s.');
                         $this->redirect('index.php?action=index');
                     }
                     $formMessage = 'Une erreur est survenue lors de l\'ajout.';
                 } catch (Throwable) {
-                    $formMessage = 'Impossible d\'ajouter le médicament pour le moment.';
+                    $formMessage = 'Impossible d\'ajouter le mÃ©dicament pour le moment.';
                 }
             }
         }
@@ -105,7 +105,7 @@ class MedicamentController extends BackController
             'data'        => $data,
             'errors'      => $errors,
             'formMessage' => $formMessage,
-            'pageTitle'   => 'Ajouter un médicament',
+            'pageTitle'   => 'Ajouter un mÃ©dicament',
         ]);
     }
 
@@ -114,7 +114,7 @@ class MedicamentController extends BackController
         $id         = $this->getIdFromQuery();
         $medicament = $this->getById($id);
         if ($medicament === null) {
-            $this->abort('Médicament introuvable.');
+            $this->abort('MÃ©dicament introuvable.');
         }
 
         $errors      = [];
@@ -131,12 +131,12 @@ class MedicamentController extends BackController
                 try {
                     $this->hydrate($this->medicament, $data);
                     if ($this->update($id, $this->buildPayload($this->medicament))) {
-                        $this->setFlash('success', 'Le médicament a été modifié avec succès.');
+                        $this->setFlash('success', 'Le mÃ©dicament a Ã©tÃ© modifiÃ© avec succÃ¨s.');
                         $this->redirect('index.php?action=index');
                     }
                     $formMessage = 'Une erreur est survenue lors de la modification.';
                 } catch (Throwable) {
-                    $formMessage = 'Impossible de modifier le médicament pour le moment.';
+                    $formMessage = 'Impossible de modifier le mÃ©dicament pour le moment.';
                 }
             }
         }
@@ -146,7 +146,7 @@ class MedicamentController extends BackController
             'data'        => $data,
             'errors'      => $errors,
             'formMessage' => $formMessage,
-            'pageTitle'   => 'Modifier un médicament',
+            'pageTitle'   => 'Modifier un mÃ©dicament',
         ]);
     }
 
@@ -164,25 +164,25 @@ class MedicamentController extends BackController
 
         try {
             if ($this->deleteById($id)) {
-                $this->setFlash('success', 'Le médicament a été supprimé avec succès.');
+                $this->setFlash('success', 'Le mÃ©dicament a Ã©tÃ© supprimÃ© avec succÃ¨s.');
             } else {
-                $this->setFlash('error', 'Le médicament n\'existe plus ou n\'a pas pu être supprimé.');
+                $this->setFlash('error', 'Le mÃ©dicament n\'existe plus ou n\'a pas pu Ãªtre supprimÃ©.');
             }
         } catch (Throwable) {
-            $this->setFlash('error', 'Impossible de supprimer le médicament pour le moment.');
+            $this->setFlash('error', 'Impossible de supprimer le mÃ©dicament pour le moment.');
         }
 
         $this->redirect('index.php?action=index');
     }
 
-    /* ── Requêtes DB ─────────────────────────────── */
+    /* â”€â”€ RequÃªtes DB â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     private function getPaginated(string $keyword, string $sortBy, string $sortDirection, int $limit, int $offset): array
     {
         $sql = 'SELECT id, nom, description, dosage, forme, fabricant, prix, created_at FROM medicaments';
 
         if ($keyword !== '') {
-            $sql .= ' WHERE nom LIKE :keyword OR description LIKE :keyword OR dosage LIKE :keyword OR forme LIKE :keyword OR fabricant LIKE :keyword';
+            $sql .= ' WHERE nom LIKE :k1 OR description LIKE :k2 OR dosage LIKE :k3 OR forme LIKE :k4 OR fabricant LIKE :k5';
         }
 
         $col       = $this->allowedSorts[$sortBy] ?? 'id';
@@ -191,7 +191,12 @@ class MedicamentController extends BackController
 
         $stmt = $this->db->prepare($sql);
         if ($keyword !== '') {
-            $stmt->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+            $val = '%' . $keyword . '%';
+            $stmt->bindValue(':k1', $val, PDO::PARAM_STR);
+            $stmt->bindValue(':k2', $val, PDO::PARAM_STR);
+            $stmt->bindValue(':k3', $val, PDO::PARAM_STR);
+            $stmt->bindValue(':k4', $val, PDO::PARAM_STR);
+            $stmt->bindValue(':k5', $val, PDO::PARAM_STR);
         }
         $stmt->bindValue(':limit',  $limit,  PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -206,8 +211,9 @@ class MedicamentController extends BackController
         $params = [];
 
         if ($keyword !== '') {
-            $sql             .= ' WHERE nom LIKE :keyword OR description LIKE :keyword OR dosage LIKE :keyword OR forme LIKE :keyword OR fabricant LIKE :keyword';
-            $params['keyword'] = '%' . $keyword . '%';
+            $sql .= ' WHERE nom LIKE :k1 OR description LIKE :k2 OR dosage LIKE :k3 OR forme LIKE :k4 OR fabricant LIKE :k5';
+            $val = '%' . $keyword . '%';
+            $params = [':k1' => $val, ':k2' => $val, ':k3' => $val, ':k4' => $val, ':k5' => $val];
         }
 
         $stmt = $this->db->prepare($sql);
@@ -265,7 +271,7 @@ class MedicamentController extends BackController
         return $stmt->rowCount() > 0;
     }
 
-    /* ── Helpers ─────────────────────────────────── */
+    /* â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
     private function hydrate(Medicament $medicament, array $data): void
     {
@@ -308,29 +314,29 @@ class MedicamentController extends BackController
         $errors = [];
 
         if ($data['nom'] === '') {
-            $errors['nom'] = 'Le nom du médicament est obligatoire.';
+            $errors['nom'] = 'Le nom du mÃ©dicament est obligatoire.';
         } elseif (mb_strlen($data['nom']) < 3) {
-            $errors['nom'] = 'Le nom doit contenir au moins 3 caractères.';
+            $errors['nom'] = 'Le nom doit contenir au moins 3 caractÃ¨res.';
         } elseif (mb_strlen($data['nom']) > 100) {
-            $errors['nom'] = 'Le nom ne doit pas dépasser 100 caractères.';
+            $errors['nom'] = 'Le nom ne doit pas dÃ©passer 100 caractÃ¨res.';
         } elseif (!preg_match("/^[\p{L}0-9 .,'()\-\/]+$/u", $data['nom'])) {
-            $errors['nom'] = 'Le nom contient des caractères non autorisés.';
+            $errors['nom'] = 'Le nom contient des caractÃ¨res non autorisÃ©s.';
         }
 
         if ($data['description'] === '') {
             $errors['description'] = 'La description est obligatoire.';
         } elseif (mb_strlen($data['description']) < 15) {
-            $errors['description'] = 'La description doit contenir au moins 15 caractères.';
+            $errors['description'] = 'La description doit contenir au moins 15 caractÃ¨res.';
         } elseif (mb_strlen($data['description']) > 500) {
-            $errors['description'] = 'La description ne doit pas dépasser 500 caractères.';
+            $errors['description'] = 'La description ne doit pas dÃ©passer 500 caractÃ¨res.';
         }
 
         if ($data['dosage'] === '') {
             $errors['dosage'] = 'Le dosage est obligatoire.';
         } elseif (mb_strlen($data['dosage']) < 2) {
-            $errors['dosage'] = 'Le dosage doit contenir au moins 2 caractères.';
+            $errors['dosage'] = 'Le dosage doit contenir au moins 2 caractÃ¨res.';
         } elseif (mb_strlen($data['dosage']) > 50) {
-            $errors['dosage'] = 'Le dosage ne doit pas dépasser 50 caractères.';
+            $errors['dosage'] = 'Le dosage ne doit pas dÃ©passer 50 caractÃ¨res.';
         } elseif (!preg_match('/\d/', $data['dosage'])) {
             $errors['dosage'] = 'Le dosage doit contenir au moins un chiffre.';
         }
@@ -338,25 +344,25 @@ class MedicamentController extends BackController
         if ($data['forme'] === '') {
             $errors['forme'] = 'La forme est obligatoire.';
         } elseif (mb_strlen($data['forme']) < 2) {
-            $errors['forme'] = 'La forme doit contenir au moins 2 caractères.';
+            $errors['forme'] = 'La forme doit contenir au moins 2 caractÃ¨res.';
         } elseif (mb_strlen($data['forme']) > 50) {
-            $errors['forme'] = 'La forme ne doit pas dépasser 50 caractères.';
+            $errors['forme'] = 'La forme ne doit pas dÃ©passer 50 caractÃ¨res.';
         }
 
         if ($data['fabricant'] === '') {
             $errors['fabricant'] = 'Le fabricant est obligatoire.';
         } elseif (mb_strlen($data['fabricant']) < 2) {
-            $errors['fabricant'] = 'Le fabricant doit contenir au moins 2 caractères.';
+            $errors['fabricant'] = 'Le fabricant doit contenir au moins 2 caractÃ¨res.';
         } elseif (mb_strlen($data['fabricant']) > 100) {
-            $errors['fabricant'] = 'Le fabricant ne doit pas dépasser 100 caractères.';
+            $errors['fabricant'] = 'Le fabricant ne doit pas dÃ©passer 100 caractÃ¨res.';
         }
 
         if ($data['prix'] === '') {
             $errors['prix'] = 'Le prix est obligatoire.';
         } elseif (!preg_match('/^\d+(\.\d{1,2})?$/', $data['prix'])) {
-            $errors['prix'] = 'Le prix doit contenir au maximum 2 décimales.';
+            $errors['prix'] = 'Le prix doit contenir au maximum 2 dÃ©cimales.';
         } elseif ((float) $data['prix'] <= 0) {
-            $errors['prix'] = 'Le prix doit être un nombre positif.';
+            $errors['prix'] = 'Le prix doit Ãªtre un nombre positif.';
         }
 
         return $errors;
@@ -404,3 +410,4 @@ class MedicamentController extends BackController
         return strtolower($v) === 'asc' ? 'asc' : 'desc';
     }
 }
+
