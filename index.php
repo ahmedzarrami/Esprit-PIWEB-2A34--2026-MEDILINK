@@ -50,6 +50,7 @@ $modules = [
     <title>MediLink &middot; Plateforme integree</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/assets/css/theme.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars($base) ?>/assets/css/unified.css">
 </head>
 <body>
 
@@ -60,6 +61,7 @@ $modules = [
         <?php foreach ($modules as $m): ?>
             <a href="<?= htmlspecialchars($m['href']) ?>"><?= htmlspecialchars($m['title']) ?></a>
         <?php endforeach; ?>
+        <a href="<?= htmlspecialchars($base) ?>/admin/index.php" style="background:#1d4ed8;color:#fff;padding:8px 18px;border-radius:8px;font-weight:700;">BackOffice</a>
     </div>
 </nav>
 

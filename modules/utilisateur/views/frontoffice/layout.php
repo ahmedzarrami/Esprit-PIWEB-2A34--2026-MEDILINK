@@ -7,6 +7,7 @@
 <meta name="description" content="MediLink — Plateforme de santé digitale. Prenez rendez-vous, consultez vos ordonnances et accédez aux meilleurs professionnels de santé.">
 <link rel="stylesheet" href="assets/css/front.css">
 <link rel="stylesheet" href="assets/css/face-auth.css">
+<link rel="stylesheet" href="/files40/assets/css/unified.css">
 </head>
 <body>
 

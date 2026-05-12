@@ -488,6 +488,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--gray-50);
 .footer-admin a { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--gray-400); text-decoration:none; padding:8px 16px; border-radius:8px; transition:.15s; }
 .footer-admin a:hover { background:var(--gray-100); color:var(--gray-600); }
 </style>
+<link rel="stylesheet" href="/files40/assets/css/unified.css">
 </head>
 <body>
 

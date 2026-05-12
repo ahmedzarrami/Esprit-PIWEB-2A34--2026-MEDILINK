@@ -4,21 +4,29 @@
    ================================================================ */
 
 :root {
-  --ml-primary:        #0f766e;
-  --ml-primary-dark:   #0b5b55;
-  --ml-primary-soft:   #ccfbf1;
-  --ml-secondary:      #2563eb;
-  --ml-accent:         #f59e0b;
+  /* Palette blanc + bleu (uniforme sur toute la plateforme) */
+  --ml-primary:        #1d4ed8;
+  --ml-primary-dark:   #1e40af;
+  --ml-primary-light:  #3b82f6;
+  --ml-primary-soft:   #dbeafe;
+  --ml-primary-pale:   #eff6ff;
+  --ml-secondary:      #0ea5e9;
+  --ml-accent:         #1d4ed8;
+  --ml-success:        #16a34a;
+  --ml-warning:        #f59e0b;
   --ml-danger:         #dc2626;
   --ml-text:           #0f172a;
+  --ml-text-soft:      #334155;
   --ml-muted:          #64748b;
   --ml-surface:        #ffffff;
   --ml-bg:             #f8fafc;
+  --ml-bg-soft:        #f1f5f9;
   --ml-border:         #e2e8f0;
+  --ml-border-strong:  #cbd5e1;
   --ml-radius:         12px;
   --ml-radius-lg:      18px;
-  --ml-shadow:         0 4px 16px rgba(15, 23, 42, 0.06);
-  --ml-shadow-lg:      0 12px 32px rgba(15, 23, 42, 0.12);
+  --ml-shadow:         0 4px 16px rgba(29, 78, 216, 0.07);
+  --ml-shadow-lg:      0 12px 32px rgba(29, 78, 216, 0.14);
   --ml-font-sans:      'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -102,7 +110,7 @@ a:hover { color: var(--ml-primary-dark); text-decoration: underline; }
 }
 
 .ml-hero {
-  background: linear-gradient(135deg, var(--ml-primary) 0%, var(--ml-secondary) 100%);
+  background: linear-gradient(135deg, var(--ml-primary-dark) 0%, var(--ml-primary-light) 100%);
   color: #fff;
   padding: 64px 32px;
   border-radius: var(--ml-radius-lg);

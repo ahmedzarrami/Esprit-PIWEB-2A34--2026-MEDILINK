@@ -1,0 +1,163 @@
+/* ================================================================
+   MediLink - Override stylesheet pour l'integration
+   But : forcer une palette UNIFORME blanc + bleu sur tous les modules
+   en redefinissant les variables CSS existantes de chaque module.
+
+   A inclure APRES le CSS natif de chaque module, dans toutes les
+   layouts/headers.
+   ================================================================ */
+
+:root,
+:root[data-theme],
+html,
+html body {
+  /* ---- Theme MediLink integration ---- */
+  --ml-primary:        #1d4ed8;
+  --ml-primary-dark:   #1e40af;
+  --ml-primary-light:  #3b82f6;
+  --ml-primary-soft:   #dbeafe;
+  --ml-primary-pale:   #eff6ff;
+  --ml-text:           #0f172a;
+  --ml-muted:          #64748b;
+  --ml-bg:             #f8fafc;
+  --ml-surface:        #ffffff;
+  --ml-border:         #e2e8f0;
+
+  /* ---- Override des variables existantes par module ---- */
+  /* utilisateur (front.css / back.css) */
+  --white:        #ffffff;
+  --off:          #f8fafc;
+  --border:       #e2e8f0;
+  --border2:      #cbd5e1;
+  --text:         #0f172a;
+  --text2:        #334155;
+  --text3:        #64748b;
+  --blue:         #1d4ed8;
+  --blue-light:   #dbeafe;
+  --blue-mid:     #60a5fa;
+  --teal:         #1d4ed8;        /* unifie -> bleu */
+  --teal-light:   #dbeafe;
+  --green:        #1d4ed8;        /* unifie -> bleu */
+  --green-light:  #dbeafe;
+  --red:          #dc2626;
+  --red-light:    #fee2e2;
+  --purple:       #1d4ed8;        /* unifie -> bleu */
+  --purple-light: #dbeafe;
+
+  /* medicaments / forum (style.css) */
+  --bg-primary:    #f8fafc;
+  --bg-secondary:  #ffffff;
+  --bg-card:       rgba(255, 255, 255, 0.95);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  --border-color:  rgba(29, 78, 216, 0.12);
+  --border-hover:  rgba(29, 78, 216, 0.35);
+  --text-primary:  #0f172a;
+  --text-secondary:#334155;
+  --text-muted:    #64748b;
+  --accent-blue:   #1d4ed8;
+  --accent-teal:   #1d4ed8;       /* unifie */
+  --accent-purple: #1d4ed8;       /* unifie */
+  --accent-green:  #16a34a;
+  --accent-red:    #dc2626;
+  --accent-orange: #f59e0b;
+  --gradient-primary: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  --gradient-purple:  linear-gradient(135deg, #1d4ed8, #3b82f6);
+  --shadow-card:  0 4px 20px rgba(29, 78, 216, 0.08);
+  --shadow-hover: 0 12px 40px rgba(29, 78, 216, 0.14);
+  --shadow-glow:  0 0 25px rgba(29, 78, 216, 0.08);
+}
+
+/* ---- Forcer le body en blanc/bleu clair ---- */
+html, body {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+/* ---- Boutons primaires Bootstrap & customs ---- */
+.btn-primary,
+.btn.btn-primary,
+button.btn-primary,
+.btn-blue,
+.btn-teal,
+.btn-success {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover,
+.btn.btn-primary:hover,
+button.btn-primary:hover,
+.btn-blue:hover,
+.btn-teal:hover {
+  background-color: #1e40af !important;
+  border-color: #1e40af !important;
+}
+
+.btn-outline,
+.btn-outline-primary {
+  background-color: #ffffff !important;
+  color: #1d4ed8 !important;
+  border: 2px solid #1d4ed8 !important;
+}
+.btn-outline:hover,
+.btn-outline-primary:hover {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+/* ---- Liens ---- */
+a { color: #1d4ed8; }
+a:hover { color: #1e40af; }
+
+/* ---- Navbars / headers ---- */
+.navbar,
+.navbar-medilink,
+header.header,
+.top-nav {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+.nav-link.active,
+.navbar a.active {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+/* ---- Sidebars admin / back office ---- */
+.sidebar,
+.admin-sidebar,
+.back-sidebar {
+  background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%) !important;
+  color: #ffffff !important;
+}
+.sidebar a, .admin-sidebar a, .back-sidebar a {
+  color: #dbeafe !important;
+}
+.sidebar a:hover, .admin-sidebar a:hover, .back-sidebar a:hover,
+.sidebar a.active, .admin-sidebar a.active, .back-sidebar a.active {
+  background: rgba(255,255,255,0.15) !important;
+  color: #ffffff !important;
+}
+
+/* ---- Cards / panels ---- */
+.card,
+.panel,
+.box {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(29, 78, 216, 0.07);
+}
+
+/* ---- Badges ---- */
+.badge-primary, .badge.primary {
+  background: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+/* ---- Inputs ---- */
+input:focus, select:focus, textarea:focus {
+  border-color: #1d4ed8 !important;
+  outline-color: #1d4ed8 !important;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.15) !important;
+}

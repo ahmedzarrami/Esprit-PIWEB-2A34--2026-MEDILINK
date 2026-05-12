@@ -305,6 +305,7 @@ $fichePatientC = new FichePatientC();
             .fiche-grid { grid-template-columns: 1fr; }
         }
     </style>
+<link rel="stylesheet" href="/files40/assets/css/unified.css">
 </head>
 <body>
     <!-- ── NAVBAR ── -->

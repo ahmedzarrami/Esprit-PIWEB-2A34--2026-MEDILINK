@@ -22,7 +22,7 @@ class MedicamentController extends BackController
 
     public function __construct()
     {
-        $this->db         = (new Database())->getConnection();
+        $this->db         = Database::getConnection();
         $this->medicament = new Medicament();
     }
 

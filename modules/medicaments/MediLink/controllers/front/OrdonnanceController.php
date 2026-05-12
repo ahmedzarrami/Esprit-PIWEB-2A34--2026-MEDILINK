@@ -13,7 +13,7 @@ class FrontOrdonnanceController extends FrontController
 
     public function __construct()
     {
-        $this->db = (new Database())->getConnection();
+        $this->db = Database::getConnection();
     }
 
     public function index(): void

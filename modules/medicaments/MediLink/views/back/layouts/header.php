@@ -16,6 +16,7 @@ if (!function_exists('e')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle ?? 'MediLink') ?></title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/files40/assets/css/unified.css">
 </head>
 <body>
     <div class="backoffice-shell">
