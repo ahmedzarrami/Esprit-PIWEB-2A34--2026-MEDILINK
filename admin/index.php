@@ -7,6 +7,9 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../config/session.php';
+require_role('Administrateur');
+
 require_once __DIR__ . '/../config/database.php';
 
 $pdo = null;
@@ -66,7 +69,7 @@ $modules = [
     'rdv' => [
         'label' => 'Rendez-vous',
         'icon'  => 'R',
-        'url'   => $base . '/modules/rdv/MediLink/index.php?route=admin',
+        'url'   => $base . '/modules/rdv/MediLink/index.php?action=admin',
         'desc'  => 'Planning medecins, fiches patient, evaluations.',
         'stat'  => $stats['rendezvous'],
         'statLabel' => 'rendez-vous',
@@ -82,7 +85,7 @@ $modules = [
     'parapharmacie' => [
         'label' => 'Parapharmacie',
         'icon'  => 'P',
-        'url'   => $base . '/modules/parapharmacie/index.php?page=admin',
+        'url'   => $base . '/modules/parapharmacie/admin.php',
         'desc'  => 'Produits, commandes, ratings, livraison.',
         'stat'  => $stats['produits'],
         'statLabel' => 'produits',
@@ -90,7 +93,7 @@ $modules = [
     'forum' => [
         'label' => 'Forum',
         'icon'  => 'F',
-        'url'   => $base . '/modules/forum/index.php?route=admin',
+        'url'   => $base . '/modules/forum/index.php?controller=forum&action=adminList',
         'desc'  => 'Forums, posts, commentaires, moderation.',
         'stat'  => $stats['posts'],
         'statLabel' => 'posts',

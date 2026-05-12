@@ -1,11 +1,9 @@
 <?php
-// Démarrer la session
-session_start();
+require_once __DIR__ . '/../../../../../config/session.php';
+require_role(['Professionnel']);
 
-// Vérifier si l'utilisateur est authentifié
 if (!isset($_SESSION['medecin_id']) || empty($_SESSION['medecin_id'])) {
-    // Redirectionner vers la page de login
-    header('Location: loginMedecin.php');
+    header('Location: /files40/modules/utilisateur/index.php?page=login');
     exit;
 }
 

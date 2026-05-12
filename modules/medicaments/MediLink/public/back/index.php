@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-session_start();
+require_once __DIR__ . '/../../../../../config/session.php';
+require_role('Administrateur');
 
 require_once __DIR__ . '/../../controllers/back/MedicamentController.php';
 

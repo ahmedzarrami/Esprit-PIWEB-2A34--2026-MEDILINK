@@ -1,9 +1,9 @@
 <?php
 /**
- * MediLink — Front Office Router (index.php)
- * Point d'entrée pour les patients et les professionnels de santé
+ * MediLink - Front Office Router (index.php)
+ * Point d'entree pour les patients et les professionnels de sante
  */
-session_start();
+require_once __DIR__ . '/../../config/session.php';
 
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/PatientController.php';
@@ -36,13 +36,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || !empty($action)) {
             if ($result['success']) {
                 $flash = ['message' => 'Bienvenue ' . ($_SESSION['user_nom'] ?? '') . ' !', 'type' => 'success'];
                 $role = $_SESSION['user_role'] ?? 'Patient';
+                // Redirection vers la cible originale si stockee, sinon par role
+                $back = $_SESSION['login_redirect'] ?? null;
+                unset($_SESSION['login_redirect']);
+                if ($back) {
+                    header('Location: ' . $back);
+                    exit;
+                }
                 if ($role === 'Administrateur') {
-                    header('Location: admin.php');
+                    header('Location: /files40/admin/index.php');
                     exit;
                 } elseif ($role === 'Professionnel') {
-                    $page = 'professionnel';
+                    header('Location: /files40/index.php');
+                    exit;
                 } else {
-                    $page = 'profile';
+                    header('Location: /files40/index.php');
+                    exit;
                 }
             } else {
                 $errors = $result['errors'];

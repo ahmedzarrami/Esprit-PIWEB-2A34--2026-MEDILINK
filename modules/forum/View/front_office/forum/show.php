@@ -21,7 +21,7 @@ require __DIR__ . '/../../layout/front_header.php';
 <!-- Section Header with Action -->
 <div class="section-header">
     <h2><i class="fas fa-file-alt" style="color: var(--accent-teal);"></i> Publications (<?= count($posts) ?>)</h2>
-    <?php if (isset($_SESSION['user']) && in_array($_SESSION['user']['role'], ['professionnel', 'administrateur'])): ?>
+    <?php if (isset($_SESSION['user']) && in_array(strtolower((string)$_SESSION['user']['role']), ['professionnel', 'administrateur'])): ?>
         <a href="index.php?controller=post&action=create&id_forum=<?= $forum->getIdForum() ?>" class="btn btn-primary">
             <i class="fas fa-plus"></i> Nouveau Post
         </a>
@@ -113,7 +113,7 @@ require __DIR__ . '/../../layout/front_header.php';
         <i class="fas fa-file-alt"></i>
         <h3>Aucun post pour le moment</h3>
         <p>Soyez le premier à publier dans ce forum !</p>
-        <?php if (isset($_SESSION['user']) && in_array($_SESSION['user']['role'], ['professionnel', 'administrateur'])): ?>
+        <?php if (isset($_SESSION['user']) && in_array(strtolower((string)$_SESSION['user']['role']), ['professionnel', 'administrateur'])): ?>
             <a href="index.php?controller=post&action=create&id_forum=<?= $forum->getIdForum() ?>" class="btn btn-primary" style="margin-top: 1rem;">
                 <i class="fas fa-plus"></i> Créer un post
             </a>

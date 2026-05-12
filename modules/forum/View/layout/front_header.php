@@ -40,7 +40,7 @@
 
         <!-- User Info / Actions -->
         <div class="navbar-user">
-            <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'administrateur'): ?>
+            <?php if (isset($_SESSION['user']) && strcasecmp($_SESSION['user']['role'], 'Administrateur') === 0): ?>
                 <a href="index.php?controller=forum&action=adminList" class="btn-admin-link">
                     <i class="fas fa-th-large"></i> Administration
                 </a>

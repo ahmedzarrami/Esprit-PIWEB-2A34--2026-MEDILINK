@@ -1,9 +1,10 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../../../../config/session.php';
+require_role(['Patient']);
 
-// ── Vérifier que le patient est connecté ──
+// Le bridge a deja peuple $_SESSION['patient_id'] depuis le user MediLink
 if (!isset($_SESSION['patient_id']) || empty($_SESSION['patient_id'])) {
-    header('Location: loginPatient.php');
+    header('Location: /files40/modules/utilisateur/index.php?page=login');
     exit;
 }
 

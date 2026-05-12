@@ -1,4 +1,6 @@
 <?php
+// Bootstrap session unifie (declare medilink_login et le bridge RDV)
+require_once __DIR__ . '/../../../config/session.php';
 // Chargement de tous les contrôleurs nécessaires à l'authentification
 require_once __DIR__ . '/Utilisateur.php';
 require_once __DIR__ . '/FaceAuthController.php';
@@ -135,11 +137,9 @@ class AuthController
             // Insertion dans utilisateur + patient (via PatientModelController)
             $id = PatientModelController::sInscrire($user);
 
-            // Ouverture de la session après inscription réussie
-            // Ces variables de session sont utilisées partout dans l'application
-            $_SESSION['user_id']   = $id;
-            $_SESSION['user_role'] = $data['role'];
-            $_SESSION['user_nom']  = trim($data['prenom']) . ' ' . trim($data['nom']);
+            // Ouverture de la session apres inscription reussie via le helper
+            // unifie : peuple $_SESSION['user'] + bridge RDV (patients/medecins)
+            medilink_login((int) $id);
 
             return ['success' => true, 'id' => $id];
 
@@ -213,15 +213,9 @@ class AuthController
             return ['success' => false, 'errors' => ['global' => $msg]];
         }
 
-        // --- Connexion réussie ---
-        // Remettre le compteur à zéro
+        // --- Connexion reussie ---
         UtilisateurController::reinitialiserEchecs((int) $user['id']);
-
-        $_SESSION['user_id']   = $user['id'];
-        $_SESSION['user_role'] = $user['role'];
-        $_SESSION['user_nom']  = $user['prenom'] . ' ' . $user['nom'];
-        $_SESSION['user_email']= $user['email'];
-
+        medilink_login((int) $user['id']);
         return ['success' => true, 'user' => $user];
     }
 
@@ -243,14 +237,9 @@ class AuthController
      */
     public function logout(): void
     {
-        // Supprime toutes les données de session côté serveur
-        session_destroy();
-
-        // header() envoie un en-tête HTTP de redirection au navigateur
-        header('Location: index.php?page=home');
-
-        // exit stoppe immédiatement l'exécution PHP pour éviter que du code
-        // s'exécute après la redirection (bonne pratique de sécurité)
+        // Helper unifie : vide la session et supprime le cookie partage.
+        medilink_logout();
+        header('Location: /files40/modules/utilisateur/index.php?page=login');
         exit;
     }
 }

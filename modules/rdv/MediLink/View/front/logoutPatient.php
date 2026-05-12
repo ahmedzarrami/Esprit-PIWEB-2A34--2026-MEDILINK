@@ -1,6 +1,5 @@
 <?php
-session_start();
-session_destroy();
-header('Location: loginPatient.php?logout=1');
+require_once __DIR__ . '/../../../../../config/session.php';
+medilink_logout();
+header('Location: /files40/modules/utilisateur/index.php?page=login');
 exit;
-?>

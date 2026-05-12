@@ -153,7 +153,7 @@ require __DIR__ . '/../../layout/front_header.php';
         <?php foreach ($commentaires as $index => $c): ?>
             <div class="comment-item" style="animation-delay: <?= $index * 0.05 ?>s">
                 <div class="comment-avatar role-<?= htmlspecialchars($c['auteur_role']) ?>"
-                     style="background: <?= $c['auteur_role'] === 'professionnel' ? 'linear-gradient(135deg, #3b82f6, #14b8a6)' : 'linear-gradient(135deg, #8b5cf6, #3b82f6)' ?>">
+                     style="background: <?= strcasecmp((string)$c['auteur_role'], 'professionnel') === 0 ? 'linear-gradient(135deg, #3b82f6, #14b8a6)' : 'linear-gradient(135deg, #8b5cf6, #3b82f6)' ?>">
                     <?= strtoupper(substr($c['auteur_prenom'], 0, 1) . substr($c['auteur_nom'], 0, 1)) ?>
                 </div>
                 <div class="comment-body">

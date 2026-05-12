@@ -95,7 +95,7 @@ require __DIR__ . '/../../layout/back_header.php';
                         <td>
                             <strong><?= htmlspecialchars($p['auteur_prenom'] . ' ' . $p['auteur_nom']) ?></strong>
                             <br>
-                            <span class="badge badge-<?= $p['auteur_role'] === 'professionnel' ? 'blue' : ($p['auteur_role'] === 'administrateur' ? 'orange' : 'purple') ?>">
+                            <span class="badge badge-<?= strcasecmp((string)$p['auteur_role'], 'professionnel') === 0 ? 'blue' : (strcasecmp((string)$p['auteur_role'], 'administrateur') === 0 ? 'orange' : 'purple') ?>">
                                 <?= htmlspecialchars($p['auteur_role']) ?>
                             </span>
                         </td>

@@ -1,35 +1,25 @@
 <?php
 /**
- * MediLink — Front Controller (Routeur)
- * Toutes les requêtes passent par ce fichier
+ * MediLink - Front Controller (Routeur)
+ * Toutes les requetes passent par ce fichier
  */
-session_start();
+require_once __DIR__ . '/../../config/session.php';
+require_login();
 
 // Charger la configuration BDD
 require_once __DIR__ . '/config/database.php';
 
-// Charger les modèles
+// Charger les modeles
 require_once __DIR__ . '/Model/Utilisateur.php';
 require_once __DIR__ . '/Model/Forum.php';
 require_once __DIR__ . '/Model/Post.php';
 require_once __DIR__ . '/Model/Commentaire.php';
 require_once __DIR__ . '/Model/BadWordsFilter.php';
 
-// Charger les contrôleurs
+// Charger les controleurs
 require_once __DIR__ . '/Controller/ForumController.php';
 require_once __DIR__ . '/Controller/PostController.php';
 require_once __DIR__ . '/Controller/CommentaireController.php';
-
-// Simuler une session utilisateur si aucune n'existe (pour démo)
-if (!isset($_SESSION['user'])) {
-    $_SESSION['user'] = [
-        'id' => 1,
-        'nom' => 'Dupont',
-        'prenom' => 'Jean',
-        'email' => 'jean.dupont@medilink.com',
-        'role' => 'administrateur'
-    ];
-}
 
 // Récupérer le contrôleur et l'action depuis l'URL
 $controller = $_GET['controller'] ?? 'forum';

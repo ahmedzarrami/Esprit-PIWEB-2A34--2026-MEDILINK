@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<?php
+require_once __DIR__ . '/../../config/session.php';
+require_login();
+$ml_user = current_user();
+?><!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -583,6 +587,15 @@ const ORDERS_KEY   = 'pharma_orders';
 const CLIENT_KEY   = 'pharma_client_id';
 const CART_KEY     = 'pharma_cart';
 
+// Utilisateur MediLink connecte (injecte depuis PHP)
+const ML_USER = <?= json_encode([
+    'id'     => (int)$ml_user['id'],
+    'nom'    => $ml_user['nom'],
+    'prenom' => $ml_user['prenom'],
+    'email'  => $ml_user['email'],
+    'role'   => $ml_user['role'],
+], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+
 const DEMO_PRODUCTS = [
     { id: 171000000001, reference:"PHM-VIS-01", nom:"Crème Hydra Éclat SPF30", description:"Protection UV et hydratation profonde, texture légère.", prix:42.500, stock:18, categorie:"Soins visage" },
     { id: 171000000002, reference:"PHM-COR-02", nom:"Beurre corporel karité",  description:"Beurre riche pour peaux sèches, 200ml.", prix:29.900, stock:6,  categorie:"Soins corps" },
@@ -602,38 +615,22 @@ const CAT_ICONS = {
 //  CLIENT MANAGEMENT - FIXED!
 // ════════════════════════════════════
 function getClientId() {
-    let clientId = localStorage.getItem(CLIENT_KEY);
-    if(!clientId) {
-        // Generate a unique client ID
-        clientId = 'CLT_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8).toUpperCase();
-        localStorage.setItem(CLIENT_KEY, clientId);
-    }
-    return clientId;
+    // Identifiant client = id MediLink de l'utilisateur connecte
+    return 'USR_' + ML_USER.id;
 }
 
 function getClientNumber() {
-    // Extract a numeric representation for display
-    const clientId = getClientId();
-    // Use a simple hash to create a 4-6 digit number
-    let hash = 0;
-    for(let i = 0; i < clientId.length; i++) {
-        hash = ((hash << 5) - hash) + clientId.charCodeAt(i);
-        hash = hash & hash;
-    }
-    return Math.abs(hash % 90000) + 10000;
+    return ML_USER.id;
 }
 
 function updateClientDisplay() {
-    const clientNum = getClientNumber();
-    document.getElementById('clientIdDisplay').textContent = '#' + clientNum;
+    document.getElementById('clientIdDisplay').textContent =
+        ML_USER.prenom + ' ' + ML_USER.nom;
 }
 
 function resetClient() {
-    if(confirm('Générer un nouvel identifiant client ? Vos commandes précédentes resteront visibles dans l\'admin.')) {
-        localStorage.removeItem(CLIENT_KEY);
-        updateClientDisplay();
-        showToast('Nouvel identifiant client généré ✓', 'success');
-    }
+    // L'identite est liee au compte MediLink, on ne peut pas la changer ici.
+    showToast('Pour changer de compte, deconnectez-vous depuis MediLink.', 'info');
 }
 
 function getProducts() {

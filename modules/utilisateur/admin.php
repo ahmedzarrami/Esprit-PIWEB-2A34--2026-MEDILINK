@@ -1,9 +1,11 @@
 <?php
 /**
- * MediLink — BackOffice Router (admin.php)
- * Point d'entrée pour le panneau d'administration
+ * MediLink - BackOffice Router (admin.php)
+ * Page "Gestion des utilisateurs" du back-office unifie.
+ * Accessible uniquement aux administrateurs connectes.
  */
-session_start();
+require_once __DIR__ . '/../../config/session.php';
+require_role('Administrateur');
 
 require_once __DIR__ . '/controllers/AdminController.php';
 
